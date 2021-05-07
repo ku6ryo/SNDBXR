@@ -10,8 +10,15 @@ export function main (): i32 {
   if (o === null) {
     return 1
   }
+  const o2 = getObjectByName("hoge")
+  if (o2 === null) {
+    return 1
+  }
   o.listen(EventType.TOUCH, () => {
     i = 1
+  })
+  o2.listen(EventType.TOUCH, () => {
+    i += 1
   })
   return 0
 }

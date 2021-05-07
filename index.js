@@ -1,12 +1,15 @@
 const fs = require("fs");
 const loader = require("@assemblyscript/loader");
 const memory = new WebAssembly.Memory({ initial: 1 })
+
+let objectId = 0;
 const imports = {
   env: {
     getObjectId: (len) => {
       const nameArray = new Uint8Array(wasmModule.exports.memory.buffer.slice(0, len))
       console.log(String.fromCharCode.apply(null, nameArray))
-      return 10;
+      objectId += 1;
+      return objectId;
     },
     getObjectPosition: (objectId) => {
       return [0, 1, 2]
