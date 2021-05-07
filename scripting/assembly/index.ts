@@ -1,12 +1,11 @@
 import { eventManager } from "./global"
 import { EventType } from "./EventType"
-import { getObjectByName, log, } from "./tool"
+import { getObjectByName, log, getTime, } from "./tool"
 
 let i = 0
 
 export function main (): i32 {
   const o = getObjectByName("cube")
-  log(100)
   if (o === null) {
     return 1
   }
@@ -24,6 +23,7 @@ export function main (): i32 {
 }
 
 export function check (): void {
+  log(getTime())
   log(i)
 }
 

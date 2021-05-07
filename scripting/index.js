@@ -1,6 +1,5 @@
 const fs = require("fs");
 const loader = require("@assemblyscript/loader");
-const memory = new WebAssembly.Memory({ initial: 1 })
 
 let objectId = 0;
 const imports = {
@@ -8,6 +7,7 @@ const imports = {
     getObjectId: (len) => {
       const nameArray = new Uint8Array(wasmModule.exports.memory.buffer.slice(0, len))
       console.log(String.fromCharCode.apply(null, nameArray))
+      console.log(wasmModule.exports.memory.buffer)
       objectId += 1;
       return objectId;
     },
@@ -18,9 +18,11 @@ const imports = {
     },
     log: (type) => {
       console.log(type)
-    }
+    },
+    getTime: () => {
+      return Math.round(new Date().getTime() / 1000)
+    },
   },
-  memory,
  };
 const wasmModule = loader.instantiateSync(fs.readFileSync(__dirname + "/build/untouched.wasm"), imports);
 module.exports = wasmModule.exports;
