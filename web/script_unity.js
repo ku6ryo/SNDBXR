@@ -1,3 +1,5 @@
+const { accessSync } = require("fs");
+
 /**
  * @param {ArrayBuffer} wasm Binary data
  */
@@ -25,9 +27,7 @@ async function createFileSourceMap (basePath, files) {
 function loadAsc() {
   return new Promise((resolve, reject) => {
     require([ "https://cdn.jsdelivr.net/npm/assemblyscript@latest/dist/sdk.js" ], ({ asc }) => {
-      asc.ready.then(() => {
-        resolve(asc)
-      })
+      resolve(asc)
     })
   })
 }
@@ -62,7 +62,7 @@ function compile(asc, fileSourceMap) {
     }, error => {
       console.log(`>>> STDOUT >>>\n${stdout.toString()}`);
       console.log(`>>> STDERR >>>\n${stderr.toString()}`);
-      if (errror) {
+      if (error) {
         console.log(">>> THROWN >>>");
         console.log(error);
         reject(error)
@@ -73,7 +73,7 @@ function compile(asc, fileSourceMap) {
 
 
 ;(async () => {
-  const base = "../scripting/assembly"
+  const base = "../../../scripting/assembly"
   const files = [
     "index.ts",
     "env.ts",
@@ -86,14 +86,13 @@ function compile(asc, fileSourceMap) {
   const imports = {
     env: {
       getObjectId: (len) => {
-        const nameArray = new Uint8Array(module.exports.memory.buffer.slice(0, len))
-        console.log(String.fromCharCode.apply(null, nameArray))
-        console.log(module.exports.memory.buffer)
-        objectId += 1;
-        return objectId;
+        return unityInstance.Module.dynCall_i(window.unityPointers.getObjectByName)
       },
       getObjectPosition: (objectId) => {
         return [0, 1, 2]
+      },
+      setObjectPosition: (objectId, x, y, z) => {
+        return unityInstance.Module.dynCall_iiiii(window.unityPointers.setObjectPosition, objectId, x, y, z) 
       },
       setEventListener: (objectId, type) => {
       },
@@ -106,8 +105,12 @@ function compile(asc, fileSourceMap) {
     },
   };
   const asc = await loadAsc()
+  await asc.ready()
   const sourceMap = await createFileSourceMap(base, files)
   const wasmBinary = await compile(asc, sourceMap)
   const module = await createModule(wasmBinary, imports)
   module.exports.main()
+  setInterval(() => {
+    module.exports.update()
+  }, 30)
 })()

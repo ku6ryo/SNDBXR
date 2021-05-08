@@ -1,25 +1,23 @@
 import { eventManager } from "./global"
 import { EventType } from "./EventType"
 import { getObjectByName, log, getTime, } from "./tool"
-
-let i = 0
+import { Object } from "./object"
 
 export function main (): i32 {
-  const o = getObjectByName("cube")
+  let o = getObjectByName("cube")
   if (o === null) {
     return 1
   }
-  const o2 = getObjectByName("hoge")
-  if (o2 === null) {
-    return 1
-  }
-  o.listen(EventType.TOUCH, () => {
-    i = 1
-  })
-  o2.listen(EventType.TOUCH, () => {
-    i += 1
-  })
   return 0
+}
+
+let i = 0;
+export function update(): void {
+  let o = getObjectByName("cube")
+  if (o !== null) {
+    o.setPosition(i * 0.1 as f32, 0, 0)
+    i += 1
+  }
 }
 
 export function check (): void {

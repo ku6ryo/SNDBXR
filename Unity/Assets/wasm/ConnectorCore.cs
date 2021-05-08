@@ -8,6 +8,7 @@ enum PrimitiveTypeEnum
     Sphere = 2,
 }
 
+
 public class ConnectorCore : MonoBehaviour
 {
     ConnectorWebGL connector = new ConnectorWebGL();
@@ -45,6 +46,16 @@ public class ConnectorCore : MonoBehaviour
         return 1;
       }
     }
+
+    public int SetObjectEventListener(int objectId, int type) {
+      GameObject obj = ObjectMap[objectId];
+      if (obj) {
+        return 0;
+      } else {
+        return -1;
+      }
+    }
+
     void Start()
     {
         Debug.Log("start");

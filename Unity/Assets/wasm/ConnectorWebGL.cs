@@ -13,9 +13,6 @@ public class ConnectorWebGL
     [DllImport("__Internal")]
     private static extern int JsTest();
 
-    [DllImport("__Internal")]
-    private static extern void JsGetObjectByName();
-
     private static ConnectorCore Core = null;
 
     public void Init(ConnectorCore core)
@@ -43,5 +40,11 @@ public class ConnectorWebGL
     static int SetObjectPosition(int objectId, int x, int y, int z)
     {
         return Core.SetObjectPosition(objectId, x, y, z);
+    }
+
+    delegate int dlgSetObjectEventListenr(int objectId, int type);
+    static int SetObjectEventListener(int objectId, int type)
+    {
+        return Core.SetObjectEventListener();
     }
 }
