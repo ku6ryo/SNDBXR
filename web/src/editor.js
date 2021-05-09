@@ -61,10 +61,22 @@ async function createFileSourceMap (basePath, files) {
 
 const initialCode = `
 export function init (): i32 {
+  const obj = getObjectByName("Cube")
+  if (obj) {
+    obj.setPosition(0, 0, 0);
+  }
   return 0
 }
 
+
+let x: f64 = 0
 export function update(): void {
+  const obj = getObjectByName("Cube")
+  if (obj) {
+    obj.setPosition(Math.sin(x) as f32, 0, 0);
+    x += 0.01
+  }
+  return
 }`
 
 window.addEventListener("DOMContentLoaded", async () => {

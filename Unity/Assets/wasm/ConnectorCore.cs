@@ -23,6 +23,9 @@ public class ConnectorCore : MonoBehaviour
     int ObjectCount = 0;
 
 
+    bool Connected = false;
+
+
     float x = 0;
 
     GameObject createPrimitive(PrimitiveTypeEnum p) {
@@ -49,7 +52,6 @@ public class ConnectorCore : MonoBehaviour
     public int SetObjectPosition(int objectId, float x, float y, float z) {
       GameObject obj = ObjectMap[objectId];
       if (obj) {
-        Debug.Log(x);
         obj.transform.position = new Vector3(x, y, z);
         return 0;
       } else {
@@ -66,6 +68,20 @@ public class ConnectorCore : MonoBehaviour
       }
     }
 
+    public void Connect ()
+    {
+      Connected = true;
+    }
+
+    public void Disconnect ()
+    {
+      Connected = false;
+    }
+
+    ///////////////////////////////
+    // Unity life cycle methods. //
+    ///////////////////////////////
+
     void Start()
     {
         Debug.Log("start");
@@ -74,6 +90,9 @@ public class ConnectorCore : MonoBehaviour
     }
     void Update()
     {
+      if (Connected) {
+        connector.Update();
+      }
       /*
         int id = this.GetObjectByName("Cube");
         this.SetObjectPosition(id, x, 0, 0);

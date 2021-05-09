@@ -11,13 +11,19 @@ class Connector extends ConnectorBase {
     return {
       env: {
         getObjectId: (len) => {
-          return this.unityInstance.Module.dyncall_i(this.unityPointers.getObjectByName)
+          const nameArray = new Uint8Array(this.wasmModule.exports.memory.buffer.slice(0, len))
+          const name = String.fromCharCode.apply(null, nameArray)
+          const encoder = new TextEncoder()
+          const buffer = encoder.encode(name + String.fromCharCode(0))
+          const ptr = this.unityInstance.Module._malloc(len)
+          this.unityInstance.Module.HEAP8.set(buffer, ptr)
+          return this.unityInstance.Module.dynCall_ii(this.unityPointers.getObjectByName, ptr)
         },
         getObjectPosition: (objectId) => {
           return [0, 1, 2]
         },
         setObjectPosition: (objectId, x, y, z) => {
-          return this.unityInstance.Module.dyncall_vifff(this.unityPointers.setObjectPosition, objectId, x, y, z) 
+          return this.unityInstance.Module.dynCall_iifff(this.unityPointers.setObjectPosition, objectId, x, y, z) 
         },
         setEventListener: (objectId, type) => {
         },
@@ -29,5 +35,10 @@ class Connector extends ConnectorBase {
         },
       },
     }
+  }
+
+  connectWasm (wasmModule) {
+    super.connectWasm(wasmModule)
+    this.unityInstance.Module.dynCall_v(this.unityPointers.connect);
   }
 }

@@ -2,9 +2,11 @@ var ConnectorPlugin = {
   $pointers: {},
 
   JsInit: function (
+    connect,
     getObjectByName,
     setObjectPosition
   ) {
+    pointers.connect = connect;
     pointers.getObjectByName = getObjectByName;
     pointers.setObjectPosition = setObjectPosition;
     window.unityPointers = pointers;
@@ -13,7 +15,9 @@ var ConnectorPlugin = {
     return 1;
   },
   JsUpdate: function () {
-    window.wasm.OnUpdate()
+    if (window.connector) {
+      window.connector.onUpdate();
+    }
   },
 };
 

@@ -6,8 +6,9 @@ public class ConnectorWebGL
 {
     [DllImport("__Internal")]
     private static extern void JsInit(
-        dlgGetObjectByName a,
-        dlgSetObjectPosition b
+        dlgConnect a,
+        dlgGetObjectByName b,
+        dlgSetObjectPosition c
     );
 
     [DllImport("__Internal")]
@@ -21,7 +22,11 @@ public class ConnectorWebGL
     public void Init(ConnectorCore core)
     {
         ConnectorWebGL.Core = core;
-        JsInit(GetObjectByName, SetObjectPosition);
+        JsInit(
+            Connect,
+            GetObjectByName,
+            SetObjectPosition
+        );
     }
     public void Test()
     {
@@ -34,12 +39,28 @@ public class ConnectorWebGL
         JsUpdate();
     }
 
-    delegate int dlgGetObjectByName();
+    delegate void dlgConnect();
+
+    [MonoPInvokeCallback(typeof(dlgConnect))]
+    static void Connect()
+    {
+        Core.Connect();
+    }
+
+    delegate void dlgDisconnect();
+
+    [MonoPInvokeCallback(typeof(dlgDisconnect))]
+    static void Disconnect()
+    {
+        Core.Disconnect();
+    }
+
+    delegate int dlgGetObjectByName(string name);
 
     [MonoPInvokeCallback(typeof(dlgGetObjectByName))]
-    static int GetObjectByName()
+    static int GetObjectByName(string name)
     {
-        return Core.GetObjectByName("Cube");
+        return Core.GetObjectByName(name);
     }
 
     delegate int dlgSetObjectPosition(int objectId, float x, float y, float z);
@@ -47,10 +68,6 @@ public class ConnectorWebGL
     [MonoPInvokeCallback(typeof(dlgSetObjectPosition))]
     static int SetObjectPosition(int objectId, float x, float y, float z)
     {
-        Debug.Log(objectId);
-        Debug.Log(x);
-        Debug.Log(y);
-        Debug.Log(z);
         return Core.SetObjectPosition(objectId, x, y, z);
     }
 
