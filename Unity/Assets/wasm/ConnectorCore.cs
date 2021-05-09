@@ -11,10 +11,19 @@ enum PrimitiveTypeEnum
 
 public class ConnectorCore : MonoBehaviour
 {
+    #if UNITY_EDITOR
+    ConnectorDummy connector = new ConnectorDummy();
+    #elif UNITY_WEBGL
     ConnectorWebGL connector = new ConnectorWebGL();
+    #else
+    ConnectorDummy connector = new ConnectorDummy();
+    #endif
 
     IDictionary<int, GameObject> ObjectMap = new Dictionary<int, GameObject>();
     int ObjectCount = 0;
+
+
+    float x = 0;
 
     GameObject createPrimitive(PrimitiveTypeEnum p) {
       var type = PrimitiveType.Cube;
@@ -37,9 +46,10 @@ public class ConnectorCore : MonoBehaviour
       }
     }
 
-    public int SetObjectPosition(int objectId, int x, int y, int z) {
+    public int SetObjectPosition(int objectId, float x, float y, float z) {
       GameObject obj = ObjectMap[objectId];
       if (obj) {
+        Debug.Log(x);
         obj.transform.position = new Vector3(x, y, z);
         return 0;
       } else {
@@ -64,5 +74,10 @@ public class ConnectorCore : MonoBehaviour
     }
     void Update()
     {
+      /*
+        int id = this.GetObjectByName("Cube");
+        this.SetObjectPosition(id, x, 0, 0);
+        x = x + 0.01f;
+        */
     }
 }

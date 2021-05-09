@@ -12,6 +12,9 @@ var ConnectorPlugin = {
   JsTest: function () {
     return 1;
   },
+  JsUpdate: function () {
+    window.wasm.OnUpdate()
+  },
 };
 
 autoAddDeps(ConnectorPlugin, "$pointers");

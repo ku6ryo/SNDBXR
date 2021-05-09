@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {  
+    "target": "esnext",
+    "rootDirs": ["src/views"],
+    "lib": [
+      "DOM",
+      "ESNext"
+    ],
+    "outDir": "./dist",
+    "moduleResolution": "Node"
+  }
+}
