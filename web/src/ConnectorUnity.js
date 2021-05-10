@@ -10,8 +10,8 @@ class Connector extends ConnectorBase {
   createImports () {
     return {
       env: {
-        getObjectId: (len) => {
-          const nameArray = new Uint8Array(this.wasmModule.exports.memory.buffer.slice(0, len))
+        getObjectId: (readPtr, len) => {
+          const nameArray = new Uint8Array(this.wasmModule.exports.memory.buffer.slice(readPtr, readPtr + len))
           const name = String.fromCharCode.apply(null, nameArray)
           const encoder = new TextEncoder()
           const buffer = encoder.encode(name + String.fromCharCode(0))
