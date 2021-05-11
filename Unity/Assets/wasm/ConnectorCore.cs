@@ -12,16 +12,19 @@ enum PrimitiveTypeEnum
 public class ConnectorCore : MonoBehaviour
 {
     #if UNITY_EDITOR
-    ConnectorDummy connector = new ConnectorDummy();
+    ConnectorWasmerSharp connector = new ConnectorWasmerSharp();
+    // ConnectorCsWasm connector = new ConnectorCsWasm();
+
     #elif UNITY_WEBGL
     ConnectorWebGL connector = new ConnectorWebGL();
+    #elif UNITY_ANDROID
+    ConnectorWasmSharp connector = new ConnectorWasmSharp();
     #else
     ConnectorDummy connector = new ConnectorDummy();
     #endif
 
     IDictionary<int, GameObject> ObjectMap = new Dictionary<int, GameObject>();
     int ObjectCount = 0;
-
 
     bool Connected = false;
 
