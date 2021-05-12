@@ -13,12 +13,18 @@ import {
   execI_IV3,
   execV3_I,
   logFloat,
+  CREATE_PRIMITIVE_OBJECT,
 } from "./env"
 import { Material } from "./Material"
 import { eventManager } from "./global"
 import { Vector3 } from "./Vector3"
 
 const OBJECT_NOT_FOUND_ID = -1
+
+export enum PrimitiveType {
+  CUBE = 0,
+  SPHERE = 1,
+}
 
 export function getObjectByName(name: string): Object | null {
   const ptr = allocString(name)
@@ -28,6 +34,17 @@ export function getObjectByName(name: string): Object | null {
     return null
   } 
   return new Object(id, eventManager)
+}
+
+/**
+ * Creates a primitive object.
+ */
+export function createPrimitiveObject(type: PrimitiveType): Object | null {
+  const id = execI_I(CREATE_PRIMITIVE_OBJECT, type);
+  if (id === OBJECT_NOT_FOUND_ID) {
+    return null
+  }
+  return new Object(id, eventManager);
 }
 
 export class Object {

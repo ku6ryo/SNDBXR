@@ -1,4 +1,4 @@
-import { getObjectByName, Object, } from "./Object";
+import { createPrimitiveObject, getObjectByName, Object, PrimitiveType, } from "./Object";
 import { logFloat, logInt, log } from "./env"
 import { Color } from "./Color";
 import { eventManager } from "./global"
@@ -11,11 +11,11 @@ export function update(): void {
   if (obj) {
     obj.setPosition(Math.sin(r) as f32, 0, 0);
     const p = obj.getPosition()
-    logFloat(p.x)
   }
 }
 
 export function start(): i32 {
+  /*
   const obj = getObjectByName("Cube");
   if (obj) {
     obj.setPosition(1, 1, 1);
@@ -27,7 +27,15 @@ export function start(): i32 {
     })
     return obj.id;
   }
-  return 222
+  */
+  const limit = 2
+  for (let i = 0; i < limit; i++) {
+      const obj = createPrimitiveObject(PrimitiveType.CUBE)
+      if (obj) {
+        obj.setPosition(i as f32, 0, 2);
+    }
+  }
+  return 0
 }
 
 export function onEvent (objectId: i32, type: i32): void {

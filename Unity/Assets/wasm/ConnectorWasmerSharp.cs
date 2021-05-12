@@ -8,6 +8,7 @@ using WasmerSharp;
 public class ConnectorWasmerSharp
 {
     const int GET_OBJECT_ID_BY_NAME = 1000;
+    const int CREATE_PRIMITIVE_OBJECT = 1001;
     const int SET_OBJECT_POSITION = 1100;
     const int GET_OBJECT_POSITION = 1101;
 
@@ -18,14 +19,16 @@ public class ConnectorWasmerSharp
     const int GET_MATERIAL_ID_BY_NAME = 2000;
     const int SET_MATERIAL_COLOR = 2100;
 
-    private static ConnectorCore StaticCore = null;
+    // private static ConnectorCore GetCore = null;
 
     private static Instance wasmInstance = null;
 
+    static ConnectorCore GetCore() {
+        return GameObject.Find("Connector").GetComponent<ConnectorCore>();
+    }
+
     public void Init(ConnectorCore core)
     {
-        ConnectorWasmerSharp.StaticCore = core;
-
         string url = "http://192.168.1.5:8080/scripting/build/untouched.wasm";
         UnityWebRequest req = UnityWebRequest.Get(url);
         req.SendWebRequest().completed += operation =>
@@ -120,24 +123,26 @@ public class ConnectorWasmerSharp
             Debug.Log(str);
         }
     }
-    private static int ExecI_I(InstanceContext context, int funcId, int int1)
+    private static int ExecI_I(InstanceContext context, int funcId, int i0)
     {
         switch(funcId)
         {
             case GET_MATERIAL_OF_OBJECT:
-                return StaticCore.GetMaterialByObjectId(int1);
+                return GetCore().GetMaterialByObjectId(i0);
+            case CREATE_PRIMITIVE_OBJECT:
+                return GetCore().CreatePrimitiveObject((PrimitiveTypeEnum) i0);
             default:
                 throw new System.Exception("No function to match");
         }
     }
-    private static int ExecI_II(InstanceContext context, int funcId, int i1, int i2)
+    private static int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
     {
         switch(funcId)
         {
             case SET_OBJECT_EVENT_LISTENER:
-                return StaticCore.SetObjectEventListener(i1, i2, () => {
+                return GetCore().SetObjectEventListener(i0, i1, () => {
                     Debug.Log("clicked22");
-                    wasmInstance.Call("onEvent", new object[]{ i1, i2 });
+                    wasmInstance.Call("onEvent", new object[]{ i0, i1 });
                 });
             default:
                 throw new System.Exception("No function to match");
@@ -154,9 +159,9 @@ public class ConnectorWasmerSharp
         switch(funcId)
         {
             case GET_OBJECT_ID_BY_NAME:
-                return StaticCore.GetObjectByName(str);
+                return GetCore().GetObjectByName(str);
             case GET_MATERIAL_ID_BY_NAME:
-                return StaticCore.GetMaterialByName(str);
+                return GetCore().GetMaterialByName(str);
             default:
                 throw new System.Exception("No function to match");
         }
@@ -166,7 +171,7 @@ public class ConnectorWasmerSharp
         switch(funcId)
         {
             case SET_OBJECT_POSITION:
-                return StaticCore.SetObjectPosition(i1, f1, f2, f3);
+                return GetCore().SetObjectPosition(i1, f1, f2, f3);
             default:
                 throw new System.Exception("No function to match");
         }
@@ -176,7 +181,7 @@ public class ConnectorWasmerSharp
         switch(funcId)
         {
             case SET_MATERIAL_COLOR:
-                return StaticCore.SetMaterialColor(i1, f1, f2, f3, f4);
+                return GetCore().SetMaterialColor(i1, f1, f2, f3, f4);
             default:
                 throw new System.Exception("No function to match");
         }
@@ -186,7 +191,7 @@ public class ConnectorWasmerSharp
         switch (funcId)
         {
             case GET_OBJECT_POSITION:
-                var pos = StaticCore.GetObjectPosition(i1);
+                var pos = GetCore().GetObjectPosition(i1);
                 if (pos == null) {
                     return -1;
                 } else {

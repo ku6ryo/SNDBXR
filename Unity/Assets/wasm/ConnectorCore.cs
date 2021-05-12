@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-enum PrimitiveTypeEnum
+public enum PrimitiveTypeEnum
 {
     Cube = 0,
     Plane = 1,
@@ -22,6 +22,8 @@ public class ConnectorCore : MonoBehaviour
     ConnectorWebGL connector = new ConnectorWebGL();
     #elif UNITY_ANDROID
     ConnectorWasmSharp connector = new ConnectorWasmSharp();
+    #elif UNITY_STANDALONE_WIN
+    ConnectorWasmerSharp connector = new ConnectorWasmerSharp();
     #else
     ConnectorDummy connector = new ConnectorDummy();
     #endif
@@ -43,15 +45,19 @@ public class ConnectorCore : MonoBehaviour
 
     bool Connected = false;
 
-    float x = 0;
-
-    GameObject createPrimitive(PrimitiveTypeEnum p) {
-      var type = PrimitiveType.Cube;
-      if (p == PrimitiveTypeEnum.Cube) {
-        type = PrimitiveType.Cube;
-      }
-      var obj = GameObject.CreatePrimitive(type);
-      return obj;
+    public int CreatePrimitiveObject(PrimitiveTypeEnum p)
+    {
+        Debug.Log("pri");
+        var type = PrimitiveType.Cube;
+        if (p == PrimitiveTypeEnum.Cube) {
+            type = PrimitiveType.Cube;
+        }
+        var obj = GameObject.CreatePrimitive(type);
+        int id = ObjectCount;
+        ObjectMap.Add(ObjectCount, obj);
+        ObjectNameMap.Add(obj.name, id);
+        ObjectCount += 1;
+        return id;
     }
 
     public int GetObjectByName (string name) {
