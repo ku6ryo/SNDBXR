@@ -11,52 +11,50 @@ public enum PrimitiveTypeEnum
     Sphere = 2,
 }
 
-
-public class ConnectorCore : MonoBehaviour
+public class ObjectService
 {
-    #if UNITY_EDITOR
-    ConnectorWasmerSharp connector = new ConnectorWasmerSharp();
-    // ConnectorCsWasm connector = new ConnectorCsWasm();
-
-    #elif UNITY_WEBGL
-    ConnectorWebGL connector = new ConnectorWebGL();
-    #elif UNITY_ANDROID
-    ConnectorWasmSharp connector = new ConnectorWasmSharp();
-    #elif UNITY_STANDALONE_WIN
-    ConnectorWasmerSharp connector = new ConnectorWasmerSharp();
-    #else
-    ConnectorDummy connector = new ConnectorDummy();
-    #endif
-
     IDictionary<int, GameObject> ObjectMap = new Dictionary<int, GameObject>();
     IDictionary<string, int> ObjectNameMap = new Dictionary<string, int>();
-
-    IDictionary<int, Material> MaterialMap = new Dictionary<int, Material>();
-    IDictionary<string, int> MaterialNameMap = new Dictionary<string, int>();
-
     IDictionary<int, UnityAction<BaseEventData>> EventListenerMap = new Dictionary<int, UnityAction<BaseEventData>>();
     // key: object id , value : listner id
     IDictionary<int, int> ObjectEventListenerMap = new Dictionary<int, int>();
+    IDictionary<int, Material> MaterialMap = new Dictionary<int, Material>();
+    IDictionary<string, int> MaterialNameMap = new Dictionary<string, int>();
 
-
-    int ObjectCount = 0;
     int MaterialCount = 0;
+
+    int ObjectNextId = 0;
     int EventListenerCount = 0;
 
-    bool Connected = false;
+    string sandboxName = null;
+
+    public ObjectService(string sandboxName)
+    {
+        this.sandboxName = sandboxName;
+    }
+
+    private GameObject GetSandboxGameObject()
+    {
+        return GameObject.Find(this.sandboxName);
+    }
+
+    public int RegisterGameObject(GameObject obj)
+    {
+        int id = ObjectNextId;
+        ObjectMap.Add(ObjectNextId, obj);
+        ObjectNextId += 1;
+        return id;
+    }
 
     public int CreatePrimitiveObject(PrimitiveTypeEnum p)
     {
-        Debug.Log("pri");
         var type = PrimitiveType.Cube;
         if (p == PrimitiveTypeEnum.Cube) {
             type = PrimitiveType.Cube;
         }
         var obj = GameObject.CreatePrimitive(type);
-        int id = ObjectCount;
-        ObjectMap.Add(ObjectCount, obj);
-        ObjectCount += 1;
-        return id;
+        obj.transform.SetParent(GetSandboxGameObject().transform);
+        return RegisterGameObject(obj);
     }
 
     public int GetObjectByName (string name) {
@@ -66,10 +64,10 @@ public class ConnectorCore : MonoBehaviour
       }
       var obj = GameObject.Find(name);
       if (obj) {
-        int id = ObjectCount;
-        ObjectMap.Add(ObjectCount, obj);
+        int id = ObjectNextId;
+        ObjectMap.Add(ObjectNextId, obj);
         ObjectNameMap.Add(name, id);
-        ObjectCount += 1;
+        ObjectNextId += 1;
         return id;
       } else {
         return -1;
@@ -140,7 +138,6 @@ public class ConnectorCore : MonoBehaviour
           return -1;
         }
     }
-
     public int GetMaterialByName(string name) 
     {
         if (MaterialNameMap.ContainsKey(name)) {
@@ -167,31 +164,5 @@ public class ConnectorCore : MonoBehaviour
         } else {
             return -1;
         }
-    }
-
-    public void Connect ()
-    {
-      Connected = true;
-    }
-
-    public void Disconnect ()
-    {
-      Connected = false;
-    }
-
-    ///////////////////////////////
-    // Unity life cycle methods. //
-    ///////////////////////////////
-
-    void Start()
-    {
-        Debug.Log("start");
-        connector.Init(this);
-    }
-    void Update()
-    {
-      if (Connected) {
-        connector.Update();
-      }
     }
 }

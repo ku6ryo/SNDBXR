@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class ConnectorDummy
 {
-    private static ConnectorCore Core = null;
+    private static Sandbox Core = null;
 
-    public void Init(ConnectorCore core)
+    public void Init(Sandbox core)
     {
         ConnectorDummy.Core = core;
         core.Connect();

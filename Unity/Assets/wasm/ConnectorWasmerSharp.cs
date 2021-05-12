@@ -1,95 +1,91 @@
 using System;
-using System.IO;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Networking;
 using WasmerSharp;
 
+/// Connector using WasmerSharp
+/// https://github.com/migueldeicaza/WasmerSharp
 public class ConnectorWasmerSharp
 {
-    const int GET_OBJECT_ID_BY_NAME = 1000;
-    const int CREATE_PRIMITIVE_OBJECT = 1001;
-    const int SET_OBJECT_POSITION = 1100;
-    const int GET_OBJECT_POSITION = 1101;
 
-    const int GET_MATERIAL_OF_OBJECT = 1200;
+    private Instance wasmInstance = null;
+    private string sandboxName = null;
 
-    const int SET_OBJECT_EVENT_LISTENER = 1300;
+    int frames = 0;
 
-    const int GET_MATERIAL_ID_BY_NAME = 2000;
-    const int SET_MATERIAL_COLOR = 2100;
-
-    // private static ConnectorCore GetCore = null;
-
-    private static Instance wasmInstance = null;
-
-    static ConnectorCore GetCore() {
-        return GameObject.Find("Connector").GetComponent<ConnectorCore>();
+    public ConnectorWasmerSharp(string sandboxName)
+    {
+        this.sandboxName = sandboxName;
     }
 
-    public void Init(ConnectorCore core)
+    Sandbox GetSandbox()
     {
-        string url = "http://192.168.1.5:8080/scripting/build/untouched.wasm";
-        UnityWebRequest req = UnityWebRequest.Get(url);
-        req.SendWebRequest().completed += operation =>
-        {
-            MemoryStream stream = new MemoryStream();
-            stream.Write(req.downloadHandler.data, 0, req.downloadHandler.data.Length);
-            stream.Seek(0, SeekOrigin.Begin);
-            var wasm = stream.ToArray();
+        Debug.Log(this.sandboxName);
+        return GameObject.Find(this.sandboxName).GetComponent<Sandbox>();
+    }
 
-            // This creates a memory block with a minimum of 256 64k pages
-            // and a maxium of 256 64k pages
-            var memory = Memory.Create(minPages: 10);
+    public void Load(byte[] wasm)
+    {
+        var imports = CreateImports();
+        wasmInstance = new Instance (wasm, imports);
+    }
 
-            // Now we surface the memory as an import
-            var memoryImport = new Import ("env", "memory", memory);
+    private Import[] CreateImports()
+    {
+        // This creates a memory block with a minimum of 256 64k pages
+        // and a maxium of 256 64k pages
+        var memory = Memory.Create(minPages: 10);
 
-            var abortFunc = new Import ("env", "abort", 
-                    new ImportFunction ((Action<InstanceContext,int,int,int,int>) (Abort)));
-            var logIntFunc = new Import ("env", "logInt",
-                    new ImportFunction ((Action<InstanceContext, int>) (LogInt)));
-            var logFloatFunc = new Import ("env", "logFloat",
-                    new ImportFunction ((Action<InstanceContext, float>) (LogFloat)));
-            var logStringFunc = new Import ("env", "logString",
-                    new ImportFunction ((Action<InstanceContext, int, int>) (LogString)));
-            var execI_IFunc = new Import ("env", "execI_I", 
-                    new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecI_I)));
-            var execI_IIFunc = new Import ("env", "execI_II", 
-                    new ImportFunction ((Func<InstanceContext, int, int, int, int>) (ExecI_II)));
-            var execI_SFunc = new Import ("env", "execI_S", 
-                    new ImportFunction ((Func<InstanceContext, int, int, int, int>) (ExecI_S)));
-            var execI_IV3Func = new Import ("env", "execI_IV3", 
-                    new ImportFunction ((Func<InstanceContext, int, int, float, float, float, int>) (ExecI_IV3)));
-            var execI_IV4Func = new Import ("env", "execI_IV4",
-                    new ImportFunction ((Func<InstanceContext, int, int, float, float, float, float, int>) (ExecI_IV4)));
-            var execV3_IFunc = new Import ("env", "execV3_I",
-                    new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecV3_I)));
-            
-            Import[] imports = new Import[] {
-                memoryImport,
-                abortFunc,
-                logIntFunc,
-                logFloatFunc,
-                logStringFunc,
-                execI_IFunc,
-                execI_IIFunc,
-                execI_SFunc,
-                execI_IV3Func,
-                execI_IV4Func,
-                execV3_IFunc,
-            };
+        // Now we surface the memory as an import
+        var memoryImport = new Import ("env", "memory", memory);
 
-            // Now we create an instance based on the WASM file, and the memory provided:
-            wasmInstance = new Instance (wasm, imports);
-            var ret = wasmInstance.Call("start");
-            if (ret == null) {
-                Debug.Log("No result");
-            } else {
-                Debug.Log(ret[0]);
-            }
-            core.Connect();
+        var abortFunc = new Import ("env", "abort", 
+                new ImportFunction ((Action<InstanceContext,int,int,int,int>) (Abort)));
+        var logIntFunc = new Import ("env", "logInt",
+                new ImportFunction ((Action<InstanceContext, int>) (LogInt)));
+        var logFloatFunc = new Import ("env", "logFloat",
+                new ImportFunction ((Action<InstanceContext, float>) (LogFloat)));
+        var logStringFunc = new Import ("env", "logString",
+                new ImportFunction ((Action<InstanceContext, int, int>) (LogString)));
+        var execI_IFunc = new Import ("env", "execI_I", 
+                new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecI_I)));
+        var execI_IIFunc = new Import ("env", "execI_II", 
+                new ImportFunction ((Func<InstanceContext, int, int, int, int>) (ExecI_II)));
+        var execI_SFunc = new Import ("env", "execI_S", 
+                new ImportFunction ((Func<InstanceContext, int, int, int, int>) (ExecI_S)));
+        var execI_IV3Func = new Import ("env", "execI_IV3", 
+                new ImportFunction ((Func<InstanceContext, int, int, float, float, float, int>) (ExecI_IV3)));
+        var execI_IV4Func = new Import ("env", "execI_IV4",
+                new ImportFunction ((Func<InstanceContext, int, int, float, float, float, float, int>) (ExecI_IV4)));
+        var execV3_IFunc = new Import ("env", "execV3_I",
+                new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecV3_I)));
+        Import[] imports = new Import[] {
+            memoryImport,
+            abortFunc,
+            logIntFunc,
+            logFloatFunc,
+            logStringFunc,
+            execI_IFunc,
+            execI_IIFunc,
+            execI_SFunc,
+            execI_IV3Func,
+            execI_IV4Func,
+            execV3_IFunc,
         };
+        return imports;
+    }
+
+    public void Start()
+    {
+        wasmInstance.Call("start");
+    }
+    public void Update()
+    {
+        if (frames > 120) {
+            wasmInstance.Call("update");
+        } else {
+            frames += 1;
+        }
     }
 
     public static void Abort (InstanceContext ctx, int msgPtr, int filenamePtr, int lineNum, int columNum)
@@ -106,15 +102,15 @@ public class ConnectorWasmerSharp
         }
         */
     }
-    private static void LogInt(InstanceContext ctx, int value)
+    private void LogInt(InstanceContext ctx, int value)
     {
         Debug.Log("LogInt: " + value.ToString());
     }
-    private static void LogFloat(InstanceContext ctx, float value)
+    private void LogFloat(InstanceContext ctx, float value)
     {
         Debug.Log("LogFloat: " + value.ToString());
     }
-    private static void LogString(InstanceContext context, int ptr, int len)
+    private void LogString(InstanceContext context, int ptr, int len)
     {
         var memory = context.GetMemory(0).Data;
         var str = "";
@@ -123,95 +119,56 @@ public class ConnectorWasmerSharp
             Debug.Log(str);
         }
     }
-    private static int ExecI_I(InstanceContext context, int funcId, int i0)
+    private int ExecI_I(InstanceContext context, int funcId, int i0)
     {
-        switch(funcId)
-        {
-            case GET_MATERIAL_OF_OBJECT:
-                return GetCore().GetMaterialByObjectId(i0);
-            case CREATE_PRIMITIVE_OBJECT:
-                return GetCore().CreatePrimitiveObject((PrimitiveTypeEnum) i0);
-            default:
-                throw new System.Exception("No function to match");
-        }
-    }
-    private static int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
-    {
-        switch(funcId)
-        {
-            case SET_OBJECT_EVENT_LISTENER:
-                return GetCore().SetObjectEventListener(i0, i1, () => {
-                    Debug.Log("clicked22");
-                    wasmInstance.Call("onEvent", new object[]{ i0, i1 });
-                });
-            default:
-                throw new System.Exception("No function to match");
-        }
+            return GetSandbox().ExecI_I(funcId, i0);
     }
 
-    private static int ExecI_S(InstanceContext context, int funcId, int strPtr, int len)
+    // To be renamed to ExecI_II_V
+    private int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
+    {
+        return GetSandbox().ExecI_II_V(funcId, i0, i1, () => {
+            Debug.Log("clicked22");
+            wasmInstance.Call("onEvent", new object[]{ i0, i1 });
+        });
+    }
+
+    private int ExecI_S(InstanceContext context, int funcId, int strPtr, int len)
     {
         var memory = context.GetMemory(0).Data;
         var str = "";
         unsafe {
             str = Encoding.UTF8.GetString((byte*) memory + strPtr, len);
         }
-        switch(funcId)
-        {
-            case GET_OBJECT_ID_BY_NAME:
-                return GetCore().GetObjectByName(str);
-            case GET_MATERIAL_ID_BY_NAME:
-                return GetCore().GetMaterialByName(str);
-            default:
-                throw new System.Exception("No function to match");
-        }
+        return GetSandbox().ExecI_S(funcId, str);
     }
-    private static int ExecI_IV3(InstanceContext context, int funcId, int i1, float f1, float f2, float f3)
+    private int ExecI_IV3(InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
     {
-        switch(funcId)
-        {
-            case SET_OBJECT_POSITION:
-                return GetCore().SetObjectPosition(i1, f1, f2, f3);
-            default:
-                throw new System.Exception("No function to match");
-        }
+        return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
     }
-    private static int ExecI_IV4(InstanceContext context, int funcId, int i1, float f1, float f2, float f3, float f4)
+    private int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
     {
-        switch(funcId)
-        {
-            case SET_MATERIAL_COLOR:
-                return GetCore().SetMaterialColor(i1, f1, f2, f3, f4);
-            default:
-                throw new System.Exception("No function to match");
-        }
+        return GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
     }
-    private static int ExecV3_I(InstanceContext context, int funcId, int i1)
+    private int ExecV3_I(InstanceContext context, int funcId, int i0)
     {
-        switch (funcId)
+        var v = GetSandbox().ExecV3_I(funcId, i0);
+        if (v == null)
         {
-            case GET_OBJECT_POSITION:
-                var pos = GetCore().GetObjectPosition(i1);
-                if (pos == null) {
-                    return -1;
-                } else {
-                    unsafe {
-                        var ptr = (float*) context.GetMemory(0).Data;
-                        *ptr = pos.Value.x;
-                        ptr++;
-                        *ptr = pos.Value.y;
-                        ptr++;
-                        *ptr = pos.Value.z;
-                        return 0;
-                    }
-                }
-            default:
-                throw new System.Exception("No function to match");
+            return -1;
         }
-    }
-
-    public void Update()
-    {
-        wasmInstance.Call("update");
+        else
+        {
+            unsafe
+            {
+                var ptr = (float*)context.GetMemory(0).Data;
+                *ptr = v.Value.x;
+                ptr++;
+                *ptr = v.Value.y;
+                ptr++;
+                *ptr = v.Value.z;
+                return 0;
+            }
+        }
     }
 }
