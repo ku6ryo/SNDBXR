@@ -1,7 +1,9 @@
 import { EventType, } from "./EventType"
-import { Object, } from "./object"
-import { execIII } from "./env"
-import { SET_OBJECT_EVENT_LISTENER } from "./exec"
+import { Object, } from "./Object"
+import {
+  SET_OBJECT_EVENT_LISTENER,
+  execI_II,
+} from "./env"
 
 export class EventManager {
 
@@ -9,7 +11,7 @@ export class EventManager {
 
   setListener(object: Object, type: EventType): i32  {
     this.objects.set(object.id, object)
-    return execIII(SET_OBJECT_EVENT_LISTENER, object.id, type)
+    return execI_II(SET_OBJECT_EVENT_LISTENER, object.id, type)
   }  
 
   onEvent(objectId: i32, type: i32): void {

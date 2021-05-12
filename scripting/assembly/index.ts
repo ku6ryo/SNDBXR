@@ -1,62 +1,35 @@
-/*
+import { getObjectByName, Object, } from "./Object";
+import { logFloat, logInt, log } from "./env"
+import { Color } from "./Color";
 import { eventManager } from "./global"
-import { EventType } from "./EventType"
-import { getObjectByName, log, getTime, } from "./tool"
-import { Object } from "./object"
+import { EventType } from "./EventType";
 
-export function main (): i32 {
-  let o = getObjectByName("cube")
-  if (o === null) {
-    return 1
-  }
-  return 0
-}
-
-let i = 0;
+let r: f64 = 0;
 export function update(): void {
-  let o = getObjectByName("cube")
-  if (o !== null) {
-    o.setPosition(i * 0.1 as f32, 0, 0)
-    i += 1
-  }
-}
-
-export function check (): void {
-  log(getTime())
-  log(i)
-}
-
-export function onEvent (objectId: i32, type: EventType): void {
-  eventManager.onEvent(objectId, type)
-}
-*/
-
-import { getObjectByName } from "./object";
-import { logInt, } from "./env"
-
-class A {
-  id: i32 = 0;
-   constructor() {
-     this.id = 100;
-   }
-}
-
-let i: f64 = 0;
-export function update(): void {
-  const obj = getObjectByName("Cube");
+  r += 0.01
+  const obj = getObjectByName("Sphere");
   if (obj) {
-    obj.setPosition(Math.sin(i) as f32, 1, 1);
-    i += 0.01
+    obj.setPosition(Math.sin(r) as f32, 0, 0);
+    const p = obj.getPosition()
+    logFloat(p.x)
   }
 }
 
-export function Test(): i32 {
-  const a = new A();
-  logInt(10);
+export function start(): i32 {
   const obj = getObjectByName("Cube");
   if (obj) {
     obj.setPosition(1, 1, 1);
+    obj.listen(EventType.TOUCH, (obj: Object) => {
+      const m = obj.getMaterial();
+      if (m) {
+        m.setColor(new Color(1, 1, 0, 1))
+      }
+    })
     return obj.id;
   }
-  return a.id
+  return 222
+}
+
+export function onEvent (objectId: i32, type: i32): void {
+  eventManager.onEvent(objectId, type)
 }

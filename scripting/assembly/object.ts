@@ -1,36 +1,32 @@
 import {
-  execIS,
-  execIIV3,
-} from "./env"
-import {
     EventType,
 } from "./EventType"
 import { EventManager } from "./EventManager"
 import { allocString } from "./memory"
 import {
-    GET_OBJECT_ID_BY_NAME,
-    SET_OBJECT_POSITION,
-} from "./exec"
-import {
-    logInt,
+  GET_OBJECT_ID_BY_NAME,
+  SET_OBJECT_POSITION,
+  GET_OBJECT_POSITION,
+  GET_MATERIAL_OF_OBJECT,
+  execI_I,
+  execI_S,
+  execI_IV3,
+  execV3_I,
+  logFloat,
 } from "./env"
+import { Material } from "./Material"
 import { eventManager } from "./global"
+import { Vector3 } from "./Vector3"
 
 const OBJECT_NOT_FOUND_ID = -1
 
 export function getObjectByName(name: string): Object | null {
-    logInt(10);
   const ptr = allocString(name)
-    logInt(11);
-    logInt(ptr);
-  const id = execIS(GET_OBJECT_ID_BY_NAME, ptr)
-    logInt(12);
+  const id = execI_S(GET_OBJECT_ID_BY_NAME, ptr, name.length)
   heap.free(ptr)
-    logInt(13);
   if (id === OBJECT_NOT_FOUND_ID) {
     return null
   } 
-    logInt(14);
   return new Object(id, eventManager)
 }
 
@@ -38,21 +34,34 @@ export class Object {
     id: i32
     eventManger: EventManager
 
-    listeners: Map<EventType, () => void> = new Map()
+    listeners: Map<EventType, (obj: Object) => void> = new Map()
 
     constructor(id: i32, eventManager: EventManager) {
-        logInt(20);
         this.id = id
-        logInt(21);
         this.eventManger = eventManager
-        logInt(22);
+    }
+
+    getPosition(): Vector3 {
+      const ptr = execV3_I(GET_OBJECT_POSITION, this.id);
+      const x = load<f32>(ptr)
+      const y = load<f32>(ptr, 4)
+      const z = load<f32>(ptr, 8)
+      return new Vector3(x, y, z)
     }
 
     setPosition(x: f32, y: f32, z: f32): i32 {
-        return execIIV3(SET_OBJECT_POSITION, this.id, x, y, z)
+      return execI_IV3(SET_OBJECT_POSITION, this.id, x, y, z)
     }
 
-    listen(type: EventType, callback: () => void): i32 {
+    getMaterial(): Material | null {
+        const id = execI_I(GET_MATERIAL_OF_OBJECT, this.id)
+        if (id === -1) {
+          return null
+        }
+        return new Material(id)
+    }
+
+    listen(type: EventType, callback: (obj: Object) => void): i32 {
         this.listeners.set(type, callback)
         return this.eventManger.setListener(this, type)
     }
@@ -60,7 +69,7 @@ export class Object {
     onEvent(type: i32): void {
         if (this.listeners.has(type)) {
             const listener = this.listeners.get(type)
-            listener()
+            listener(this)
         }
     }
 }
