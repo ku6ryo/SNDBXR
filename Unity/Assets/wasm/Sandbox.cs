@@ -142,7 +142,7 @@ public class Sandbox : MonoBehaviour
     void Update()
     {
       if (Connected) {
-        connector.Update();
+        // connector.Update();
       }
     }
 }
