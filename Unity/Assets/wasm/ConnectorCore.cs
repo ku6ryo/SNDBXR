@@ -55,7 +55,6 @@ public class ConnectorCore : MonoBehaviour
         var obj = GameObject.CreatePrimitive(type);
         int id = ObjectCount;
         ObjectMap.Add(ObjectCount, obj);
-        ObjectNameMap.Add(obj.name, id);
         ObjectCount += 1;
         return id;
     }
