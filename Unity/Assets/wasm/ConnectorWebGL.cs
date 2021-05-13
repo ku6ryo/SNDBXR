@@ -1,3 +1,4 @@
+#if UNITY_WEBGL
 using AOT;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -77,3 +78,5 @@ public class ConnectorWebGL
         return 1;
     }
 }
+
+#endif

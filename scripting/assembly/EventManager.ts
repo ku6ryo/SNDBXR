@@ -1,14 +1,17 @@
 import { EventType, } from "./EventType"
-import { Object, } from "./object"
-import { setEventListener, } from "./env"
+import { Object, } from "./Object"
+import {
+  SET_OBJECT_EVENT_LISTENER,
+  execI_II,
+} from "./env"
 
 export class EventManager {
 
   objects: Map<i32, Object> = new Map()
 
-  setListener(object: Object, type: EventType): void  {
+  setListener(object: Object, type: EventType): i32  {
     this.objects.set(object.id, object)
-    setEventListener(object.id, type)
+    return execI_II(SET_OBJECT_EVENT_LISTENER, object.id, type)
   }  
 
   onEvent(objectId: i32, type: i32): void {

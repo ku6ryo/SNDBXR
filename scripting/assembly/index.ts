@@ -1,31 +1,54 @@
+import { createPrimitiveObject, getObjectByName, Object, PrimitiveType, } from "./Object";
+import { logFloat, logInt, log } from "./env"
+import { Color } from "./Color";
 import { eventManager } from "./global"
-import { EventType } from "./EventType"
-import { getObjectByName, log, getTime, } from "./tool"
-import { Object } from "./object"
+import { EventType } from "./EventType";
 
-export function main (): i32 {
-  let o = getObjectByName("cube")
-  if (o === null) {
-    return 1
+let r: f64 = 0
+export function update(): void {
+  r += 0.01
+  for(let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      const d = 0.01 * j * i;
+      const obj = mat[i][j]
+      if (obj) {
+        const p = obj.getPosition()
+        obj.setPosition(p.x, p.y, Math.sin(r + d) * 1.5 as f32)
+      }
+    }
+  }
+}
+
+const mat: Object[][] = []
+
+export function start(): i32 {
+  /*
+  const obj = getObjectByName("Cube");
+  if (obj) {
+    obj.setPosition(1, 1, 1);
+    obj.listen(EventType.TOUCH, (obj: Object) => {
+      const m = obj.getMaterial();
+      if (m) {
+        m.setColor(new Color(1, 1, 0, 1))
+      }
+    })
+    return obj.id;
+  }
+  */
+  for(let i = -5; i < 5; i++) {
+    const row: Object[] = []
+    for (let j = -5; j < 5; j++) {
+      const obj = createPrimitiveObject(PrimitiveType.CUBE)
+      if (obj) {
+        obj.setPosition(i * 1.1 as f32, j * 1.1 as f32, 0);
+        row.push(obj)
+      }
+    }
+    mat.push(row)
   }
   return 0
 }
 
-let i = 0;
-export function update(): void {
-  let o = getObjectByName("cube")
-  if (o !== null) {
-    o.setPosition(i * 0.1 as f32, 0, 0)
-    i += 1
-  }
-}
-
-export function check (): void {
-  log(getTime())
-  log(i)
-}
-
-export function onEvent (objectId: i32, type: EventType): void {
+export function onEvent (objectId: i32, type: i32): void {
   eventManager.onEvent(objectId, type)
 }
-
