@@ -2,35 +2,41 @@ using System;
 using System.Text;
 using UnityEngine;
 using WasmerSharp;
+using System.Collections.Generic;
 
 /// Connector using WasmerSharp
 /// https://github.com/migueldeicaza/WasmerSharp
 public class ConnectorWasmerSharp
 {
 
-    private Instance wasmInstance = null;
-    private string sandboxName = null;
+    private int id = -1;
 
-    int frames = 0;
+    private static Instance wasmInstance = null;
+    private static Sandbox SandboxInstance = null;
+    private static int SandboxNextId = 0;
+    private static IDictionary<int, Sandbox> SandboxIdMap = new Dictionary<int, Sandbox>();
 
-    public ConnectorWasmerSharp(string sandboxName)
+    public ConnectorWasmerSharp(Sandbox sandbox)
     {
-        this.sandboxName = sandboxName;
+        SandboxInstance = sandbox;
+        SandboxIdMap.Add(SandboxNextId, sandbox);
+        this.id = SandboxNextId;
+        SandboxNextId += 1;
     }
 
-    Sandbox GetSandbox()
+    static Sandbox GetSandbox()
     {
-        Debug.Log(this.sandboxName);
-        return GameObject.Find(this.sandboxName).GetComponent<Sandbox>();
+        return SandboxInstance;
+        // return SandboxIdMap[id];
     }
 
     public void Load(byte[] wasm)
     {
-        var imports = CreateImports();
+        var imports = CreateImports(this.id);
         wasmInstance = new Instance (wasm, imports);
     }
 
-    private Import[] CreateImports()
+    private Import[] CreateImports(int id)
     {
         // This creates a memory block with a minimum of 256 64k pages
         // and a maxium of 256 64k pages
@@ -47,29 +53,45 @@ public class ConnectorWasmerSharp
                 new ImportFunction ((Action<InstanceContext, float>) (LogFloat)));
         var logStringFunc = new Import ("env", "logString",
                 new ImportFunction ((Action<InstanceContext, int, int>) (LogString)));
-        var execI_IFunc = new Import ("env", "execI_I", 
-                new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecI_I)));
-        var execI_IIFunc = new Import ("env", "execI_II", 
-                new ImportFunction ((Func<InstanceContext, int, int, int, int>) (ExecI_II)));
-        var execI_SFunc = new Import ("env", "execI_S", 
-                new ImportFunction ((Func<InstanceContext, int, int, int, int>) (ExecI_S)));
-        var execI_IV3Func = new Import ("env", "execI_IV3", 
-                new ImportFunction ((Func<InstanceContext, int, int, float, float, float, int>) (ExecI_IV3)));
-        var execI_IV4Func = new Import ("env", "execI_IV4",
-                new ImportFunction ((Func<InstanceContext, int, int, float, float, float, float, int>) (ExecI_IV4)));
-        var execV3_IFunc = new Import ("env", "execV3_I",
-                new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecV3_I)));
+
+        Func<InstanceContext, int, int, int> execI_I = (context, funcId, i0) => {
+            return ExecI_I(context, funcId, i0);
+        };
+        var execI_I_Import = new Import ("env", "execI_I", new ImportFunction (execI_I));
+
+        Func<InstanceContext, int, int, int, int> execI_II = (context, funcId, i0, i1) => {
+            return ExecI_II(context, funcId, i0, i1);
+        };
+        var execI_II_Import = new Import ("env", "execI_II", new ImportFunction (execI_II));
+
+        Func<InstanceContext, int, int, int, int> execI_S = (context, funcId, i0, i1) => {
+            return ExecI_S(context, funcId, i0, i1);
+        };
+        var execI_S_Import = new Import ("env", "execI_S", new ImportFunction (execI_S));
+
+        Func<InstanceContext, int, int, float, float, float, int> execI_IV3 = (context, funcId, i0, f0, f1, f2) => {
+            return ExecI_IV3(context, funcId, i0, f0, f1, f2);
+        };
+        var execI_IV3_Import = new Import ("env", "execI_IV3", new ImportFunction (execI_IV3));
+
+        Func<InstanceContext, int, int, float, float, float, float, int> execI_IV4 = (context, funcId, i0, f0, f1, f2, f3) => {
+            return ExecI_IV4(context, funcId, i0, f0, f1, f2, f3);
+        };
+        var execI_IV4_Import = new Import ("env", "execI_IV4", new ImportFunction (execI_IV4));
+        
+        var execV3_IFunc = new Import ("env", "execV3_I", new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecV3_I)));
+
         Import[] imports = new Import[] {
             memoryImport,
             abortFunc,
             logIntFunc,
             logFloatFunc,
             logStringFunc,
-            execI_IFunc,
-            execI_IIFunc,
-            execI_SFunc,
-            execI_IV3Func,
-            execI_IV4Func,
+            execI_I_Import,
+            execI_II_Import,
+            execI_S_Import,
+            execI_IV3_Import,
+            execI_IV4_Import,
             execV3_IFunc,
         };
         return imports;
@@ -81,11 +103,7 @@ public class ConnectorWasmerSharp
     }
     public void Update()
     {
-        if (frames > 120) {
-            wasmInstance.Call("update");
-        } else {
-            frames += 1;
-        }
+        wasmInstance.Call("update");
     }
 
     public static void Abort (InstanceContext ctx, int msgPtr, int filenamePtr, int lineNum, int columNum)
@@ -119,13 +137,13 @@ public class ConnectorWasmerSharp
             Debug.Log(str);
         }
     }
-    private int ExecI_I(InstanceContext context, int funcId, int i0)
+    private static int ExecI_I(InstanceContext context, int funcId, int i0)
     {
-            return GetSandbox().ExecI_I(funcId, i0);
+        return GetSandbox().ExecI_I(funcId, i0);
     }
 
     // To be renamed to ExecI_II_V
-    private int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
+    private static int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
     {
         return GetSandbox().ExecI_II_V(funcId, i0, i1, () => {
             Debug.Log("clicked22");
@@ -133,7 +151,7 @@ public class ConnectorWasmerSharp
         });
     }
 
-    private int ExecI_S(InstanceContext context, int funcId, int strPtr, int len)
+    private static int ExecI_S(InstanceContext context, int funcId, int strPtr, int len)
     {
         var memory = context.GetMemory(0).Data;
         var str = "";
@@ -142,14 +160,17 @@ public class ConnectorWasmerSharp
         }
         return GetSandbox().ExecI_S(funcId, str);
     }
-    private int ExecI_IV3(InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
+
+    private static int ExecI_IV3(InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
     {
         return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
     }
-    private int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
+
+    private static int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
     {
         return GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
     }
+
     private int ExecV3_I(InstanceContext context, int funcId, int i0)
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);

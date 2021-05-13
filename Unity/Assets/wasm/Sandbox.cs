@@ -35,7 +35,6 @@ public class Sandbox : MonoBehaviour
     const int GET_MATERIAL_ID_BY_NAME = 2000;
     const int SET_MATERIAL_COLOR = 2100;
 
-
     public void Connect ()
     {
       Connected = true;
@@ -115,7 +114,7 @@ public class Sandbox : MonoBehaviour
 
     void Awake()
     {
-        connector = new ConnectorWasmerSharp(this.gameObject.name);
+        connector = new ConnectorWasmerSharp(this);
         objectService = new ObjectService(this.gameObject.name);
         audioService = new AudioService(objectService);
     }
@@ -134,15 +133,17 @@ public class Sandbox : MonoBehaviour
             connector.Load(wasm);
             Connect();
             connector.Start();
+            /*
             StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
                 audioService.CreateAudioObjectWithAudioSource(id);
             }));
+            */
         };
     }
     void Update()
     {
       if (Connected) {
-        // connector.Update();
+        connector.Update();
       }
     }
 }
