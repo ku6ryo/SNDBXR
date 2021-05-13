@@ -167,6 +167,8 @@ public class ConnectorWasmerSharp
 
     private static int ExecI_IV3(int sandboxId, InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
     {
+        // これならうまくいく
+        // return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
         var sandbox = GetSandboxById(sandboxId);
         return sandbox.ExecI_IV3(funcId, i0, f0, f1, f2);
     }
@@ -176,7 +178,7 @@ public class ConnectorWasmerSharp
         return GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
     }
 
-    private int ExecV3_I(InstanceContext context, int funcId, int i0)
+    private static int ExecV3_I(InstanceContext context, int funcId, int i0)
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);
         if (v == null)

@@ -12,8 +12,8 @@ export function update(): void {
       const d = 0.01 * j * i;
       const obj = mat[i][j]
       if (obj) {
-        const p = obj.getPosition()
-        obj.setPosition(p.x, p.y, Math.sin(r + d) * 1.5 as f32)
+        // const p = obj.getPosition()
+        obj.setPosition((i - 5) * 1.1 as f32, (j -5) * 1.1 as f32, Math.sin(r + d) * 1.5 as f32)
       }
     }
   }
