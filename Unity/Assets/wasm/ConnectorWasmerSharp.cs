@@ -40,7 +40,7 @@ public class ConnectorWasmerSharp
         wasmInstance = new Instance (wasm, imports);
     }
 
-    private Import[] CreateImports(int id)
+    private Import[] CreateImports(int sandboxId)
     {
         // This creates a memory block with a minimum of 256 64k pages
         // and a maxium of 256 64k pages
@@ -74,7 +74,9 @@ public class ConnectorWasmerSharp
         var execI_S_Import = new Import ("env", "execI_S", new ImportFunction (execI_S));
 
         Func<InstanceContext, int, int, float, float, float, int> execI_IV3 = (context, funcId, i0, f0, f1, f2) => {
-            return ExecI_IV3(id, context, funcId, i0, f0, f1, f2);
+            // これならうまくいく 
+            // return ExecI_IV3(context, funcId, i0, f0, f1, f2);
+            return ExecI_IV3(sandboxId, context, funcId, i0, f0, f1, f2);
         };
         var execI_IV3_Import = new Import ("env", "execI_IV3", new ImportFunction (execI_IV3));
 
@@ -165,12 +167,15 @@ public class ConnectorWasmerSharp
         return GetSandbox().ExecI_S(funcId, str);
     }
 
+    // これならうまくいく
+    // private static int ExecI_IV3(InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
     private static int ExecI_IV3(int sandboxId, InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
     {
-        // これならうまくいく
-        // return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
         var sandbox = GetSandboxById(sandboxId);
         return sandbox.ExecI_IV3(funcId, i0, f0, f1, f2);
+
+        // これならうまくいく
+        // return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
     }
 
     private static int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
