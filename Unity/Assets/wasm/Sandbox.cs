@@ -9,14 +9,14 @@ public class Sandbox : MonoBehaviour
 {
     #if UNITY_EDITOR
     ConnectorWasmerSharp connector = null;
-    // ConnectorCsWasm connector = new ConnectorCsWasm();
-
     #elif UNITY_WEBGL
-    ConnectorWebGL connector = new ConnectorWebGL();
+    ConnectorWebGL connector = null;
     #elif UNITY_ANDROID
-    ConnectorWasmSharp connector = new ConnectorWasmSharp();
+    ConnectorWasmSharp connector = null;
     #elif UNITY_STANDALONE_WIN
-    ConnectorWasmerSharp connector = new ConnectorWasmerSharp();
+    ConnectorWasmerSharp connector = null;
+    #elif UNITY_STANDALONE_OSX
+    ConnectorWasmerSharp connector = null;
     #else
     ConnectorDummy connector = new ConnectorDummy();
     #endif
