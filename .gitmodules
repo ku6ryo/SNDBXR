@@ -1,3 +1,6 @@
 [submodule ".\\Unity\\Assets\\WasmerSharp"]
 	path = .\\Unity\\Assets\\WasmerSharp
 	url = git@github.com:migueldeicaza/WasmerSharp.git
+[submodule "Unity/Assets/Wasm3DotNet"]
+	path = Unity/Assets/Wasm3DotNet
+	url = git@github.com:tana/Wasm3DotNet.git
