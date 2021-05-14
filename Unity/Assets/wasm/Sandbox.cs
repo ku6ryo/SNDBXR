@@ -12,7 +12,7 @@ public class Sandbox : MonoBehaviour
     #elif UNITY_WEBGL
     ConnectorWebGL connector = null;
     #elif UNITY_ANDROID
-    ConnectorWasmSharp connector = null;
+    ConnectorWasmerSharp connector = null;
     #elif UNITY_STANDALONE_WIN
     ConnectorWasmerSharp connector = null;
     #elif UNITY_STANDALONE_OSX
