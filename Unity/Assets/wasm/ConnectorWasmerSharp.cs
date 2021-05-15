@@ -40,7 +40,7 @@ public class ConnectorWasmerSharp
     {
         // This creates a memory block with a minimum of 256 64k pages
         // and a maxium of 256 64k pages
-        var memory = Memory.Create(minPages: 10);
+        var memory = Memory.Create(minPages: 256);
 
         // Now we surface the memory as an import
         var memoryImport = new Import ("env", "memory", memory);

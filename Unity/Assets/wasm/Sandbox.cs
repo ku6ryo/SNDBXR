@@ -30,6 +30,10 @@ public class Sandbox : MonoBehaviour
     const int CREATE_PRIMITIVE_OBJECT = 1001;
     const int SET_OBJECT_POSITION = 1100;
     const int GET_OBJECT_POSITION = 1101;
+    const int SET_OBJECT_ROTATION = 1110;
+    const int GET_OBJECT_ROTATION = 1111;
+    const int SET_OBJECT_SCALE = 1120;
+    const int GET_OBJECT_SCALE = 1121;
     const int GET_MATERIAL_OF_OBJECT = 1200;
     const int SET_OBJECT_EVENT_LISTENER = 1300;
     const int GET_MATERIAL_ID_BY_NAME = 2000;
@@ -82,7 +86,9 @@ public class Sandbox : MonoBehaviour
         switch(funcId)
         {
             case SET_OBJECT_POSITION:
-                return objectService.SetObjectPosition(i1, f1, f2, f3);
+                return objectService.SetObjectPosition(i1, new Vector3(f1, f2, f3));
+            case SET_OBJECT_SCALE:
+                return objectService.SetObjectScale(i1, new Vector3(f1, f2, f3));
             default:
                 throw new System.Exception("No function to match");
         }
@@ -103,6 +109,8 @@ public class Sandbox : MonoBehaviour
         {
             case GET_OBJECT_POSITION:
                 return objectService.GetObjectPosition(i1);
+            case GET_OBJECT_SCALE:
+                return objectService.GetObjectScale(i1);
             default:
                 throw new System.Exception("No function to match");
         }

@@ -7,8 +7,7 @@ using UnityEngine.Events;
 public enum PrimitiveTypeEnum
 {
     Cube = 0,
-    Plane = 1,
-    Sphere = 2,
+    Sphere = 1,
 }
 
 public class ObjectService
@@ -49,8 +48,8 @@ public class ObjectService
     public int CreatePrimitiveObject(PrimitiveTypeEnum p)
     {
         var type = PrimitiveType.Cube;
-        if (p == PrimitiveTypeEnum.Cube) {
-            type = PrimitiveType.Cube;
+        if (p == PrimitiveTypeEnum.Sphere) {
+            type = PrimitiveType.Sphere;
         }
         var obj = GameObject.CreatePrimitive(type);
         obj.transform.SetParent(GetSandboxGameObject().transform);
@@ -74,11 +73,11 @@ public class ObjectService
       }
     }
 
-    public int SetObjectPosition(int objectId, float x, float y, float z)
+    public int SetObjectPosition(int objectId, Vector3 v)
     {
         GameObject obj = ObjectMap[objectId];
         if (obj) {
-            obj.transform.position = new Vector3(x, y, z);
+            obj.transform.position = v;
             return 0;
         } else {
             return 1;
@@ -90,6 +89,26 @@ public class ObjectService
         GameObject obj = ObjectMap[objectId];
         if (obj) {
             return obj.transform.position;
+        }
+        return null;
+    }
+
+    public int SetObjectScale(int objectId, Vector3 v)
+    {
+        GameObject obj = ObjectMap[objectId];
+        if (obj) {
+            obj.transform.localScale = v;
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    public Vector3? GetObjectScale(int objectId)
+    {
+        GameObject obj = ObjectMap[objectId];
+        if (obj) {
+            return obj.transform.localScale;
         }
         return null;
     }
