@@ -8,7 +8,8 @@ using System.IO;
 public class Sandbox : MonoBehaviour
 {
     #if UNITY_EDITOR
-    ConnectorWasmerSharp connector = null;
+    // ConnectorWasmerSharp connector = null;
+    ConnectorWasm3 connector = null;
     #elif UNITY_WEBGL
     ConnectorWebGL connector = null;
     #elif UNITY_ANDROID
@@ -114,7 +115,8 @@ public class Sandbox : MonoBehaviour
 
     void Awake()
     {
-        connector = new ConnectorWasmerSharp(this);
+        // connector = new ConnectorWasmerSharp(this);
+        connector = new ConnectorWasm3(this);
         objectService = new ObjectService(this.gameObject.name);
         audioService = new AudioService(objectService);
     }
