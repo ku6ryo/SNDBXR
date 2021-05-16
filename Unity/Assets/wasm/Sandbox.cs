@@ -26,6 +26,8 @@ public class Sandbox : MonoBehaviour
     ObjectService objectService = null;
     AudioService audioService = null;
 
+    GltfService gltfService = null;
+
     const int GET_OBJECT_ID_BY_NAME = 1000;
     const int CREATE_PRIMITIVE_OBJECT = 1001;
     const int SET_OBJECT_POSITION = 1100;
@@ -38,6 +40,8 @@ public class Sandbox : MonoBehaviour
     const int SET_OBJECT_EVENT_LISTENER = 1300;
     const int GET_MATERIAL_ID_BY_NAME = 2000;
     const int SET_MATERIAL_COLOR = 2100;
+
+    const int LOAD_GLTF = 3000;
 
     public void Connect ()
     {
@@ -77,6 +81,10 @@ public class Sandbox : MonoBehaviour
                 return objectService.GetObjectByName(str);
             case GET_MATERIAL_ID_BY_NAME:
                 return objectService.GetMaterialByName(str);
+            case LOAD_GLTF:
+                return gltfService.loadByUrl(str, (loaderId, objectId) => {
+                  connector.OnGltfLoaded(loaderId, objectId);
+                });
             default:
                 throw new System.Exception("No function to match");
         }
@@ -125,6 +133,7 @@ public class Sandbox : MonoBehaviour
         connector = new ConnectorWasmerSharp(this);
         objectService = new ObjectService(this.gameObject.name);
         audioService = new AudioService(objectService);
+        gltfService = new GltfService(objectService);
     }
 
     void Start()
@@ -145,6 +154,11 @@ public class Sandbox : MonoBehaviour
             StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
                 audioService.CreateAudioObjectWithAudioSource(id);
             }));
+            */
+            /*
+            gltfService.loadByUrl("https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb", (id) => {
+                Debug.Log(id);
+            });
             */
         };
     }
