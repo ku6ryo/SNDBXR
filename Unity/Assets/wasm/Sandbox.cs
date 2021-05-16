@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.IO;
-
 
 public class Sandbox : MonoBehaviour
 {
@@ -25,8 +23,8 @@ public class Sandbox : MonoBehaviour
 
     ObjectService objectService = null;
     AudioService audioService = null;
-
     GltfService gltfService = null;
+    SkyService skyService = null;
 
     const int GET_OBJECT_ID_BY_NAME = 1000;
     const int CREATE_PRIMITIVE_OBJECT = 1001;
@@ -42,6 +40,7 @@ public class Sandbox : MonoBehaviour
     const int SET_MATERIAL_COLOR = 2100;
 
     const int LOAD_GLTF = 3000;
+    const int LOAD_SKY = 4000;
 
     public void Connect ()
     {
@@ -83,7 +82,11 @@ public class Sandbox : MonoBehaviour
                 return objectService.GetMaterialByName(str);
             case LOAD_GLTF:
                 return gltfService.loadByUrl(str, (loaderId, objectId) => {
-                  connector.OnGltfLoaded(loaderId, objectId);
+                    connector.OnGltfLoaded(loaderId, objectId);
+                });
+            case LOAD_SKY:
+                return skyService.loadByUrl(str, (loaderId) => {
+                    connector.OnSkyLoaded(loaderId);
                 });
             default:
                 throw new System.Exception("No function to match");
@@ -134,6 +137,7 @@ public class Sandbox : MonoBehaviour
         objectService = new ObjectService(this.gameObject.name);
         audioService = new AudioService(objectService);
         gltfService = new GltfService(objectService);
+        skyService = new SkyService();
     }
 
     void Start()
@@ -143,10 +147,12 @@ public class Sandbox : MonoBehaviour
         UnityWebRequest req = UnityWebRequest.Get(url);
         req.SendWebRequest().completed += operation =>
         {
-            MemoryStream stream = new MemoryStream();
-            stream.Write(req.downloadHandler.data, 0, req.downloadHandler.data.Length);
-            stream.Seek(0, SeekOrigin.Begin);
-            var wasm = stream.ToArray();
+            if (req.result != UnityWebRequest.Result.Success) {
+                Debug.Log(req.error);
+                return;
+            }
+
+            var wasm = req.downloadHandler.data;
             connector.Load(wasm);
             Connect();
             connector.Start();
@@ -154,11 +160,6 @@ public class Sandbox : MonoBehaviour
             StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
                 audioService.CreateAudioObjectWithAudioSource(id);
             }));
-            */
-            /*
-            gltfService.loadByUrl("https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb", (id) => {
-                Debug.Log(id);
-            });
             */
         };
     }

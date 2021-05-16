@@ -14,11 +14,11 @@ export class GltfLoader {
   }
 
   onLoaded(loaderId: i32, objectId: i32): void {
-    logInt(loaderId)
     if (this.callbacks.has(loaderId)) {
       const c = this.callbacks.get(loaderId)
       const obj = new Object(objectId, eventManager)
       c.call(null, obj)
+      this.callbacks.delete(loaderId)
     }
   }
 }

@@ -1,4 +1,4 @@
-import { eventManager, gltfLoader } from "./global"
+import { eventManager, gltfLoader, skyManager } from "./global"
 import { log } from "./env"
 import { Vector3 } from "./Vector3"
 import { Object } from "./Object"
@@ -16,6 +16,9 @@ export function update(): void {
 }
 
 export function start(): i32 {
+  skyManager.load("https://pixexid.com/img/5v2gd8di-a-view-of-the-television.jpeg?download=true", () => {
+    log("sky loaded")
+  })
   const glbUrl = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
   gltfLoader.load(glbUrl, (obj) => {
     loadedObj = obj
@@ -31,4 +34,8 @@ export function onEvent (objectId: i32, type: i32): void {
 
 export function onGltfLoaded(loaderId: i32, objectId: i32): void {
   gltfLoader.onLoaded(loaderId, objectId)
+}
+
+export function onSkyLoaded(loaderId: i32): void {
+  skyManager.onLoaded(loaderId)
 }

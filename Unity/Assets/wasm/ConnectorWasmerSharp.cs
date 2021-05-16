@@ -110,6 +110,10 @@ public class ConnectorWasmerSharp
     {
         wasmInstance.Call("onGltfLoaded", loaderId, objectId);
     }
+    public void OnSkyLoaded(int loaderId)
+    {
+        wasmInstance.Call("onSkyLoaded", loaderId);
+    }
 
     public static void Abort (InstanceContext ctx, int msgPtr, int filenamePtr, int lineNum, int columNum)
     {
