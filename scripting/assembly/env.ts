@@ -19,6 +19,10 @@ export const GET_MATERIAL_ID_BY_NAME = 2000
 // MATERIAL/COLOR
 export const SET_MATERIAL_COLOR = 2100
 
+// Loader
+export const LOAD_GLTF = 3000
+
+
 
 export declare function execI_II(funcId: i32, arg1: i32, arg2: i32): i32;
 export declare function execI_I(funcId: i32, arg1: i32): i32;

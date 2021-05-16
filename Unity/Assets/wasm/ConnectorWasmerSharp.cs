@@ -106,6 +106,11 @@ public class ConnectorWasmerSharp
         wasmInstance.Call("update");
     }
 
+    public void OnGltfLoaded(int loaderId, int objectId)
+    {
+        wasmInstance.Call("onGltfLoaded", loaderId, objectId);
+    }
+
     public static void Abort (InstanceContext ctx, int msgPtr, int filenamePtr, int lineNum, int columNum)
     {
         Debug.Log("Abort");

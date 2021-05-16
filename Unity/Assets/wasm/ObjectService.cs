@@ -32,7 +32,7 @@ public class ObjectService
         this.sandboxName = sandboxName;
     }
 
-    private GameObject GetSandboxGameObject()
+    public GameObject GetSandboxGameObject()
     {
         return GameObject.Find(this.sandboxName);
     }
