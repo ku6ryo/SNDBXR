@@ -1,12 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Networking;
 using WasmerSharp;
-using System.Collections.Generic;
 
 /// Connector using WasmerSharp
 /// https://github.com/migueldeicaza/WasmerSharp
-public class ConnectorWasmerSharp
+public class ConnectorWasmerSharp : ConnectorAbstract
 {
 
     private int id = -1;
@@ -27,13 +28,23 @@ public class ConnectorWasmerSharp
     static Sandbox GetSandbox()
     {
         return SandboxInstance;
-        // return SandboxIdMap[id];
     }
 
-    public void Load(byte[] wasm)
+    public override void Load(string url, Action<bool> callback)
     {
-        var imports = CreateImports(this.id);
-        wasmInstance = new Instance (wasm, imports);
+        UnityWebRequest req = UnityWebRequest.Get(url);
+        req.SendWebRequest().completed += operation =>
+        {
+            if (req.result != UnityWebRequest.Result.Success) {
+                Debug.Log(req.error);
+                callback(false);
+                return;
+            }
+            var wasm = req.downloadHandler.data;
+            var imports = CreateImports(this.id);
+            wasmInstance = new Instance(wasm, imports);
+            callback(true);
+        };
     }
 
     private Import[] CreateImports(int id)
@@ -97,11 +108,12 @@ public class ConnectorWasmerSharp
         return imports;
     }
 
-    public void Start()
+    public override int Start()
     {
-        wasmInstance.Call("start");
+        var result = wasmInstance.Call("start");
+        return (int) result[0];
     }
-    public void Update()
+    public override void Update()
     {
         wasmInstance.Call("update");
     }
@@ -113,6 +125,11 @@ public class ConnectorWasmerSharp
     public void OnSkyLoaded(int loaderId)
     {
         wasmInstance.Call("onSkyLoaded", loaderId);
+    }
+
+    public void OnEvent(int i0, int i1)
+    {
+        wasmInstance.Call("onEvent", new WasmerValue[]{ i0, i1 });
     }
 
     public static void Abort (InstanceContext ctx, int msgPtr, int filenamePtr, int lineNum, int columNum)
@@ -154,10 +171,7 @@ public class ConnectorWasmerSharp
     // To be renamed to ExecI_II_V
     private static int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
     {
-        return GetSandbox().ExecI_II_V(funcId, i0, i1, () => {
-            Debug.Log("clicked22");
-            wasmInstance.Call("onEvent", new object[]{ i0, i1 });
-        });
+        return GetSandbox().ExecI_II(funcId, i0, i1);
     }
 
     private static int ExecI_S(InstanceContext context, int funcId, int strPtr, int len)

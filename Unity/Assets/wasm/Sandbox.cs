@@ -1,10 +1,8 @@
-using System;
 using UnityEngine;
-using UnityEngine.Networking;
-using System.IO;
 
 public class Sandbox : MonoBehaviour
 {
+
     #if UNITY_EDITOR
     ConnectorWasmerSharp connector = null;
     #elif UNITY_WEBGL
@@ -42,15 +40,6 @@ public class Sandbox : MonoBehaviour
     const int LOAD_GLTF = 3000;
     const int LOAD_SKY = 4000;
 
-    public void Connect ()
-    {
-      Connected = true;
-    }
-
-    public void Disconnect ()
-    {
-      Connected = false;
-    }
     public int ExecI_I(int funcId, int i0) {
         switch(funcId)
         {
@@ -62,12 +51,14 @@ public class Sandbox : MonoBehaviour
                 throw new System.Exception("No function to match");
         }
     }
-    public int ExecI_II_V(int funcId, int i0, int i1, Action listener)
+    public int ExecI_II(int funcId, int i0, int i1)
     {
         switch(funcId)
         {
             case SET_OBJECT_EVENT_LISTENER:
-                return objectService.SetObjectEventListener(i0, i1, listener);
+                return objectService.SetObjectEventListener(i0, i1, () => {
+                    connector.OnEvent(i1, i0);
+                });
             default:
                 throw new System.Exception("No function to match");
         }
@@ -144,24 +135,17 @@ public class Sandbox : MonoBehaviour
     {
         Debug.Log("start");
         string url = "http://192.168.1.5:8080/scripting/build/untouched.wasm";
-        UnityWebRequest req = UnityWebRequest.Get(url);
-        req.SendWebRequest().completed += operation =>
-        {
-            if (req.result != UnityWebRequest.Result.Success) {
-                Debug.Log(req.error);
-                return;
+        connector.Load(url, (success) => {
+            if (success) {
+                this.Connected = true;
+                connector.Start();
+                /*
+                StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
+                    audioService.CreateAudioObjectWithAudioSource(id);
+                }));
+                */
             }
-
-            var wasm = req.downloadHandler.data;
-            connector.Load(wasm);
-            Connect();
-            connector.Start();
-            /*
-            StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
-                audioService.CreateAudioObjectWithAudioSource(id);
-            }));
-            */
-        };
+        });
     }
     void Update()
     {

@@ -1,22 +1,29 @@
 using AOT;
-using System.Runtime.InteropServices;
-using UnityEngine;
+using System;
 
-public class ConnectorDummy
+public class ConnectorDummy : ConnectorAbstract
 {
-    private static Sandbox Core = null;
+    private Sandbox sandbox = null;
 
-    public void Init(Sandbox core)
+    ConnectorDummy(Sandbox sandbox)
     {
-        ConnectorDummy.Core = core;
-        core.Connect();
+        this.sandbox = sandbox;
+    }
+    public override void Load(string url, Action<bool> onComplete)
+    {
+        onComplete(true);
+    }
+    public void Init()
+    {
     }
     public void Test()
     {
     }
-
-    public void Update()
+    public override int Start()
     {
-        Debug.Log("Dummy: Update");
+        return 0;
+    }
+    public override void Update()
+    {
     }
 }

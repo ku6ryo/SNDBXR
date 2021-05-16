@@ -5,30 +5,40 @@ using UnityEngine;
 
 public class ConnectorWebGL
 {
-    [DllImport("__Internal")]
-    private static extern void JsInit(
-        dlgConnect a,
-        dlgGetObjectByName b,
-        dlgSetObjectPosition c
-    );
+    private static Sandbox SandboxInstance = null;
+    private static int SandboxNextId = 0;
+    private static IDictionary<int, Sandbox> SandboxIdMap = new Dictionary<int, Sandbox>();
+
+    public ConnectorWasmerSharp(Sandbox sandbox)
+    {
+        SandboxInstance = sandbox;
+        SandboxIdMap.Add(SandboxNextId, sandbox);
+        this.id = SandboxNextId;
+        SandboxNextId += 1;
+    }
+
+    static Sandbox GetSandbox()
+    {
+        return SandboxInstance;
+    }
 
     [DllImport("__Internal")]
     private static extern int JsTest();
 
-    [DllImport("__Internal")]
-    private static extern int JsUpdate();
 
-    private static ConnectorCore Core = null;
-
-    public void Init(ConnectorCore core)
+    public void Init()
     {
-        ConnectorWebGL.Core = core;
-        JsInit(
-            Connect,
-            GetObjectByName,
-            SetObjectPosition
-        );
+        JsInit();
+        ConnectExecI_I(ExecI_I);
+        ConnectExecI_II(ExecI_II);
+        ConnectExecI_S(ExecI_S);
+        ConnectExecI_IV3(ExecI_IV3);
+        ConnectExecI_IV4(ExecI_IV4);
+        ConnectExecV3_I(ExecV3_I);
     }
+    [DllImport("__Internal")]
+    private static extern int JsInit();
+
     public void Test()
     {
         var val = JsTest();
@@ -39,44 +49,62 @@ public class ConnectorWebGL
     {
         JsUpdate();
     }
+    [DllImport("__Internal")]
+    private static extern int JsUpdate();
 
-    delegate void dlgConnect();
-
-    [MonoPInvokeCallback(typeof(dlgConnect))]
-    static void Connect()
+    delegate int dlgExecI_I(int funcId, int i0);
+    [MonoPInvokeCallback(typeof(dlgExecI_I))]
+    private static int ExecI_I(int funcId, int i0)
     {
-        Core.Connect();
+        return GetSandbox().ExecI_I(funcId, i0);
     }
+    [DllImport("__Internal")]
+    private static extern int ConnectExecI_I(dlgExecI_I ptr);
 
-    delegate void dlgDisconnect();
-
-    [MonoPInvokeCallback(typeof(dlgDisconnect))]
-    static void Disconnect()
+    delegate int dlgExecI_II(int funcId, int i0, int i1);
+    [MonoPInvokeCallback(typeof(dlgExecI_II))]
+    private static int ExecI_II(int funcId, int i0, int i1)
     {
-        Core.Disconnect();
+        return GetSandbox().ExecI_II(funcId, i0, i1);
     }
+    [DllImport("__Internal")]
+    private static extern int ConnectExecI_II(dlgExecI_II ptr);
 
-    delegate int dlgGetObjectByName(string name);
-
-    [MonoPInvokeCallback(typeof(dlgGetObjectByName))]
-    static int GetObjectByName(string name)
+    delegate int dlgExecI_S(int funcId, string str);
+    [MonoPInvokeCallback(typeof(dlgExecI_S))]
+    private static int ExecI_S(int funcId, string str)
     {
-        return Core.GetObjectByName(name);
+        return GetSandbox().ExecI_S(funcId, str);
     }
+    [DllImport("__Internal")]
+    private static extern int ConnectExecI_S(dlgExecI_S ptr);
 
-    delegate int dlgSetObjectPosition(int objectId, float x, float y, float z);
-
-    [MonoPInvokeCallback(typeof(dlgSetObjectPosition))]
-    static int SetObjectPosition(int objectId, float x, float y, float z)
+    delegate int dlgExecI_IV3(int funcId, int i0, float f0, float f1, float f2);
+    [MonoPInvokeCallback(typeof(dlgExecI_IV3))]
+    private static int ExecI_IV3(int funcId, int i0, float f0, float f1, float f2)
     {
-        return Core.SetObjectPosition(objectId, x, y, z);
+        return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
     }
+    [DllImport("__Internal")]
+    private static extern int ConnectExecI_IV3(dlgExecI_IV3 ptr);
 
-    delegate int dlgSetObjectEventListenr(int objectId, int type);
-    static int SetObjectEventListener(int objectId, int type)
+    delegate int dlgExecI_IV4(int funcId, int i0, float f0, float f1, float f2, float f3);
+    [MonoPInvokeCallback(typeof(dlgExecI_IV4))]
+    private static int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
     {
-        return 1;
+        return GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
     }
+    [DllImport("__Internal")]
+    private static extern int ConnectExecI_IV4(dlgExecI_IV4 ptr);
+
+    delegate int dlgExecV3_I(int funcId, int i0);
+    [MonoPInvokeCallback(typeof(dlgExecV3_I))]
+    private int ExecV3_I(int funcId, int i0)
+    {
+        var v = GetSandbox().ExecV3_I(funcId, i0);
+        // TODO pass vector3 to web
+    }
+    [DllImport("__Internal")]
+    private static extern int ConnectExecV3_I(dlgExecV3_I ptr);
 }
-
 #endif
