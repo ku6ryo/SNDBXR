@@ -117,19 +117,14 @@ public class ConnectorWasmerSharp : ConnectorAbstract
     {
         wasmInstance.Call("update");
     }
-
-    public void OnGltfLoaded(int loaderId, int objectId)
+    public override void SandboxExecV_II(int funcId, int i0, int i1)
     {
-        wasmInstance.Call("onGltfLoaded", loaderId, objectId);
-    }
-    public void OnSkyLoaded(int loaderId)
-    {
-        wasmInstance.Call("onSkyLoaded", loaderId);
+        wasmInstance.Call("sandboxExecV_II", funcId, i0, i1);
     }
 
-    public void OnEvent(int i0, int i1)
+    public override void SandboxExecV_I(int funcId, int loaderId)
     {
-        wasmInstance.Call("onEvent", new WasmerValue[]{ i0, i1 });
+        wasmInstance.Call("sandboxExecV_I", funcId, loaderId);
     }
 
     public static void Abort (InstanceContext ctx, int msgPtr, int filenamePtr, int lineNum, int columNum)

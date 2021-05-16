@@ -25,6 +25,10 @@ export const LOAD_GLTF = 3000
 export const LOAD_SKY = 4000
 
 
+// FROM Sandbox
+export const SANDBOX_ON_OBJECT_EVENT = 10000
+export const SANDBOX_ON_GLTF_LOADED = 10010
+export const SANDBOX_ON_SKY_LOADED = 10020
 
 export declare function execI_II(funcId: i32, arg1: i32, arg2: i32): i32;
 export declare function execI_I(funcId: i32, arg1: i32): i32;

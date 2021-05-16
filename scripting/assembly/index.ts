@@ -1,5 +1,5 @@
 import { eventManager, gltfLoader, skyManager } from "./global"
-import { log } from "./env"
+import { log, SANDBOX_ON_OBJECT_EVENT, SANDBOX_ON_GLTF_LOADED, SANDBOX_ON_SKY_LOADED } from "./env"
 import { createPrimitiveObject, Object, PrimitiveType, } from "./Object"
 import { Vector2 } from "./Vector2"
 import { Vector3 } from "./Vector3"
@@ -53,14 +53,20 @@ export function start(): i32 {
 }
 
 // Please do not remove following.
-export function onEvent (objectId: i32, type: i32): void {
-  eventManager.onEvent(objectId, type)
+export function sandboxExecV_I(funcId: i32, i0: i32): void {
+  switch(funcId) {
+    case SANDBOX_ON_SKY_LOADED:
+      skyManager.onLoaded(i0)
+  }
 }
 
-export function onGltfLoaded(loaderId: i32, objectId: i32): void {
-  gltfLoader.onLoaded(loaderId, objectId)
-}
-
-export function onSkyLoaded(loaderId: i32): void {
-  skyManager.onLoaded(loaderId)
+export function sandboxExecV_II(funcId: i32, i0: i32, i1: i32): void {
+  switch(funcId) {
+    case SANDBOX_ON_OBJECT_EVENT:
+      eventManager.onEvent(i0, i1)
+      break;
+    case SANDBOX_ON_GLTF_LOADED:
+      gltfLoader.onLoaded(i0, i1)
+      break;
+  }
 }

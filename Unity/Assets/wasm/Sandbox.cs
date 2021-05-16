@@ -3,19 +3,7 @@ using UnityEngine;
 public class Sandbox : MonoBehaviour
 {
 
-    #if UNITY_EDITOR
-    ConnectorWasmerSharp connector = null;
-    #elif UNITY_WEBGL
-    ConnectorWebGL connector = null;
-    #elif UNITY_ANDROID
-    ConnectorWasmerSharp connector = null;
-    #elif UNITY_STANDALONE_WIN
-    ConnectorWasmerSharp connector = null;
-    #elif UNITY_STANDALONE_OSX
-    ConnectorWasmerSharp connector = null;
-    #else
-    ConnectorDummy connector = new ConnectorDummy();
-    #endif
+    ConnectorAbstract connector = null;
 
     bool Connected = false;
 
@@ -36,9 +24,13 @@ public class Sandbox : MonoBehaviour
     const int SET_OBJECT_EVENT_LISTENER = 1300;
     const int GET_MATERIAL_ID_BY_NAME = 2000;
     const int SET_MATERIAL_COLOR = 2100;
-
     const int LOAD_GLTF = 3000;
     const int LOAD_SKY = 4000;
+
+    // Function IDs of calls from Unity to WASM.
+    const int SANDBOX_ON_OBJECT_EVENT = 10000;
+    const int SANDBOX_ON_GLTF_LOADED = 10010;
+    const int SANDBOX_ON_SKY_LOADED = 10020;
 
     public int ExecI_I(int funcId, int i0) {
         switch(funcId)
@@ -57,7 +49,7 @@ public class Sandbox : MonoBehaviour
         {
             case SET_OBJECT_EVENT_LISTENER:
                 return objectService.SetObjectEventListener(i0, i1, () => {
-                    connector.OnEvent(i1, i0);
+                    connector.SandboxExecV_II(SANDBOX_ON_OBJECT_EVENT, i1, i0);
                 });
             default:
                 throw new System.Exception("No function to match");
@@ -73,11 +65,11 @@ public class Sandbox : MonoBehaviour
                 return objectService.GetMaterialByName(str);
             case LOAD_GLTF:
                 return gltfService.loadByUrl(str, (loaderId, objectId) => {
-                    connector.OnGltfLoaded(loaderId, objectId);
+                    connector.SandboxExecV_II(SANDBOX_ON_GLTF_LOADED, loaderId, objectId);
                 });
             case LOAD_SKY:
                 return skyService.loadByUrl(str, (loaderId) => {
-                    connector.OnSkyLoaded(loaderId);
+                    connector.SandboxExecV_I(SANDBOX_ON_SKY_LOADED, loaderId);
                 });
             default:
                 throw new System.Exception("No function to match");
@@ -124,7 +116,19 @@ public class Sandbox : MonoBehaviour
 
     void Awake()
     {
+        #if UNITY_EDITOR
         connector = new ConnectorWasmerSharp(this);
+        #elif UNITY_WEBGL
+        connector = new ConnectorWebGL(this);
+        #elif UNITY_ANDROID
+        connector = new ConnectorWasmerSharp(this);
+        #elif UNITY_STANDALONE_WIN
+        connector = new ConnectorWasmerSharp(this);
+        #elif UNITY_STANDALONE_OSX
+        connector = new ConnectorWasmerSharp(this);
+        #else
+        connector = new ConnectorDummy();
+        #endif
         objectService = new ObjectService(this.gameObject.name);
         audioService = new AudioService(objectService);
         gltfService = new GltfService(objectService);

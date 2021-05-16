@@ -11,6 +11,7 @@ class Connector extends ConnectorBase {
     const strArray = new Uint8Array(this.wasmModule.exports.memory.buffer.slice(wasmPtr, wasmPtr + len))
     const uPtr = this.unityInstance.Module._malloc(len)
     this.unityInstance.Module.HEAP8.set(strArray, uPtr)
+    return uPtr
   }
 
   createFunctionImports () {
@@ -31,8 +32,8 @@ class Connector extends ConnectorBase {
         return 0
       },
       execI_S: (funcId, ptr, len) => {
-        this.passStringFromWasmToUnity(ptr, len)
-        return 0
+        const uPtr = this.passStringFromWasmToUnity(ptr, len)
+        return this.unityInstance.Module.dynCall_iii(this.unityPointers.execI_S, funcId, uPtr)
       },
       execI_IV3: (funcId, funcId, f0, f1, f2) => {
         return 0

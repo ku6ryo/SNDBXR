@@ -1,15 +1,18 @@
 #if UNITY_WEBGL
 using AOT;
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-public class ConnectorWebGL
+public class ConnectorWebGL : ConnectorAbstract
 {
+    private int id;
     private static Sandbox SandboxInstance = null;
     private static int SandboxNextId = 0;
     private static IDictionary<int, Sandbox> SandboxIdMap = new Dictionary<int, Sandbox>();
 
-    public ConnectorWasmerSharp(Sandbox sandbox)
+    public ConnectorWebGL(Sandbox sandbox)
     {
         SandboxInstance = sandbox;
         SandboxIdMap.Add(SandboxNextId, sandbox);
@@ -45,12 +48,36 @@ public class ConnectorWebGL
         Debug.Log(val);
     }
 
-    public void Update()
+    public override void Update()
     {
         JsUpdate();
     }
     [DllImport("__Internal")]
     private static extern int JsUpdate();
+
+    public override int Start()
+    {
+        JsStart();
+        return 0;
+    }
+    [DllImport("__Internal")]
+    private static extern int JsStart();
+    public override void Load(string url, Action<bool> onComplete)
+    {
+        Init();
+        JsLoad(url);
+    }
+    [DllImport("__Internal")]
+    private static extern int JsLoad(string url);
+    public override void SandboxExecV_II(int funcId, int i0, int i1)
+    {
+        // wasmInstance.Call("sandboxExecV_I", funcId, i0, i1);
+    }
+
+    public override void SandboxExecV_I(int funcId, int loaderId)
+    {
+        // wasmInstance.Call("sandboxExecV_I", funcId, loaderId);
+    }
 
     delegate int dlgExecI_I(int funcId, int i0);
     [MonoPInvokeCallback(typeof(dlgExecI_I))]
@@ -90,7 +117,7 @@ public class ConnectorWebGL
 
     delegate int dlgExecI_IV4(int funcId, int i0, float f0, float f1, float f2, float f3);
     [MonoPInvokeCallback(typeof(dlgExecI_IV4))]
-    private static int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
+    private static int ExecI_IV4(int funcId, int i0, float f0, float f1, float f2, float f3)
     {
         return GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
     }
@@ -103,6 +130,7 @@ public class ConnectorWebGL
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);
         // TODO pass vector3 to web
+        return 0;
     }
     [DllImport("__Internal")]
     private static extern int ConnectExecV3_I(dlgExecV3_I ptr);

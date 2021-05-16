@@ -7,6 +7,16 @@ var ConnectorPlugin = {
   JsTest: function () {
     return 1;
   },
+  JsLoad: function () {
+    if (window.connector) {
+      window.connector.Load();
+    }
+  },
+  JsStart: function () {
+    if (window.connector) {
+      window.connector.onStart();
+    }
+  },
   JsUpdate: function () {
     if (window.connector) {
       window.connector.onUpdate();

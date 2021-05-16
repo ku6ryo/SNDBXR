@@ -71,3 +71,9 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 /Assets/Packages
+/Assets/VRM
+/Assets/VRM.meta
+/Assets/VRMShaders
+/Assets/VRMShaders.meta
+/Assets/UniGLTF
+/Assets/UniGLTF.meta

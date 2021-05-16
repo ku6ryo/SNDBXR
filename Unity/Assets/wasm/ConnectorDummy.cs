@@ -26,4 +26,10 @@ public class ConnectorDummy : ConnectorAbstract
     public override void Update()
     {
     }
+    public override void SandboxExecV_II(int funcId, int i0, int i1)
+    {
+    }
+    public override void SandboxExecV_I(int funcId, int loaderId)
+    {
+    }
 }
