@@ -7,9 +7,9 @@ var ConnectorPlugin = {
   JsTest: function () {
     return 1;
   },
-  JsLoad: function () {
+  JsLoad: function (url) {
     if (window.connector) {
-      window.connector.Load();
+      window.connector.load(url);
     }
   },
   JsStart: function () {
@@ -36,7 +36,7 @@ var ConnectorPlugin = {
   },
   ConnectExecI_IV4: function(ptr) {
     window.unityPointers.execI_IV4 = ptr;
-  }
+  },
   ConnectExecV3_I: function(ptr) {
     window.unityPointers.execV3 = ptr;
   },
