@@ -126,7 +126,7 @@ public class ConnectorWebGL : ConnectorAbstract
 
     delegate int dlgExecV3_I(int funcId, int i0);
     [MonoPInvokeCallback(typeof(dlgExecV3_I))]
-    private int ExecV3_I(int funcId, int i0)
+    private static int ExecV3_I(int funcId, int i0)
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);
         // TODO pass vector3 to web

@@ -5,7 +5,7 @@ public class Sandbox : MonoBehaviour
 
     ConnectorAbstract connector = null;
 
-    bool Connected = false;
+    bool Running = false;
 
     ObjectService objectService = null;
     AudioService audioService = null;
@@ -141,7 +141,7 @@ public class Sandbox : MonoBehaviour
         string url = "http://192.168.1.5:8080/scripting/build/untouched.wasm";
         connector.Load(url, (success) => {
             if (success) {
-                this.Connected = true;
+                this.Running = true;
                 connector.Start();
                 /*
                 StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
@@ -153,7 +153,7 @@ public class Sandbox : MonoBehaviour
     }
     void Update()
     {
-      if (Connected) {
+      if (Running) {
         connector.Update();
       }
     }

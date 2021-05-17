@@ -22,6 +22,16 @@ var ConnectorPlugin = {
       window.connector.onUpdate();
     }
   },
+  JsSandboxExecV_I: function(i0) {
+    if (window.connector) {
+      window.connector.sandboxExecV_I(i0);
+    }
+  },
+  JsSandboxExecV_II: function(i0, i1) {
+    if (window.connector) {
+      window.connector.sandboxExecV_II(i0, i1);
+    }
+  },
   ConnectExecI_I: function(ptr) {
     window.unityPointers.execI_I = ptr;
   },
@@ -38,7 +48,7 @@ var ConnectorPlugin = {
     window.unityPointers.execI_IV4 = ptr;
   },
   ConnectExecV3_I: function(ptr) {
-    window.unityPointers.execV3 = ptr;
+    window.unityPointers.execV3_I = ptr;
   },
 };
 
