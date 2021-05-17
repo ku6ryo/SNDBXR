@@ -36,13 +36,13 @@ export function start(): i32 {
   skyManager.load("https://cdn.eso.org/images/wallpaper2/eso0932a.jpg", () => {
     log("sky loaded")
   })
-  const sunGlbUrl = "http://localhost:8080/assets/sun.glb"
+  const sunGlbUrl = "http://192.168.1.5:8080/assets/sun.glb"
   gltfLoader.load(sunGlbUrl, (obj) => {
     sun = obj
     sun!.setScale(new Vector3(0.5, 0.5, 0.5))
     log("sun loaded")
   })
-  const earthGlbUrl = "http://localhost:8080/assets/earth.glb"
+  const earthGlbUrl = "http://192.168.1.5:8080/assets/earth.glb"
   gltfLoader.load(earthGlbUrl, (obj) => {
     earth = obj
     earth!.setPosition(new Vector3(earthPos.x, 0, earthPos.y))
