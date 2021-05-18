@@ -1,0 +1,16 @@
+{
+  "name": "sndbxr-api-usecases",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ryo Kuroyanagi",
+  "license": "MIT",
+  "dependencies": {
+    "@assemblyscript/loader": "^0.18.31",
+    "assemblyscript": "^0.18.31",
+    "sndbxr-wasm-api": "../api"
+  }
+}

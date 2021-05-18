@@ -1,5 +1,5 @@
-import { createPrimitiveObject, Object, PrimitiveType, } from "./Object";
-import { eventManager } from "./global"
+import { createPrimitiveObject, Object, PrimitiveType, } from "sndbxr-wasm-api/src/api/Object";
+import { Vector3 } from "sndbxr-wasm-api/src/api/Vector3"
 
 let r: f64 = 0
 export function update(): void {
@@ -10,7 +10,7 @@ export function update(): void {
       const obj = mat[i][j]
       if (obj) {
         const p = obj.getPosition()
-        obj.setPosition(p.x, p.y, Math.sin(r + d) * 1.5 as f32)
+        obj.setPosition(new Vector3(p.x, p.y, Math.sin(r + d) * 1.5 as f32))
       }
     }
   }
@@ -24,15 +24,11 @@ export function start(): i32 {
     for (let j = -5; j < 5; j++) {
       const obj = createPrimitiveObject(PrimitiveType.CUBE)
       if (obj) {
-        obj.setPosition(i * 1.1 as f32, j * 1.1 as f32, 0);
+        obj.setPosition(new Vector3(i * 1.1 as f32, j * 1.1 as f32, 0));
         row.push(obj)
       }
     }
     mat.push(row)
   }
   return 0
-}
-
-export function onEvent (objectId: i32, type: i32): void {
-  eventManager.onEvent(objectId, type)
 }

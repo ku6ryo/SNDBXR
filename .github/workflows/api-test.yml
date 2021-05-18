@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  all:
+    name: Tests code
+    runs-on: ubuntu-18.04
+    working-directory: api
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - name: Install npm modules
+        run: yarn install
+      - name: build wasm files
+        run: node build_wasm.js
+      - name: Run tests
+        run: yarn test
