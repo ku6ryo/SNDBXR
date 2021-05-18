@@ -1,14 +1,15 @@
 using System;
-using System.Text;
 using UnityEngine;
 using System.Collections.Generic;
 using Wasm3DotNet;
 using Wasm3DotNet.Wrapper;
+using UnityEngine.Networking;
+using System.Runtime.InteropServices;
 
 
 /// Connector using Wasm3DotNet
 /// https://github.com/tana/Wasm3DotNet
-public class ConnectorWasm3
+public class ConnectorWasm3 : ConnectorAbstract
 {
     private int id = -1;
     private static Sandbox SandboxInstance = null;
@@ -31,50 +32,72 @@ public class ConnectorWasm3
         // return SandboxIdMap[id];
     }
 
-    public void Load(byte[] wasm)
+    public override void Load(string url, Action<bool> callback)
     {
-        using (var environment = new Wasm3DotNet.Wrapper.Environment())
+        UnityWebRequest req = UnityWebRequest.Get(url);
+        req.SendWebRequest().completed += operation =>
         {
-            runtime = new Runtime(environment);
-            runtime.PrintRuntimeInfo();
-            var module = runtime.ParseModule(wasm);
+            if (req.result != UnityWebRequest.Result.Success) {
+                Debug.Log(req.error);
+                callback(false);
+                return;
+            }
+            var wasm = req.downloadHandler.data;
+            using (var environment = new Wasm3DotNet.Wrapper.Environment())
+            {
+                runtime = new Runtime(environment);
+                var module = runtime.ParseModule(wasm);
 
-            runtime.LoadModule(module);
+                module.LinkRawFunction("externals", "print_add", "i(ii)", LogInt);
 
-            module.LinkRawFunction("env", "abort", "v(iii)", Abort);
-            module.LinkRawFunction("env", "logInt", "v(i)", LogInt);
-            module.LinkRawFunction("env", "logFloat", "v(f)", LogFloat);
-            module.LinkRawFunction("env", "logString", "v(ii)", LogString);
-        }
+                runtime.LoadModule(module);
+                GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                var func = runtime.FindFunction("test");
+                func.Call(10);
+                GameObject.CreatePrimitive(PrimitiveType.Cube);
+            }
+            callback(true);
+        };
     }
 
-    public void Start()
+    public override int Start()
     {
-        var func = runtime.FindFunction("start");
-        func.Call(10);
+        return 0;
     }
-    public void Update()
+    public override void Update()
+    {
+    }
+    public override void SandboxExecV_II(int funcId, int i0, int i1)
+    {
+    }
+    public override void SandboxExecV_I(int funcId, int loaderId)
     {
     }
 
-    static IntPtr Abort (IntPtr runtime, IntPtr paramPtr, IntPtr memPtr)
+    static IntPtr Abort(IntPtr runtime, IntPtr paramPtr, IntPtr memPtr, IntPtr mem)
     {
         Debug.Log("Abort");
         return IntPtr.Zero;
     }
-    static IntPtr LogInt (IntPtr runtime, IntPtr paramPtr, IntPtr memPtr)
+    static IntPtr LogInt(IntPtr runtime, IntPtr ctx, IntPtr sp, IntPtr mem)
     {
+        GameObject.CreatePrimitive(PrimitiveType.Capsule);
         /*
         Debug.Log("LogInt: " + value.ToString());
         */
+         var x = Marshal.ReadInt32(sp, 8);
+            var y = Marshal.ReadInt32(sp, 16);
+            Debug.Log($"x={x}, y={y}");
+            // Write result to WASM stack.
+            Marshal.WriteInt32(sp, x + y);
         return IntPtr.Zero;
     }
-    static IntPtr LogFloat (IntPtr runtime, IntPtr paramPtr, IntPtr memPtr)
+    static IntPtr LogFloat(IntPtr runtime, IntPtr paramPtr, IntPtr memPtr, IntPtr mem)
     {
         // Debug.Log("LogFloat: " + value.ToString());
         return IntPtr.Zero;
     }
-    private IntPtr LogString(IntPtr runtime, IntPtr paramPtr, IntPtr memPtr)
+    private IntPtr LogString(IntPtr runtime, IntPtr paramPtr, IntPtr memPtr, IntPtr mem)
     {
         /*
         var memory = context.GetMemory(0).Data;

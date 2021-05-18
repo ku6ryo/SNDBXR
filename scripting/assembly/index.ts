@@ -1,3 +1,12 @@
+import { logInt, } from "./env"
+export function update(): void {
+}
+
+export function start(): i32 {
+  // logInt(0);
+  return 0
+}
+/*
 import { eventManager, gltfLoader, skyManager } from "./global"
 import { log, SANDBOX_ON_OBJECT_EVENT, SANDBOX_ON_GLTF_LOADED, SANDBOX_ON_SKY_LOADED } from "./env"
 import { createPrimitiveObject, Object, PrimitiveType, } from "./Object"
@@ -70,3 +79,4 @@ export function sandboxExecV_II(funcId: i32, i0: i32, i1: i32): void {
       break;
   }
 }
+*/
