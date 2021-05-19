@@ -1,4 +1,4 @@
-import { log } from "../api/env"
+import { log } from "../../assembly/env"
 
 export function main(): void {
   log("test")
