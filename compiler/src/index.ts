@@ -5,6 +5,9 @@ import express from "express"
 import { compile, createFileSourceMap } from "./compiler"
 import { CompileError } from "./compiler"
 import { v4 as uuid } from "uuid"
+import handleApiError from "./handleApiError"
+import handleFinally from "./handleFinally"
+import { BadRequestError } from "./errors"
 
 const writeFile = util.promisify(fs.writeFile)
 
@@ -18,7 +21,7 @@ app.use((req, __, next) => {
   next()
 })
 
-app.post("/api/compile", async (req: express.Request, res: express.Response) => {
+app.post("/api/compile", async (req: express.Request, res: express.Response, next) => {
   const code = req.body as string
   try {
     const result = await compile(await createFileSourceMap(code))
@@ -37,14 +40,13 @@ app.post("/api/compile", async (req: express.Request, res: express.Response) => 
     })
   } catch (e) {
     if (e instanceof CompileError) {
-      res.status(400).json({
-        message: e.message
-      })
-      return
+      next(new BadRequestError(e.message))
     }
-    throw e
+    next(e)
   }
 })
+app.use(handleApiError)
+app.use(handleFinally)
 
 app.listen(8080, () => {
   console.log("server started")
