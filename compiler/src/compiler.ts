@@ -8,7 +8,7 @@ const apiDir = path.join(__dirname, "..", apiModuleDir)
 const readdir = util.promisify(fs.readdir)
 const readFile = util.promisify(fs.readFile)
 
-export async function createFileSourceMap (indexSource: string) {
+export async function createFileSourceMap (userScript: string) {
   const apiFiles = await readdir(apiDir)
   const apiSources = await Promise.all(apiFiles.map(f => {
     return readFile(path.join(apiDir, f))
@@ -17,7 +17,9 @@ export async function createFileSourceMap (indexSource: string) {
   apiFiles.forEach((f, i) => {
     sourceMap[path.join(apiModuleDir, f)] = apiSources[i].toString()
   })
-  sourceMap["index.ts"] = indexSource
+  const indexSourceBuf = await readFile(path.join(__dirname, "../assembly/entrypoint.ts"))
+  sourceMap["userScript.ts"] = userScript
+  sourceMap["index.ts"] = indexSourceBuf.toString()
   return sourceMap
 }
 
