@@ -9,19 +9,25 @@ import handleApiError from "./handleApiError"
 import handleFinally from "./handleFinally"
 import { BadRequestError } from "./errors"
 import compression from "compression"
+import serveStatic from "serve-static"
 
 const writeFile = util.promisify(fs.writeFile)
 
 const app = express()
-app.use(compression())
-app.use(express.text())
-app.use(express.static(path.join(__dirname, "public")))
-app.use("/artifacts", express.static(path.join(__dirname, "../artifacts")))
-
 app.use((req, __, next) => {
   console.log(`[${new Date()}] ${req.method} ${req.url}`)
   next()
 })
+app.use(express.text())
+app.use("/", serveStatic(path.join(__dirname, "public"), {
+  setHeaders: (res, path) => {
+    if (path.endsWith(".br")) {
+      res.setHeader("Content-Encoding", "br")
+    }
+  }
+}))
+app.use(compression())
+app.use("/artifacts", express.static(path.join(__dirname, "../artifacts")))
 
 app.get("/", (req ,res) => {
   res.send("no content yet")
