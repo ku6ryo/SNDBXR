@@ -26,10 +26,11 @@
 		height: 600px;
 		width: 600px;
 	}
-	#compileButton {
+	.button {
 		border: none;
     background: #460046;
     color: white;
+		margin-right: 8px;
     padding: 10px;
 	}
 </style>
@@ -37,8 +38,13 @@
 <div id="panel">
 	<div id="editor"></div>
 	<div>
-		<button id="compileButton">RUN</button>
-		<div id="process-message"></div>
+		<div>
+			<button class="button" id="compileButton">RUN</button>
+			<button class="button" id="deleteAllButton">RESET</button>
+		</div>
+		<div>
+			<div id="process-message"></div>
+		</div>
 	</div>
 </div>
 
@@ -49,19 +55,63 @@
 <script src="../min/vs/editor/editor.main.nls.js"></script>
 <script src="../min/vs/editor/editor.main.js"></script>
 <script>
-	var editor = monaco.editor.create(document.getElementById('editor'), {
-		value: `import { createPrimitiveObject, PrimitiveType } from "sndbxr/Object"
+	const initialCode = `
+import { createPrimitiveObject, Object, PrimitiveType, } from "sndbxr/Object"
+import { Vector2 } from "sndbxr/Vector2"
+import { Vector3 } from "sndbxr/Vector3"
+
+const objects: Object[] = [];
+let speed: Vector2 = new Vector2(0, 0.6)
+const g: f32 = 0.01
+const mEarth: f32 = 1
+const mSun: f32 = 100
+let sunPos = new Vector2(1, 0)
+let earthPos = new Vector2(3, 0)
+
+const dt: f32 = 0.01
+let sunR: f32 = 0
+const sunDR: f32 = 0.0005
+
 export function update(): void {
+  const sun = objects[0]
+  const earth = objects[1]
+  const a = g * mSun * mEarth / sunPos.distanceToSquared(earthPos)
+  const fn = sunPos.sub(earthPos).normalize()
+  const av = fn.multiplyScalar(a as f32)
+  earthPos = earthPos.add(speed.multiplyScalar(dt))
+  earth.setPosition(new Vector3(earthPos.x, earthPos.y, 0))
+  speed = speed.add(av.multiplyScalar(dt))
+  sunPos = new Vector2(Math.cos(sunR) as f32, Math.sin(sunR) as f32)
+  sun.setPosition(new Vector3(sunPos.x, sunPos.y, 0))
+  sunR += sunDR
 }
+
 export function start(): void {
-  const o = createPrimitiveObject(PrimitiveType.CUBE)
-}`,
+  const sun = createPrimitiveObject(PrimitiveType.SPHERE)
+  const earth = createPrimitiveObject(PrimitiveType.SPHERE)
+  if (sun) {
+    sun.setPosition(new Vector3(sunPos.x, sunPos.y, 0))
+    objects.push(sun)
+  }
+  if (earth) {
+    earth.setPosition(new Vector3(earthPos.x, earthPos.y, 0))
+    earth.setScale(new Vector3(0.2, 0.2, 0.2))
+    objects.push(earth)
+  }
+}
+`
+	var editor = monaco.editor.create(document.getElementById('editor'), {
+		value: initialCode,
 		language: 'typescript'
 	});
 	monaco.editor.setTheme("vs-dark")
 	window.addEventListener("DOMContentLoaded", () => {
+		const unityFrame = document.getElementById("unity")
 		const messageContainer = document.getElementById("process-message")
-		document.getElementById("compileButton").addEventListener("click", async () => {
+		const compileButton = document.getElementById("compileButton")
+		const resetButton = document.getElementById("deleteAllButton")
+
+		compileButton.addEventListener("click", async () => {
 			const code = editor.getValue()
 			messageContainer.innerText = "Compiling"
 			const res = await fetch("/api/compile", {
@@ -74,14 +124,16 @@ export function start(): void {
 			if (res.status === 200) {
 				messageContainer.innerText = "Compiled"
 				const json = await res.json()
-				document.getElementById("unity").contentWindow.postMessage({
-					subject: "COMPILED",
-					id: json.id,
-				}, "*")
+      	const url = "/artifacts/" + json.id + ".wasm"
+      	unityFrame.contentWindow.connector.requestLoad(url)
 			} else {
 				const json = await res.json()
 				messageContainer.innerText = "Failed" + json.message
 			}
+		})
+
+		resetButton.addEventListener("click", () => {
+			unityFrame.contentWindow.deleteAllSandboxes()	
 		})
 	})
 </script>

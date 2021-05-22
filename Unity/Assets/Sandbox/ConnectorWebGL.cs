@@ -7,17 +7,11 @@ using UnityEngine;
 
 public class ConnectorWebGL : ConnectorAbstract
 {
-    private int id;
     private static Sandbox SandboxInstance = null;
-    private static int SandboxNextId = 0;
-    private static IDictionary<int, Sandbox> SandboxIdMap = new Dictionary<int, Sandbox>();
 
     public ConnectorWebGL(Sandbox sandbox)
     {
         SandboxInstance = sandbox;
-        SandboxIdMap.Add(SandboxNextId, sandbox);
-        this.id = SandboxNextId;
-        SandboxNextId += 1;
     }
 
     static Sandbox GetSandbox()
@@ -46,12 +40,6 @@ public class ConnectorWebGL : ConnectorAbstract
     [DllImport("__Internal")]
     private static extern int JsInit();
 
-    public void Test()
-    {
-        var val = JsTest();
-        Debug.Log(val);
-    }
-
     public override void Update()
     {
         JsUpdate();
@@ -59,13 +47,13 @@ public class ConnectorWebGL : ConnectorAbstract
     [DllImport("__Internal")]
     private static extern int JsUpdate();
 
-    public override int Start()
+    public override int Start(int sandboxId)
     {
-        JsStart();
+        JsStart(sandboxId);
         return 0;
     }
     [DllImport("__Internal")]
-    private static extern int JsStart();
+    private static extern int JsStart(int sandboxId);
 
     public override void Load(int id, string url)
     {

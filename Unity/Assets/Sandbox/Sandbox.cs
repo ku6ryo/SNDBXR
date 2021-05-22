@@ -147,7 +147,7 @@ public class Sandbox : MonoBehaviour
         if (status == 0)
         {
             this.Running = true;
-            connector.Start();
+            connector.Start(this.id);
             /*
             StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
                 audioService.CreateAudioObjectWithAudioSource(id);

@@ -3,6 +3,7 @@ var ConnectorPlugin = {
 
   JsInit: function () {
     window.unityPointers = {};
+    window.connector = new Connector(window.unityInstance, window.unityPointers)
   },
   JsTest: function () {
     return 1;
@@ -13,9 +14,9 @@ var ConnectorPlugin = {
       return 0;
     }
   },
-  JsStart: function () {
+  JsStart: function (sandboxId) {
     if (window.connector) {
-      window.connector.onStart();
+      window.connector.onStart(sandboxId);
     }
   },
   JsUpdate: function () {
@@ -35,6 +36,9 @@ var ConnectorPlugin = {
   },
   ConnectOnLoadRequested: function(ptr) {
     window.unityPointers.onLoadRequested = ptr;
+  },
+  ConnectOnDeleteRequested: function(ptr) {
+    window.unityPointers.onDeleteRequested = ptr;
   },
   ConnectOnLoadCompleted: function(ptr) {
     window.unityPointers.onLoadCompleted = ptr;

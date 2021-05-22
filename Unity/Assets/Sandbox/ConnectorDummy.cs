@@ -18,7 +18,7 @@ public class ConnectorDummy : ConnectorAbstract
     public void Test()
     {
     }
-    public override int Start()
+    public override int Start(int sandboxId)
     {
         return 0;
     }

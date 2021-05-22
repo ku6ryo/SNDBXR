@@ -3,7 +3,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="TemplateData/favicon.ico">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
-<script src="./ConnectorBase.js"></script>
 <script src="./ConnectorUnity.js"></script>
 <style>
   * {
@@ -38,6 +37,7 @@
     createUnityInstance(canvas, config, (progress) => {
     }).then((unityInstance) => {
       window.unityInstance = unityInstance;
+      console.log("unity instance")
     }).catch((message) => {
       alert(message);
     });
@@ -48,13 +48,7 @@
   window.require([ "https://cdn.jsdelivr.net/npm/@assemblyscript/loader@0.18.31/umd/index.js" ], (loader) => {
     window.wasmLoader = loader
   })
-  window.addEventListener("message", async (e) => {
-    const { subject, id } = e.data
-    if (subject === "COMPILED") {
-      const url = "/artifacts/" + id + ".wasm"
-      const connector = new Connector(window.unityInstance, window.unityPointers)
-      window.connector = connector
-      connector.requestLoad(url);
-    }
-  })
+  function deleteAllSandboxes() {
+    window.connector.requestDeleteAll()
+  }
 </script>

@@ -108,7 +108,7 @@ public class ConnectorWasmerSharp : ConnectorAbstract
         return imports;
     }
 
-    public override int Start()
+    public override int Start(int sandboxId)
     {
         var result = wasmInstance.Call("start");
         return (int) result[0];

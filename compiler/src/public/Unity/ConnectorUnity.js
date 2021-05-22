@@ -1,10 +1,24 @@
 
-class Connector extends ConnectorBase {
+class Connector {
+
+  wasmModuleMap = new Map()
 
   constructor (unityInstance, unityPointers) {
-    super()
     this.unityInstance = unityInstance
     this.unityPointers = unityPointers
+  }
+
+  onStart (id) {
+    const module = this.wasmModuleMap.get(id)
+    if (module) {
+      module.exports.start()
+    }
+  }
+
+  onUpdate () {
+    this.wasmModuleMap.forEach((module, id) => {
+      module.exports.update()
+    })
   }
 
   async load (sandboxId, url) {
@@ -15,7 +29,7 @@ class Connector extends ConnectorBase {
       const blob  = await res.blob()
       const buf = await blob.arrayBuffer()
       const wasmModule = await window.wasmLoader.instantiate(buf, connector.createImports())
-      this.connectWasm(wasmModule)
+      this.wasmModuleMap.set(sandboxId, wasmModule)
       this.unityInstance.Module.dynCall_vii(this.unityPointers.onLoadCompleted, sandboxId, 0)
     } catch(e) {
       console.log(e)
@@ -72,13 +86,20 @@ class Connector extends ConnectorBase {
   }
 
   requestLoad(url) {
-    const strArray = (new TextEncoder()).encode(url)
+    const strArray = (new TextEncoder()).encode(url + String.fromCharCode(0))
     const uPtr = this.unityInstance.Module._malloc(strArray.length)
     this.unityInstance.Module.HEAP8.set(strArray, uPtr)
     this.unityInstance.Module.dynCall_vi(this.unityPointers.onLoadRequested, uPtr)
   }
 
-  connectWasm (wasmModule) {
-    super.connectWasm(wasmModule)
+  requestDelete(id) {
+    this.wasmModuleMap.delete(id)
+    this.unityInstance.Module.dynCall_vi(this.unityPointers.onDeleteRequested, id)
+  }
+
+  requestDeleteAll() {
+    this.wasmModuleMap.forEach((v, id) => {
+      this.requestDelete(id)
+    })
   }
 }
