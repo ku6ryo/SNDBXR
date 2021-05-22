@@ -68,6 +68,6 @@ app.post("/api/compile", async (req: express.Request, res: express.Response, nex
 app.use(handleApiError)
 app.use(handleFinally)
 
-app.listen(8080, () => {
+app.listen(process.env.PORT || 8080, () => {
   console.log("server started")
 })

@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  server:
+    build:
+      context: ./Dockerfile.dev
+    environment:
+      # Server port number
+      PORT: 8080
+    ports:
+      - 8080:8080
+    entrypoint: ["npm", "run", "dev"]
+    volumes:
+      - "./:/usr/src/app"
