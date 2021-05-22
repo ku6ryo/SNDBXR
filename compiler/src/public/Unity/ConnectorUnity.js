@@ -58,6 +58,7 @@ class Connector {
         console.log(f)
       },
       execI_II: (funcId, i0, i1) => {
+        console.log(funcId, i0, i1)
         return this.unityInstance.Module.dynCall_iiii(this.unityPointers.execI_II, funcId, i0, i1)
       },
       execI_I: (funcId, i0) => {
@@ -74,6 +75,9 @@ class Connector {
         return this.unityInstance.Module.dynCall_iiiffff(this.unityPointers.execI_IV4, funcId, i0, f0, f1, f2, f3)
       },
       execV3_I: (funcId, i0) => {
+        console.log(funcId, i0)
+        const ptr = this.unityInstance.Module.dynCall_iii(this.unityPointers.execV3_I, funcId, i0)
+        console.log(ptr)
         return 0
       },
     }

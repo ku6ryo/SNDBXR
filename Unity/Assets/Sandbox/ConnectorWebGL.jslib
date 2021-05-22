@@ -5,9 +5,6 @@ var ConnectorPlugin = {
     window.unityPointers = {};
     window.connector = new Connector(window.unityInstance, window.unityPointers)
   },
-  JsTest: function () {
-    return 1;
-  },
   JsLoad: function (id, urlPtr) {
     if (window.connector) {
       window.connector.load(id, Pointer_stringify(urlPtr));

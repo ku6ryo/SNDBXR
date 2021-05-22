@@ -19,9 +19,6 @@ public class ConnectorWebGL : ConnectorAbstract
         return SandboxInstance;
     }
 
-    [DllImport("__Internal")]
-    private static extern int JsTest();
-
     public static void WebGLInit()
     {
         JsInit();
@@ -73,13 +70,17 @@ public class ConnectorWebGL : ConnectorAbstract
 
     public override void SandboxExecV_II(int funcId, int i0, int i1)
     {
-        // wasmInstance.Call("sandboxExecV_I", funcId, i0, i1);
+        JsSandboxExecV_II(funcId, i0, i1);
     }
+    [DllImport("__Internal")]
+    private static extern int JsSandboxExecV_II(int funcId, int i0, int i1);
 
-    public override void SandboxExecV_I(int funcId, int loaderId)
+    public override void SandboxExecV_I(int funcId, int i0)
     {
-        // wasmInstance.Call("sandboxExecV_I", funcId, loaderId);
+        JsSandboxExecV_I(funcId, i0);
     }
+    [DllImport("__Internal")]
+    private static extern int JsSandboxExecV_I(int funcId, int i0);
 
     delegate int dlgExecI_I(int funcId, int i0);
     [MonoPInvokeCallback(typeof(dlgExecI_I))]
@@ -126,13 +127,16 @@ public class ConnectorWebGL : ConnectorAbstract
     [DllImport("__Internal")]
     private static extern int ConnectExecI_IV4(dlgExecI_IV4 ptr);
 
-    delegate int dlgExecV3_I(int funcId, int i0);
+    delegate float[] dlgExecV3_I(int funcId, int i0);
     [MonoPInvokeCallback(typeof(dlgExecV3_I))]
-    private static int ExecV3_I(int funcId, int i0)
+    private static float[] ExecV3_I(int funcId, int i0)
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);
-        // TODO pass vector3 to web
-        return 0;
+        var fArray = new float[3];
+        fArray[0] = v.x;
+        fArray[1] = v.y;
+        fArray[2] = v.x;
+        return fArray;
     }
     [DllImport("__Internal")]
     private static extern int ConnectExecV3_I(dlgExecV3_I ptr);

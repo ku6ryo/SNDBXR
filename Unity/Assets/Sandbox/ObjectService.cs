@@ -84,13 +84,13 @@ public class ObjectService
         }
     }
 
-    public Vector3? GetObjectPosition(int objectId)
+    public Vector3 GetObjectPosition(int objectId)
     {
         GameObject obj = ObjectMap[objectId];
         if (obj) {
             return obj.transform.position;
         }
-        return null;
+        throw new Exception("Object not found");
     }
 
     public int SetObjectScale(int objectId, Vector3 v)
@@ -104,13 +104,13 @@ public class ObjectService
         }
     }
 
-    public Vector3? GetObjectScale(int objectId)
+    public Vector3 GetObjectScale(int objectId)
     {
         GameObject obj = ObjectMap[objectId];
         if (obj) {
             return obj.transform.localScale;
         }
-        return null;
+        throw new Exception("Object not found");
     }
 
     public int SetObjectEventListener(int objectId, int type, Action listener)

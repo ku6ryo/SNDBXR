@@ -192,22 +192,16 @@ public class ConnectorWasmerSharp : ConnectorAbstract
     private int ExecV3_I(InstanceContext context, int funcId, int i0)
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);
-        if (v == null)
+        unsafe
         {
-            return -1;
-        }
-        else
-        {
-            unsafe
-            {
-                var ptr = (float*)context.GetMemory(0).Data;
-                *ptr = v.Value.x;
-                ptr++;
-                *ptr = v.Value.y;
-                ptr++;
-                *ptr = v.Value.z;
-                return 0;
-            }
+            // Bad implementaion, to be fixed.
+            var ptr = (float*) context.GetMemory(0).Data;
+            *ptr = v.x;
+            ptr++;
+            *ptr = v.y;
+            ptr++;
+            *ptr = v.z;
+            return 0;
         }
     }
 }
