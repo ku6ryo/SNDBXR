@@ -24,6 +24,9 @@ app.use("/", serveStatic(path.join(__dirname, "public"), {
     if (path.endsWith(".br")) {
       res.setHeader("Content-Encoding", "br")
     }
+    if (path.endsWith(".gz")) {
+      res.setHeader("Content-Encoding", "gzip")
+    }
   }
 }))
 app.use(compression())
