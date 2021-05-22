@@ -8,10 +8,12 @@ import { v4 as uuid } from "uuid"
 import handleApiError from "./handleApiError"
 import handleFinally from "./handleFinally"
 import { BadRequestError } from "./errors"
+import compression from "compression"
 
 const writeFile = util.promisify(fs.writeFile)
 
 const app = express()
+app.use(compression())
 app.use(express.text())
 app.use(express.static(path.join(__dirname, "public")))
 app.use("/artifacts", express.static(path.join(__dirname, "../artifacts")))
@@ -19,6 +21,10 @@ app.use("/artifacts", express.static(path.join(__dirname, "../artifacts")))
 app.use((req, __, next) => {
   console.log(`[${new Date()}] ${req.method} ${req.url}`)
   next()
+})
+
+app.get("/", (req ,res) => {
+  res.send("no content yet")
 })
 
 app.post("/api/compile", async (req: express.Request, res: express.Response, next) => {
