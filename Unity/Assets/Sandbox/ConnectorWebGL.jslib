@@ -7,9 +7,10 @@ var ConnectorPlugin = {
   JsTest: function () {
     return 1;
   },
-  JsLoad: function (url) {
+  JsLoad: function (id, urlPtr) {
     if (window.connector) {
-      window.connector.load(url);
+      window.connector.load(id, Pointer_stringify(urlPtr));
+      return 0;
     }
   },
   JsStart: function () {
@@ -31,6 +32,12 @@ var ConnectorPlugin = {
     if (window.connector) {
       window.connector.sandboxExecV_II(i0, i1);
     }
+  },
+  ConnectOnLoadRequested: function(ptr) {
+    window.unityPointers.onLoadRequested = ptr;
+  },
+  ConnectOnLoadCompleted: function(ptr) {
+    window.unityPointers.onLoadCompleted = ptr;
   },
   ConnectExecI_I: function(ptr) {
     window.unityPointers.execI_I = ptr;

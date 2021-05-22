@@ -3,6 +3,7 @@ import path from "path"
 import fs from "fs"
 import util from "util" 
 
+const apiUserDir = "node_modules/sndbxr/assembly"
 const apiModuleDir = "node_modules/sndbxr-wasm-api/assembly"
 const apiDir = path.join(__dirname, "..", apiModuleDir)
 const readdir = util.promisify(fs.readdir)
@@ -15,7 +16,7 @@ export async function createFileSourceMap (userScript: string) {
   }))
   const sourceMap = {} 
   apiFiles.forEach((f, i) => {
-    sourceMap[path.join(apiModuleDir, f)] = apiSources[i].toString()
+    sourceMap[path.join(apiUserDir, f)] = apiSources[i].toString()
   })
   const indexSourceBuf = await readFile(path.join(__dirname, "../assembly/entrypoint.ts"))
   sourceMap["userScript.ts"] = userScript

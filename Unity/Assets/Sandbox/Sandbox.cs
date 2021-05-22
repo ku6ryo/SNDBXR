@@ -32,6 +32,14 @@ public class Sandbox : MonoBehaviour
     const int SANDBOX_ON_GLTF_LOADED = 10010;
     const int SANDBOX_ON_SKY_LOADED = 10020;
 
+    int id = -1;
+    string wasmUrl = null;
+    public void SetLoadParameters(int sandboxId, string url)
+    {
+        id = sandboxId;
+        wasmUrl = url;
+    }
+
     public int ExecI_I(int funcId, int i0) {
         switch(funcId)
         {
@@ -135,21 +143,26 @@ public class Sandbox : MonoBehaviour
         skyService = new SkyService();
     }
 
+    public void OnLoadCompleted(int status) {
+        if (status == 0)
+        {
+            this.Running = true;
+            connector.Start();
+            /*
+            StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
+                audioService.CreateAudioObjectWithAudioSource(id);
+            }));
+            */
+        }
+    }
+
     void Start()
     {
-        Debug.Log("start");
-        string url = "http://192.168.1.5:8080/scripting/build/untouched.wasm";
-        connector.Load(url, (success) => {
-            if (success) {
-                this.Running = true;
-                connector.Start();
-                /*
-                StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
-                    audioService.CreateAudioObjectWithAudioSource(id);
-                }));
-                */
-            }
-        });
+        if (wasmUrl != null)
+        {
+            Debug.Log("starting " + wasmUrl);
+            connector.Load(id, wasmUrl);
+        }
     }
     void Update()
     {

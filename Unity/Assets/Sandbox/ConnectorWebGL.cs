@@ -28,8 +28,7 @@ public class ConnectorWebGL : ConnectorAbstract
     [DllImport("__Internal")]
     private static extern int JsTest();
 
-
-    public void Init()
+    public static void WebGLInit()
     {
         JsInit();
         ConnectExecI_I(ExecI_I);
@@ -38,6 +37,11 @@ public class ConnectorWebGL : ConnectorAbstract
         ConnectExecI_IV3(ExecI_IV3);
         ConnectExecI_IV4(ExecI_IV4);
         ConnectExecV3_I(ExecV3_I);
+        ConnectOnLoadCompleted(OnLoadCompleted);
+    }
+
+    public void Init()
+    {
     }
     [DllImport("__Internal")]
     private static extern int JsInit();
@@ -62,13 +66,23 @@ public class ConnectorWebGL : ConnectorAbstract
     }
     [DllImport("__Internal")]
     private static extern int JsStart();
-    public override void Load(string url, Action<bool> onComplete)
+
+    public override void Load(int id, string url)
     {
-        Init();
-        JsLoad(url);
+        var result = JsLoad(id, url);
     }
     [DllImport("__Internal")]
-    private static extern int JsLoad(string url);
+    private static extern int JsLoad(int id, string url);
+
+    delegate void dlgOnLoadCompleted(int id, int status);
+    [MonoPInvokeCallback(typeof(dlgOnLoadCompleted))]
+    private static void OnLoadCompleted(int id, int status)
+    {
+        GetSandbox().OnLoadCompleted(status);
+    }
+    [DllImport("__Internal")]
+    private static extern int ConnectOnLoadCompleted(dlgOnLoadCompleted ptr);
+
     public override void SandboxExecV_II(int funcId, int i0, int i1)
     {
         // wasmInstance.Call("sandboxExecV_I", funcId, i0, i1);

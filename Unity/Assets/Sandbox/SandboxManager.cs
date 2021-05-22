@@ -1,0 +1,46 @@
+using AOT;
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+public class SandboxManager: MonoBehaviour {
+
+    static int SandboxNextId = 0;
+
+    public void Start ()
+    {
+        // #if !UNITY_WEBGL
+        // #endif
+
+        #if !UNITY_EDITOR
+        #if UNITY_WEBGL
+        ConnectorWebGL.WebGLInit();
+        ConnectOnLoadRequested(OnLoadRequested);
+        #endif
+        #else
+        string url = "http://192.168.1.5:8080/artifacts/ffed64db-c4fe-400b-99af-b956c31b382c.wasm";
+        CreateSandbox(url);
+        #endif
+    }
+
+    static void CreateSandbox(string url)
+    {
+        var uuid = System.Guid.NewGuid().ToString();
+        var id = SandboxNextId;
+        var sandboxObj = new GameObject(string.Format("sandbox_{0}_{1}", id, uuid));
+        sandboxObj.SetActive(false);
+        var sandboxClass = sandboxObj.AddComponent<Sandbox>();
+        sandboxClass.SetLoadParameters(id, url);
+        sandboxObj.SetActive(true);
+        SandboxNextId += 1;
+    }
+
+    delegate void dlgOnLoadRequested(string url);
+    [MonoPInvokeCallback(typeof(dlgOnLoadRequested))]
+    private static void OnLoadRequested(string url)
+    {
+        Debug.Log(url);
+        CreateSandbox(url);
+    }
+    [DllImport("__Internal")]
+    private static extern int ConnectOnLoadRequested(dlgOnLoadRequested ptr);
+}

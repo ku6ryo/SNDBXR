@@ -9,9 +9,8 @@ public class ConnectorDummy : ConnectorAbstract
     {
         this.sandbox = sandbox;
     }
-    public override void Load(string url, Action<bool> onComplete)
+    public override void Load(int id, string url)
     {
-        onComplete(true);
     }
     public void Init()
     {

@@ -30,20 +30,20 @@ public class ConnectorWasmerSharp : ConnectorAbstract
         return SandboxInstance;
     }
 
-    public override void Load(string url, Action<bool> callback)
+    public override void Load(int id, string url)
     {
         UnityWebRequest req = UnityWebRequest.Get(url);
         req.SendWebRequest().completed += operation =>
         {
             if (req.result != UnityWebRequest.Result.Success) {
                 Debug.Log(req.error);
-                callback(false);
+                GetSandbox().OnLoadCompleted(1);
                 return;
             }
             var wasm = req.downloadHandler.data;
-            var imports = CreateImports(this.id);
+            var imports = CreateImports(id);
             wasmInstance = new Instance(wasm, imports);
-            callback(true);
+            GetSandbox().OnLoadCompleted(0);
         };
     }
 
