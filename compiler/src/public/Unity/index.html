@@ -11,21 +11,13 @@
     padding: 0;
   }
   #unity-canvas {
+    display: block;
     height: 100vh;
     width: 100vw;
   }
-	#editor {
-		border: none;
-		height: 100vh;
-		position: fixed;
-		right: 0;
-		top: 0;
-		width: 700px;
-	}
 </style>
 
 <canvas id="unity-canvas"></canvas>
-<iframe id="editor" src="/editor.html"></iframe>
 
 <script>
   var buildUrl = "Build";

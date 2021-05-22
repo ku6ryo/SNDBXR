@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" data-name="vs/editor/editor.main" href="../min/vs/editor/editor.main.css" />
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	body {
+		background-color: black;
+	}
+	#unity {
+		display: block;
+		border: none;
+		width: calc(100vw - 600px);
+		height: 100vh;
+	}
+	#panel {
+		color: white;
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 600px;
+	}
+	#editor {
+		height: 600px;
+		width: 600px;
+	}
+	#compileButton {
+		border: none;
+    background: #460046;
+    color: white;
+    padding: 10px;
+	}
+</style>
+<iframe id="unity" src="/Unity/"></iframe>
+<div id="panel">
+	<div id="editor"></div>
+	<div>
+		<button id="compileButton">RUN</button>
+		<div id="process-message"></div>
+	</div>
+</div>
+
+<script>
+	var require = { paths: { vs: '../min/vs' } };
+</script>
+<script src="../min/vs/loader.js"></script>
+<script src="../min/vs/editor/editor.main.nls.js"></script>
+<script src="../min/vs/editor/editor.main.js"></script>
+<script>
+	var editor = monaco.editor.create(document.getElementById('editor'), {
+		value: `import { createPrimitiveObject, PrimitiveType } from "sndbxr/Object"
+export function update(): void {
+}
+export function start(): void {
+  const o = createPrimitiveObject(PrimitiveType.CUBE)
+}`,
+		language: 'typescript'
+	});
+	monaco.editor.setTheme("vs-dark")
+	window.addEventListener("DOMContentLoaded", () => {
+		const messageContainer = document.getElementById("process-message")
+		document.getElementById("compileButton").addEventListener("click", async () => {
+			const code = editor.getValue()
+			messageContainer.innerText = "Compiling"
+			const res = await fetch("/api/compile", {
+				method: "POST",
+				headers: {
+					"Content-Type": "text/plain"
+				},
+				body: code
+			})
+			if (res.status === 200) {
+				messageContainer.innerText = "Compiled"
+				const json = await res.json()
+				document.getElementById("unity").contentWindow.postMessage({
+					subject: "COMPILED",
+					id: json.id,
+				}, "*")
+			} else {
+				const json = await res.json()
+				messageContainer.innerText = "Failed" + json.message
+			}
+		})
+	})
+</script>
