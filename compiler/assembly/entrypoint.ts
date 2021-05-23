@@ -1,5 +1,5 @@
 import { eventManager, gltfLoader, skyManager } from "sndbxr/global"
-import { SANDBOX_ON_OBJECT_EVENT, SANDBOX_ON_GLTF_LOADED, SANDBOX_ON_SKY_LOADED } from "sndbxr/env"
+import { SANDBOX_ON_OBJECT_EVENT, SANDBOX_ON_GLTF_LOADED, SANDBOX_ON_SKY_LOADED } from "sndbxr/function_ids"
 import { start as userStart, update as userUpdate } from "./userScript"
 
 

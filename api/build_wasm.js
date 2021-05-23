@@ -30,10 +30,10 @@ function spawn(cmd, args) {
     })
     p.stdout.setEncoding("utf-8")
     p.stdout.on("data", data => {
-      console.log(data)
+      console.log(data.toString())
     })
     p.stderr.on("data", data => {
-      console.error(data)
+      console.error(data.toString())
     })
   })
 }
