@@ -47,50 +47,54 @@ public class ConnectorWasmerSharp : ConnectorAbstract
         };
     }
 
-    private Import[] CreateImports(int id)
+    private Import[] CreateImports(int sandboxId)
     {
         // This creates a memory block with a minimum of 256 64k pages
         // and a maxium of 256 64k pages
         var memory = Memory.Create(minPages: 256);
+        unsafe {
+            var ptr = (int*) memory.Data;
+            *ptr = sandboxId;
+        }
 
         // Now we surface the memory as an import
         var memoryImport = new Import ("env", "memory", memory);
 
         var abortFunc = new Import ("env", "abort", 
                 new ImportFunction ((Action<InstanceContext,int,int,int,int>) (Abort)));
-        var logIntFunc = new Import ("env", "logInt",
+        var logIntFunc = new Import ("gate", "logInt",
                 new ImportFunction ((Action<InstanceContext, int>) (LogInt)));
-        var logFloatFunc = new Import ("env", "logFloat",
+        var logFloatFunc = new Import ("gate", "logFloat",
                 new ImportFunction ((Action<InstanceContext, float>) (LogFloat)));
-        var logStringFunc = new Import ("env", "logString",
+        var logStringFunc = new Import ("gate", "logString",
                 new ImportFunction ((Action<InstanceContext, int, int>) (LogString)));
 
         Func<InstanceContext, int, int, int> execI_I = (context, funcId, i0) => {
             return ExecI_I(context, funcId, i0);
         };
-        var execI_I_Import = new Import ("env", "execI_I", new ImportFunction (execI_I));
+        var execI_I_Import = new Import ("gate", "_callEngine_i_i", new ImportFunction (execI_I));
 
         Func<InstanceContext, int, int, int, int> execI_II = (context, funcId, i0, i1) => {
             return ExecI_II(context, funcId, i0, i1);
         };
-        var execI_II_Import = new Import ("env", "execI_II", new ImportFunction (execI_II));
+        var execI_II_Import = new Import ("gate", "_callEngine_i_ii", new ImportFunction (execI_II));
 
         Func<InstanceContext, int, int, int, int> execI_S = (context, funcId, i0, i1) => {
             return ExecI_S(context, funcId, i0, i1);
         };
-        var execI_S_Import = new Import ("env", "execI_S", new ImportFunction (execI_S));
+        var execI_S_Import = new Import ("gate", "_callEngine_i_s", new ImportFunction (execI_S));
 
         Func<InstanceContext, int, int, float, float, float, int> execI_IV3 = (context, funcId, i0, f0, f1, f2) => {
             return ExecI_IV3(context, funcId, i0, f0, f1, f2);
         };
-        var execI_IV3_Import = new Import ("env", "execI_IV3", new ImportFunction (execI_IV3));
+        var execI_IV3_Import = new Import ("gate", "_callEngine_i_ifff", new ImportFunction (execI_IV3));
 
         Func<InstanceContext, int, int, float, float, float, float, int> execI_IV4 = (context, funcId, i0, f0, f1, f2, f3) => {
             return ExecI_IV4(context, funcId, i0, f0, f1, f2, f3);
         };
-        var execI_IV4_Import = new Import ("env", "execI_IV4", new ImportFunction (execI_IV4));
+        var execI_IV4_Import = new Import ("gate", "_callEngine_i_iffff", new ImportFunction (execI_IV4));
         
-        var execV3_IFunc = new Import ("env", "execV3_I", new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecV3_I)));
+        var execV3_IFunc = new Import ("gate", "_callEngine_fff_i", new ImportFunction ((Func<InstanceContext, int, int, int>) (ExecV3_I)));
 
         Import[] imports = new Import[] {
             memoryImport,
@@ -113,7 +117,7 @@ public class ConnectorWasmerSharp : ConnectorAbstract
         var result = wasmInstance.Call("start");
         return (int) result[0];
     }
-    public override void Update()
+    public override void Update(int sandboxId)
     {
         wasmInstance.Call("update");
     }
@@ -160,13 +164,25 @@ public class ConnectorWasmerSharp : ConnectorAbstract
     }
     private static int ExecI_I(InstanceContext context, int funcId, int i0)
     {
-        return GetSandbox().ExecI_I(funcId, i0);
+        unsafe {
+            var value = GetSandbox().ExecI_I(funcId, i0);
+            // Bad implementaion, to be fixed.
+            var ptr = (int*) context.GetMemory(0).Data;
+            *ptr = value;
+            return 0;
+        }
     }
 
     // To be renamed to ExecI_II_V
     private static int ExecI_II(InstanceContext context, int funcId, int i0, int i1)
     {
-        return GetSandbox().ExecI_II(funcId, i0, i1);
+        unsafe {
+            var value = GetSandbox().ExecI_II(funcId, i0, i1);
+            // Bad implementaion, to be fixed.
+            var ptr = (int*) context.GetMemory(0).Data;
+            *ptr = value;
+            return 0;
+        }
     }
 
     private static int ExecI_S(InstanceContext context, int funcId, int strPtr, int len)
@@ -175,21 +191,39 @@ public class ConnectorWasmerSharp : ConnectorAbstract
         var str = "";
         unsafe {
             str = Encoding.UTF8.GetString((byte*) memory + strPtr, len);
+            var value = GetSandbox().ExecI_S(funcId, str);
+            // Bad implementaion, to be fixed.
+            var ptr = (int*) context.GetMemory(0).Data;
+            *ptr = value;
+            return 0;
         }
-        return GetSandbox().ExecI_S(funcId, str);
     }
 
     private static int ExecI_IV3(InstanceContext context, int funcId, int i0, float f0, float f1, float f2)
     {
-        return GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
+        var value = GetSandbox().ExecI_IV3(funcId, i0, f0, f1, f2);
+        unsafe
+        {
+            // Bad implementaion, to be fixed.
+            var ptr = (int*) context.GetMemory(0).Data;
+            *ptr = value;
+            return 0;
+        }
     }
 
     private static int ExecI_IV4(InstanceContext context, int funcId, int i0, float f0, float f1, float f2, float f3)
     {
-        return GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
+        var value = GetSandbox().ExecI_IV4(funcId, i0, f0, f1, f2, f3);
+        unsafe
+        {
+            // Bad implementaion, to be fixed.
+            var ptr = (int*) context.GetMemory(0).Data;
+            *ptr = value;
+            return 0;
+        }
     }
 
-    private int ExecV3_I(InstanceContext context, int funcId, int i0)
+    private static int ExecV3_I(InstanceContext context, int funcId, int i0)
     {
         var v = GetSandbox().ExecV3_I(funcId, i0);
         unsafe

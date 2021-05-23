@@ -1,0 +1,154 @@
+
+export default class Gate {
+  wasmInstance: WebAssembly.Instance | null = null
+  wasmMemory: WebAssembly.Memory | null = null
+
+  setWasm (instance: WebAssembly.Instance) {
+    this.wasmInstance = instance
+  }
+
+  getWasmInstance(): WebAssembly.Instance {
+    if (this.wasmInstance) {
+      return this.wasmInstance
+    }
+    throw new Error("WASM instance is not set yet.")
+  }
+
+  getWasmMemory(): WebAssembly.Memory {
+    const instance = this.getWasmInstance()
+    if (instance.exports.memory) {
+      return instance.exports.memory as WebAssembly.Memory
+    }
+    throw new Error("No memory export.")
+  }
+  
+  malloc(len: number): number {
+    const u = new Uint8Array(this.getWasmMemory().buffer)
+    let freeCount = 0
+    for (let i = 0; i < u.length; i++) {
+      const isFree = u[i] === 0
+      if (isFree) {
+        freeCount += 1
+        if (len + 2 === freeCount) {
+          return i - len + 1
+        }
+      } else {
+        freeCount = 0 
+      }
+    }
+    throw new Error("No free memory")
+  }
+
+  free(ptr: number) {
+    const u = new Uint8Array(this.getWasmMemory().buffer)
+    for (let i = 0; i < u.length; i++) {
+      if (u[ptr + i] === 0) {
+        break
+      } else {
+        u[i] = 0
+      }
+    }
+  }
+
+  onStart() {
+    (this.getWasmInstance().exports as any).start()
+  }
+
+  onUpdate() {
+    (this.getWasmInstance().exports as any).update()
+  }
+
+  onAbort(
+    message: string | null,
+    fileName: string | null,
+    lineNumber: number,
+    columnNumber: number,
+  ) {
+  }
+
+  _logString (ptr: number, len: number) {
+    const strArray = new Uint8Array(this.getWasmMemory().buffer.slice(ptr, ptr + len))
+    const codeArray: number[] = []
+    strArray.forEach(code => codeArray.push(code))
+    this.logString(String.fromCharCode(...codeArray))
+  }
+
+  logString(str: string) {
+    console.log(str)
+    return;
+  }
+
+  logInt(i: number) {
+    console.log(i)
+    return;
+  }
+
+  logFloat(f: number) {
+    console.log(f)
+    return;
+  }
+
+  createImport() {
+    return {
+      logString: this._logString.bind(this),
+      logInt: this.logInt.bind(this),
+      logFloat: this.logFloat.bind(this),
+{{#functions}}
+      _{{funcName}}: this._{{funcName}}.bind(this),
+{{/functions}}
+    }
+  }
+
+{{#functions}}
+  {{funcName}} (
+    funcId: number,
+{{#inputs}}
+    {{#isInt32}}i{{index}}: number{{/isInt32}}
+    {{#isInt64}}l{{index}}: number{{/isInt64}}
+    {{#isFloat32}}f{{index}}: number{{/isFloat32}}
+    {{#isFloat64}}d{{index}}: number{{/isFloat64}}
+    {{#isString}}sPtr{{index}}: number, sLen{{index}}: number{{/isString}}
+    {{^isLast}},{{/isLast}}
+{{/inputs}}
+  ): Uint8Array {
+{{#output}}
+    return new Uint8Array()
+{{/output}}
+  }
+{{/functions}}
+
+{{#functions}}
+  _{{funcName}} (
+    funcId: number,
+{{#inputs}}
+    {{#isInt32}}i{{index}}: number{{/isInt32}}
+    {{#isInt64}}l{{index}}: number{{/isInt64}}
+    {{#isFloat32}}f{{index}}: number{{/isFloat32}}
+    {{#isFloat64}}d{{index}}: number{{/isFloat64}}
+    {{#isString}}sPtr{{index}}: number, sLen{{index}}: number{{/isString}}
+    {{^isLast}},{{/isLast}}
+{{/inputs}}
+  ): number {
+{{#output}}
+    const mLen = {{length}} * {{byteUnit}}
+    const ptr = this.malloc(mLen)
+    const valueArr = this.{{funcName}}(
+      funcId,
+{{#inputs}}
+      {{#isInt32}}i{{index}}{{/isInt32}}
+      {{#isInt64}}l{{index}}{{/isInt64}}
+      {{#isFloat32}}f{{index}}{{/isFloat32}}
+      {{#isFloat64}}d{{index}}{{/isFloat64}}
+      {{#isString}}sPtr{{index}}, sLen{{index}}{{/isString}}
+      {{^isLast}},{{/isLast}}
+{{/inputs}}
+    )
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
+    for (let i = 0; i < valueArr.length; i++) {
+      memArr[i] = valueArr[i]
+    }
+    return ptr
+{{/output}}
+  }
+{{/functions}}
+}

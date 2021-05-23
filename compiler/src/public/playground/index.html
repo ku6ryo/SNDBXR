@@ -56,7 +56,7 @@
 <script src="../min/vs/editor/editor.main.js"></script>
 <script>
 	const initialCode = `
-import { createPrimitiveObject, Object, PrimitiveType, } from "sndbxr/Object"
+import { createPrimitive, Object, PrimitiveType, } from "sndbxr/Object"
 import { Vector2 } from "sndbxr/Vector2"
 import { Vector3 } from "sndbxr/Vector3"
 
@@ -87,17 +87,13 @@ export function update(): void {
 }
 
 export function start(): void {
-  const sun = createPrimitiveObject(PrimitiveType.SPHERE)
-  const earth = createPrimitiveObject(PrimitiveType.SPHERE)
-  if (sun) {
-    sun.setPosition(new Vector3(sunPos.x, sunPos.y, 0))
-    objects.push(sun)
-  }
-  if (earth) {
-    earth.setPosition(new Vector3(earthPos.x, earthPos.y, 0))
-    earth.setScale(new Vector3(0.2, 0.2, 0.2))
-    objects.push(earth)
-  }
+  const sun = createPrimitive(PrimitiveType.SPHERE)
+  const earth = createPrimitive(PrimitiveType.SPHERE)
+	sun.setPosition(new Vector3(sunPos.x, sunPos.y, 0))
+	objects.push(sun)
+	earth.setPosition(new Vector3(earthPos.x, earthPos.y, 0))
+	earth.setScale(new Vector3(0.2, 0.2, 0.2))
+	objects.push(earth)
 }
 `
 	var editor = monaco.editor.create(document.getElementById('editor'), {

@@ -16,9 +16,9 @@ var ConnectorPlugin = {
       window.connector.onStart(sandboxId);
     }
   },
-  JsUpdate: function () {
+  JsUpdate: function (sandboxId) {
     if (window.connector) {
-      window.connector.onUpdate();
+      window.connector.onUpdate(sandboxId);
     }
   },
   JsSandboxExecV_I: function(i0) {

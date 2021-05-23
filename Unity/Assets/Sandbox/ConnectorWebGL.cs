@@ -37,12 +37,12 @@ public class ConnectorWebGL : ConnectorAbstract
     [DllImport("__Internal")]
     private static extern int JsInit();
 
-    public override void Update()
+    public override void Update(int sandboxId)
     {
-        JsUpdate();
+        JsUpdate(sandboxId);
     }
     [DllImport("__Internal")]
-    private static extern int JsUpdate();
+    private static extern int JsUpdate(int sandboxId);
 
     public override int Start(int sandboxId)
     {
