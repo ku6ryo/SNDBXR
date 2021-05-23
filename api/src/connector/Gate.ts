@@ -1,15 +1,26 @@
 export default class Gate {
-  wasmInstance: WebAssembly.Instance
-  wasmMemory: WebAssembly.Memory
+  wasmInstance: WebAssembly.Instance | null = null
+  wasmMemory: WebAssembly.Memory | null = null
   setWasm (instance: WebAssembly.Instance) {
     this.wasmInstance = instance
-    if (!instance.exports.memory) {
-      throw new Error('No memory export.')
+  }
+
+  getWasmInstance (): WebAssembly.Instance {
+    if (this.wasmInstance) {
+      return this.wasmInstance
     }
-    this.wasmMemory = instance.exports.memory as WebAssembly.Memory
+    throw new Error('WASM instance is not set yet.')
+  }
+
+  getWasmMemory (): WebAssembly.Memory {
+    const instance = this.getWasmInstance()
+    if (instance.exports.memory) {
+      return instance.exports.memory as WebAssembly.Memory
+    }
+    throw new Error('No memory export.')
   }
   malloc (len: number): number {
-    const u = new Uint8Array(this.wasmMemory.buffer)
+    const u = new Uint8Array(this.getWasmMemory().buffer)
     let freeCount = 0
     for (let i = 0; i < u.length; i++) {
       const isFree = u[i] === 0
@@ -26,7 +37,7 @@ export default class Gate {
   }
 
   free (ptr: number) {
-    const u = new Uint8Array(this.wasmMemory.buffer)
+    const u = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < u.length; i++) {
       if (u[ptr + i] === 0) {
         break
@@ -37,11 +48,11 @@ export default class Gate {
   }
 
   onStart () {
-    (this.wasmInstance.exports as any).start()
+    (this.getWasmInstance().exports as any).start()
   }
 
   onUpdate () {
-    (this.wasmInstance.exports as any).update()
+    (this.getWasmInstance().exports as any).update()
   }
 
   onAbort (message: string | null,
@@ -51,8 +62,10 @@ export default class Gate {
   }
 
   _logString (ptr: number, len: number) {
-    const strArray = new Uint8Array(this.wasmMemory.buffer.slice(ptr, ptr + len))
-    this.logString(String.fromCharCode.apply(null, strArray))
+    const strArray = new Uint8Array(this.getWasmMemory().buffer.slice(ptr, ptr + len))
+    const codeArray: number[] = []
+    strArray.forEach(code => codeArray.push(code))
+    this.logString(String.fromCharCode(...codeArray))
   }
 
   logString (str: string) {
@@ -125,7 +138,7 @@ export default class Gate {
     const ptr = this.malloc(mLen)
     const valueArr = this.callEngine_i_i(funcId,
       i0)
-    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < valueArr.length; i++) {
       memArr[i] = valueArr[i]
     }
@@ -141,7 +154,7 @@ export default class Gate {
       i0
       ,
       i1)
-    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < valueArr.length; i++) {
       memArr[i] = valueArr[i]
     }
@@ -153,7 +166,7 @@ export default class Gate {
     const ptr = this.malloc(mLen)
     const valueArr = this.callEngine_i_s(funcId,
       sPtr0, sLen0)
-    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < valueArr.length; i++) {
       memArr[i] = valueArr[i]
     }
@@ -177,7 +190,7 @@ export default class Gate {
       f2
       ,
       f3)
-    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < valueArr.length; i++) {
       memArr[i] = valueArr[i]
     }
@@ -205,7 +218,7 @@ export default class Gate {
       f3
       ,
       f4)
-    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < valueArr.length; i++) {
       memArr[i] = valueArr[i]
     }
@@ -217,7 +230,7 @@ export default class Gate {
     const ptr = this.malloc(mLen)
     const valueArr = this.callEngine_fff_i(funcId,
       i0)
-    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    const memArr = new Uint8Array(this.getWasmMemory().buffer)
     for (let i = 0; i < valueArr.length; i++) {
       memArr[i] = valueArr[i]
     }

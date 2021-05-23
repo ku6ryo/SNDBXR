@@ -167,7 +167,7 @@ public class Sandbox : MonoBehaviour
     void Update()
     {
       if (Running) {
-        connector.Update();
+        connector.Update(this.id);
       }
     }
 }

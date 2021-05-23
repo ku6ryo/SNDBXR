@@ -22,7 +22,7 @@ public class ConnectorDummy : ConnectorAbstract
     {
         return 0;
     }
-    public override void Update()
+    public override void Update(int sandboxId)
     {
     }
     public override void SandboxExecV_II(int funcId, int i0, int i1)

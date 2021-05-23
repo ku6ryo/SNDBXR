@@ -3,7 +3,6 @@ import path from "path"
 import mustache from "mustache"
 import { ESLint } from "eslint"
 
-
 enum ValueType {
   Int32 = "i",
   Int64 = "L",
@@ -15,15 +14,9 @@ enum ValueType {
 type ValueInterface = {
   isVoid: boolean,
   values: {
-    type: ValueType
+    type: ValueType,
+    byteUnit: number,
   }[]
-}
-
-const a: ValueInterface = {
-  isVoid: false,
-  values: [{
-    type: ValueType.Float32
-  }]
 }
 
 function createSign(def: ValueInterface): string {
@@ -48,8 +41,15 @@ function parseValueSign(sign: string): ValueInterface {
   return {
     isVoid: valueTypes.length === 0,
     values: valueTypes.map(t => {
+      let byteUnit = 0
+      if (t === ValueType.Int32 || t === ValueType.Float32) {
+        byteUnit = 4
+      } else if (t === ValueType.Int64 || t === ValueType.Float64) {
+        byteUnit = 8
+      }
       return {
         type: t,
+        byteUnit,
       }
     })
   }
@@ -91,6 +91,7 @@ function createRenderData(definitions: {
         isInt64: d.output.isVoid ? false : d.output.values[0].type === ValueType.Int64,
         isFloat32: d.output.isVoid ? false : d.output.values[0].type === ValueType.Float32,
         isFloat64: d.output.isVoid ? false : d.output.values[0].type === ValueType.Float64,
+        byteUnit: d.output.values[0].byteUnit,
         isArray: d.output.values.length > 1,
         length: d.output.values.length,
       }
