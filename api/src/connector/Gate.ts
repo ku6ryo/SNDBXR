@@ -36,32 +36,46 @@ export default class Gate {
     }
   }
 
-  onStart() {
+  onStart () {
     (this.wasmInstance.exports as any).start()
   }
 
-  onUpdate() {
+  onUpdate () {
     (this.wasmInstance.exports as any).update()
   }
 
-  _logString(ptr: number, len: number) {
+  onAbort (message: string | null,
+    fileName: string | null,
+    lineNumber: number,
+    columnNumber: number) {
+  }
+
+  _logString (ptr: number, len: number) {
     const strArray = new Uint8Array(this.wasmMemory.buffer.slice(ptr, ptr + len))
     this.logString(String.fromCharCode.apply(null, strArray))
   }
 
-  logString(str: string) {
+  logString (str: string) {
     console.log(str)
-    return;
   }
-
-  logInt(i: number) {
+  logInt (i: number) {
     console.log(i)
-    return;
   }
-
-  logFloat(f: number) {
+  logFloat (f: number) {
     console.log(f)
-    return;
+  }
+  createImport () {
+    return {
+      logString: this._logString.bind(this),
+      logInt: this.logInt.bind(this),
+      logFloat: this.logFloat.bind(this),
+      _callEngine_i_i: this._callEngine_i_i.bind(this),
+      _callEngine_i_ii: this._callEngine_i_ii.bind(this),
+      _callEngine_i_s: this._callEngine_i_s.bind(this),
+      _callEngine_i_ifff: this._callEngine_i_ifff.bind(this),
+      _callEngine_i_iffff: this._callEngine_i_iffff.bind(this),
+      _callEngine_fff_i: this._callEngine_fff_i.bind(this)
+    }
   }
 
   callEngine_i_i (funcId: number,
@@ -208,22 +222,5 @@ export default class Gate {
       memArr[i] = valueArr[i]
     }
     return ptr
-  }
-
-  onAbort() {
-  }
-
-  createImport () {
-    return {
-      logString: this._logString.bind(this),
-      logInt: this.logInt.bind(this),
-      logFloat: this.logFloat.bind(this),
-      _callEngine_i_i: this._callEngine_i_i.bind(this),
-      _callEngine_i_ii: this._callEngine_i_ii.bind(this),
-      _callEngine_i_s: this._callEngine_i_s.bind(this),
-      _callEngine_i_ifff: this._callEngine_i_ifff.bind(this),
-      _callEngine_i_iffff: this._callEngine_i_iffff.bind(this),
-      _callEngine_fff_i: this._callEngine_fff_i.bind(this)
-    }
   }
 }

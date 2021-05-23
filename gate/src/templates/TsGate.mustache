@@ -39,6 +39,53 @@ export default class Gate {
     }
   }
 
+  onStart() {
+    (this.wasmInstance.exports as any).start()
+  }
+
+  onUpdate() {
+    (this.wasmInstance.exports as any).update()
+  }
+
+  onAbort(
+    message: string | null,
+    fileName: string | null,
+    lineNumber: number,
+    columnNumber: number,
+  ) {
+  }
+
+  _logString(ptr: number, len: number) {
+    const strArray = new Uint8Array(this.wasmMemory.buffer.slice(ptr, ptr + len))
+    this.logString(String.fromCharCode.apply(null, strArray))
+  }
+
+  logString(str: string) {
+    console.log(str)
+    return;
+  }
+
+  logInt(i: number) {
+    console.log(i)
+    return;
+  }
+
+  logFloat(f: number) {
+    console.log(f)
+    return;
+  }
+
+  createImport() {
+    return {
+      logString: this._logString.bind(this),
+      logInt: this.logInt.bind(this),
+      logFloat: this.logFloat.bind(this),
+{{#functions}}
+      _{{funcName}}: this._{{funcName}}.bind(this),
+{{/functions}}
+    }
+  }
+
 {{#functions}}
   {{funcName}} (
     funcId: number,
@@ -91,12 +138,4 @@ export default class Gate {
 {{/output}}
   }
 {{/functions}}
-
-  createImport() {
-    return {
-{{#functions}}
-      _{{funcName}}: this._{{funcName}}.bind(this),
-{{/functions}}
-    }
-  }
 }
