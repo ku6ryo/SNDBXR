@@ -4,4 +4,4 @@ import { SkyManager } from "./SkyManager"
 
 export const eventManager = new EventManager()
 export const gltfLoader = new GltfLoader()
-export const skyManager = new SkyManager();
+export const skyManager = new SkyManager()

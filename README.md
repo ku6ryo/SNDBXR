@@ -13,4 +13,4 @@ Currently only Unity is supported.
 # Directory structure
 - Unity: Unity project that implements the sandbox environment.
 - api: APIs for scripting in WASM environment. 
-- compiler: Compiler / Playground server
+- server: Compiler / Playground server
