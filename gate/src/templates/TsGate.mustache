@@ -1,0 +1,102 @@
+
+export default class Gate {
+  wasmInstance: WebAssembly.Instance
+  wasmMemory: WebAssembly.Memory
+
+  setWasm (instance: WebAssembly.Instance) {
+    this.wasmInstance = instance
+    if (!instance.exports.memory) {
+      throw new Error('No memory export.')
+    }
+    this.wasmMemory = instance.exports.memory as WebAssembly.Memory
+  }
+  
+  malloc(len: number): number {
+    const u = new Uint8Array(this.wasmMemory.buffer)
+    let freeCount = 0
+    for (let i = 0; i < u.length; i++) {
+      const isFree = u[i] === 0
+      if (isFree) {
+        freeCount += 1
+        if (len + 2 === freeCount) {
+          return i - len + 1
+        }
+      } else {
+        freeCount = 0 
+      }
+    }
+    throw new Error("No free memory")
+  }
+
+  free(ptr: number) {
+    const u = new Uint8Array(this.wasmMemory.buffer)
+    for (let i = 0; i < u.length; i++) {
+      if (u[ptr + i] === 0) {
+        break
+      } else {
+        u[i] = 0
+      }
+    }
+  }
+
+{{#functions}}
+  {{funcName}} (
+    funcId: number,
+{{#inputs}}
+    {{#isInt32}}i{{index}}: number{{/isInt32}}
+    {{#isInt64}}l{{index}}: number{{/isInt64}}
+    {{#isFloat32}}f{{index}}: number{{/isFloat32}}
+    {{#isFloat64}}d{{index}}: number{{/isFloat64}}
+    {{#isString}}sPtr{{index}}: number, sLen{{index}}: number{{/isString}}
+    {{^isLast}},{{/isLast}}
+{{/inputs}}
+  ): Uint8Array {
+{{#output}}
+    return new Uint8Array()
+{{/output}}
+  }
+{{/functions}}
+
+{{#functions}}
+  _{{funcName}} (
+    funcId: number,
+{{#inputs}}
+    {{#isInt32}}i{{index}}: number{{/isInt32}}
+    {{#isInt64}}l{{index}}: number{{/isInt64}}
+    {{#isFloat32}}f{{index}}: number{{/isFloat32}}
+    {{#isFloat64}}d{{index}}: number{{/isFloat64}}
+    {{#isString}}sPtr{{index}}: number, sLen{{index}}: number{{/isString}}
+    {{^isLast}},{{/isLast}}
+{{/inputs}}
+  ): number {
+{{#output}}
+    const mLen = {{length}} * 4
+    const ptr = this.malloc(mLen)
+    const valueArr = this.{{funcName}}(
+      funcId,
+{{#inputs}}
+      {{#isInt32}}i{{index}}{{/isInt32}}
+      {{#isInt64}}l{{index}}{{/isInt64}}
+      {{#isFloat32}}f{{index}}{{/isFloat32}}
+      {{#isFloat64}}d{{index}}{{/isFloat64}}
+      {{#isString}}sPtr{{index}}, sLen{{index}}{{/isString}}
+      {{^isLast}},{{/isLast}}
+{{/inputs}}
+    )
+    const memArr = new Uint8Array(this.wasmMemory.buffer)
+    for (let i = 0; i < valueArr.length; i++) {
+      memArr[i] = valueArr[i]
+    }
+    return ptr
+{{/output}}
+  }
+{{/functions}}
+
+  createImport() {
+    return {
+{{#functions}}
+      _{{funcName}}: this._{{funcName}}.bind(this),
+{{/functions}}
+    }
+  }
+}

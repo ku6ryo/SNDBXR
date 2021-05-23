@@ -2,20 +2,21 @@ import {
     EventType,
 } from "./EventType"
 import { EventManager } from "./EventManager"
-import { allocString } from "./memory"
 import {
   GET_OBJECT_ID_BY_NAME,
   SET_OBJECT_POSITION,
   GET_OBJECT_POSITION,
   GET_MATERIAL_OF_OBJECT,
-  execI_I,
-  execI_S,
-  execI_IV3,
-  execV3_I,
   CREATE_PRIMITIVE_OBJECT,
   SET_OBJECT_SCALE,
   GET_OBJECT_SCALE,
-} from "./env"
+} from "./function_ids"
+import {
+  callEngine_i_i,
+  callEngine_i_s,
+  callEngine_i_ifff,
+  callEngine_fff_i,
+} from "./gate"
 import { Material } from "./Material"
 import { eventManager } from "./global"
 import { Vector3 } from "./Vector3"
@@ -28,9 +29,7 @@ export enum PrimitiveType {
 }
 
 export function getObjectByName(name: string): Object | null {
-  const ptr = allocString(name)
-  const id = execI_S(GET_OBJECT_ID_BY_NAME, ptr, name.length)
-  heap.free(ptr)
+  const id = callEngine_i_s(GET_OBJECT_ID_BY_NAME, name)
   if (id === OBJECT_NOT_FOUND_ID) {
     return null
   } 
@@ -40,11 +39,8 @@ export function getObjectByName(name: string): Object | null {
 /**
  * Creates a primitive object.
  */
-export function createPrimitiveObject(type: PrimitiveType): Object | null {
-  const id = execI_I(CREATE_PRIMITIVE_OBJECT, type);
-  if (id === OBJECT_NOT_FOUND_ID) {
-    return null
-  }
+export function createPrimitive(type: PrimitiveType): Object {
+  const id = callEngine_i_i(CREATE_PRIMITIVE_OBJECT, type);
   return new Object(id, eventManager);
 }
 
@@ -60,31 +56,25 @@ export class Object {
     }
 
     getPosition(): Vector3 {
-      const ptr = execV3_I(GET_OBJECT_POSITION, this.id);
-      const x = load<f32>(ptr)
-      const y = load<f32>(ptr, 4)
-      const z = load<f32>(ptr, 8)
-      return new Vector3(x, y, z)
+      const value = callEngine_fff_i(GET_OBJECT_POSITION, this.id);
+      return new Vector3(value[0], value[1], value[2])
     }
 
     setPosition(v: Vector3): i32 {
-      return execI_IV3(SET_OBJECT_POSITION, this.id, v.x, v.y, v.z)
+      return callEngine_i_ifff(SET_OBJECT_POSITION, this.id, v.x, v.y, v.z)
     }
 
     getScale(v: Vector3): Vector3 {
-      const ptr = execV3_I(GET_OBJECT_SCALE, this.id);
-      const x = load<f32>(ptr)
-      const y = load<f32>(ptr, 4)
-      const z = load<f32>(ptr, 8)
-      return new Vector3(x, y, z)
+      const value: f32[] = callEngine_fff_i(GET_OBJECT_SCALE, this.id);
+      return new Vector3(value[0], value[1], value[2])
     }
 
     setScale(v: Vector3): i32 {
-      return execI_IV3(SET_OBJECT_SCALE, this.id, v.x, v.y, v.z)
+      return callEngine_i_ifff(SET_OBJECT_SCALE, this.id, v.x, v.y, v.z)
     }
 
     getMaterial(): Material | null {
-        const id = execI_I(GET_MATERIAL_OF_OBJECT, this.id)
+        const id = callEngine_i_i(GET_MATERIAL_OF_OBJECT, this.id)
         if (id === -1) {
           return null
         }

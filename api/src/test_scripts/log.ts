@@ -1,5 +1,5 @@
-import { log } from "../../assembly/env"
+import { log } from "../../assembly/debug"
 
-export function main(): void {
+export function start(): void {
   log("test")
 }

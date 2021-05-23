@@ -1,15 +1,14 @@
-import { Object } from "./Object"
-import { execI_S, LOAD_SKY } from "./env"
-import { allocString } from "./memory"
-import { eventManager } from "./global";
+import { callEngine_i_s } from "./gate"
+import {
+  LOAD_SKY
+} from "./function_ids"
 
 export class SkyManager {
 
   private callbacks: Map<i32, () => void> = new Map()
 
   load(url: string, callback: () => void): void {
-    const ptr = allocString(url)
-    const loaderId = execI_S(LOAD_SKY, ptr, url.length)
+    const loaderId = callEngine_i_s(LOAD_SKY, url)
     this.callbacks.set(loaderId, callback)
   }
 

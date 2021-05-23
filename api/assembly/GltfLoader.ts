@@ -1,15 +1,18 @@
 import { Object } from "./Object"
-import { execI_S, LOAD_GLTF, logInt } from "./env"
-import { allocString } from "./memory"
+import {
+  LOAD_GLTF
+} from "./function_ids"
 import { eventManager } from "./global";
+import {
+  callEngine_i_s
+} from "./gate"
 
 export class GltfLoader {
 
   private callbacks: Map<i32, (obj: Object) => void> = new Map()
 
   load(url: string, callback: (obj: Object) => void): void {
-    const ptr = allocString(url)
-    const loaderId = execI_S(LOAD_GLTF, ptr, url.length)
+    const loaderId = callEngine_i_s(LOAD_GLTF, url)
     this.callbacks.set(loaderId, callback)
   }
 

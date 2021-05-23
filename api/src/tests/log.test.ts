@@ -1,15 +1,15 @@
 import * as path from "path"
-import assert from "assert"
 import { loadFromFile } from "../loader"
-import { Connector } from "../connector/Connector"
+import Gate from "../connector/Gate"
 
-class TestConnector extends Connector {
+class TestGate extends Gate {
   logString(str) {
     expect(str).toBe("test")
   }
 }
 
-test("test logString", () => {
-  const m = loadFromFile(path.join(__dirname, "../../build_test/log.wasm"), new TestConnector()) as any
-  m.exports.main()
+test("test logString", async () => {
+  const gate = new TestGate()
+  await loadFromFile(path.join(__dirname, "../../build_test/log.wasm"), gate)
+  gate.onStart()
 })
