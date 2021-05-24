@@ -1,7 +1,7 @@
-import { eventManager, gltfLoader, skyManager } from "./global"
-import { log } from "./env"
-import { Vector3 } from "./Vector3"
-import { Object } from "./Object"
+import { gltfLoader, skyManager } from "sndbxr/global"
+import { Vector3 } from "sndbxr/Vector3"
+import { Object } from "sndbxr/Object"
+import { log } from "sndbxr/debug"
 
 let loadedObj: Object | null = null
 const objPos = new Vector3(0, 0, 0)
@@ -25,17 +25,4 @@ export function start(): i32 {
     log("glb loaded")
   })
   return 0
-}
-
-// Please do not remove following.
-export function onEvent (objectId: i32, type: i32): void {
-  eventManager.onEvent(objectId, type)
-}
-
-export function onGltfLoaded(loaderId: i32, objectId: i32): void {
-  gltfLoader.onLoaded(loaderId, objectId)
-}
-
-export function onSkyLoaded(loaderId: i32): void {
-  skyManager.onLoaded(loaderId)
 }

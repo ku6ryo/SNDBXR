@@ -10,10 +10,13 @@ import handleFinally from "./handleFinally"
 import { BadRequestError } from "./errors"
 import compression from "compression"
 import serveStatic from "serve-static"
+import cors from "cors"
 
 const writeFile = util.promisify(fs.writeFile)
 
 const app = express()
+app.use(cors())
+
 app.use((req, __, next) => {
   console.log(`[${new Date()}] ${req.method} ${req.url}`)
   next()
