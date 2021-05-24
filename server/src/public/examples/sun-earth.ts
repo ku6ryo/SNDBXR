@@ -1,7 +1,6 @@
-import { createPrimitiveObject, Object, PrimitiveType, } from "./Object"
-import { eventManager } from "./global"
-import { Vector2 } from "./Vector2"
-import { Vector3 } from "./Vector3"
+import { createPrimitive, Object, PrimitiveType, } from "sndbxr/Object"
+import { Vector2 } from "sndbxr/Vector2"
+import { Vector3 } from "sndbxr/Vector3"
 
 const objects: Object[] = [];
 let speed: Vector2 = new Vector2(0, 0.6)
@@ -24,8 +23,8 @@ export function update(): void {
 }
 
 export function start(): i32 {
-  const sun = createPrimitiveObject(PrimitiveType.SPHERE)
-  const earth = createPrimitiveObject(PrimitiveType.SPHERE)
+  const sun = createPrimitive(PrimitiveType.SPHERE)
+  const earth = createPrimitive(PrimitiveType.SPHERE)
   if (sun) {
     sun.setPosition(new Vector3(sunPos.x, sunPos.y, 0))
     objects.push(sun)
@@ -36,8 +35,4 @@ export function start(): i32 {
     objects.push(earth)
   }
   return 0
-}
-
-export function onEvent (objectId: i32, type: i32): void {
-  eventManager.onEvent(objectId, type)
 }

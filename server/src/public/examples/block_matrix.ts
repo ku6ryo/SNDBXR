@@ -1,5 +1,5 @@
-import { createPrimitiveObject, Object, PrimitiveType, } from "sndbxr-wasm-api/src/api/Object";
-import { Vector3 } from "sndbxr-wasm-api/src/api/Vector3"
+import { createPrimitive, Object, PrimitiveType, } from "sndbxr/Object";
+import { Vector3 } from "sndbxr/Vector3"
 
 let r: f64 = 0
 export function update(): void {
@@ -22,7 +22,7 @@ export function start(): i32 {
   for(let i = -5; i < 5; i++) {
     const row: Object[] = []
     for (let j = -5; j < 5; j++) {
-      const obj = createPrimitiveObject(PrimitiveType.CUBE)
+      const obj = createPrimitive(PrimitiveType.CUBE)
       if (obj) {
         obj.setPosition(new Vector3(i * 1.1 as f32, j * 1.1 as f32, 0));
         row.push(obj)
