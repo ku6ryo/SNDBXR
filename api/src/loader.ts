@@ -1,14 +1,14 @@
 import fs from "fs"
-import Gate from "./connector/Gate";
+import { Sandbox } from "./connector/Sandbox";
 
-export async function loadFromFile (path: string, gate: Gate) {
+export async function loadFromFile (path: string, sandbox: Sandbox) {
   const file = fs.readFileSync(path)
   const source = await WebAssembly.instantiate(file, {
     env: {
-      abort: gate.onAbort.bind(this),
+      abort: sandbox.onAbort.bind(this),
     },
-    gate: gate.createImport(),
+    ...sandbox.createImports()
   })
-  gate.setWasm(source.instance)
+  sandbox.setWasm(source.instance)
   return source.instance
 }

@@ -4,7 +4,7 @@ import {
 } from "./function_ids"
 import { eventManager } from "./global";
 import {
-  callEngine_i_s
+  // callEngine_i_s
 } from "./gate"
 
 export class GltfLoader {
@@ -12,8 +12,8 @@ export class GltfLoader {
   private callbacks: Map<i32, (obj: Object) => void> = new Map()
 
   load(url: string, callback: (obj: Object) => void): void {
-    const loaderId = callEngine_i_s(LOAD_GLTF, url)
-    this.callbacks.set(loaderId, callback)
+    // const loaderId = callEngine_i_s(LOAD_GLTF, url)
+    // this.callbacks.set(loaderId, callback)
   }
 
   onLoaded(loaderId: i32, objectId: i32): void {

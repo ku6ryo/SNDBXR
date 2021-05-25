@@ -55,10 +55,7 @@ export class Three {
       const blob  = await res.blob()
       const buf = await blob.arrayBuffer()
       const source = await WebAssembly.instantiate(buf, {
-        env: {
-          abort: sandbox.onAbort.bind(sandbox),
-        },
-        gate: sandbox.createImport(),
+        ...sandbox.createImports(),
       })
       sandbox.setWasm(source.instance)
       sandbox.onStart()

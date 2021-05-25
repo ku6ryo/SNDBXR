@@ -13,7 +13,7 @@ test("proto", async () => {
         throw new Error()
       }
     },
-    gate: {
+    debug: {
       logInt: (value: number) => {
         expect(value).toBe(300)
       }
@@ -31,11 +31,15 @@ test("proto", async () => {
         const memory32 = new Int32Array(memory.buffer)
         memory32[outP >> 2] = 300
 
-        expect(iTypes[0]).toBe(2)
+        expect(iTypes[0]).toBe(1)
         expect(iTypes[1]).toBe(2)
+        expect(iTypes[2]).toBe(2)
+        expect(iTypes[3]).toBe(2)
         expect(oTypes[0]).toBe(1)
-        expect(Math.round(fArray[2 + ni + no] * 1000) / 1000).toBe(33.7)
-        expect(Math.round(fArray[2 + ni + no + 1] * 1000) / 1000).toBe(2.8)
+        expect(iArray[2 + ni + no]).toBe(1)
+        expect(Math.round(fArray[2 + ni + no + 1] * 1000) / 1000).toBe(33.7)
+        expect(Math.round(fArray[2 + ni + no + 2] * 1000) / 1000).toBe(2.8)
+        expect(Math.round(fArray[2 + ni + no + 3] * 1000) / 1000).toBe(789.53)
         expect(funcId).toBe(200)
       }
     }

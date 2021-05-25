@@ -1,7 +1,7 @@
 import { Color } from "./Color"
 import {
   callEngine_i_iffff,
-  callEngine_i_s,
+  // callEngine_i_s,
 } from "./gate"
 import {
   SET_MATERIAL_COLOR,
@@ -10,6 +10,7 @@ import {
 
 export const MATERIAL_NOT_FOUND_ID = -1
 
+/*
 export function getMaterialByName(name: string): Material | null {
   const id = callEngine_i_s(GET_MATERIAL_ID_BY_NAME, name)
   if (id === MATERIAL_NOT_FOUND_ID) {
@@ -17,6 +18,7 @@ export function getMaterialByName(name: string): Material | null {
   } 
   return new Material(id)
 }
+*/
 
 export class Material {
   id: i32
@@ -33,6 +35,6 @@ export class Material {
       color.g,
       color.b,
       color.a
-    )
+    )[0].vi32
   }
 }

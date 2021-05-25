@@ -85,6 +85,17 @@ function createRenderData(definitions: {
           isLast: i === d.input.values.length - 1 
         }
       }),
+      outputs: d.output.values.map((v, i) => {
+        return {
+          index: i,
+          isInt32: v.type === ValueType.Int32,
+          isInt64: v.type === ValueType.Int64,
+          isFloat32: v.type === ValueType.Float32,
+          isFloat64: v.type === ValueType.Float64,
+          isString: v.type === ValueType.String,
+          isLast: i === d.input.values.length - 1 
+        }
+      }),
       output: {
         isVoid: d.output.isVoid,
         isInt32: d.output.isVoid ? false : d.output.values[0].type === ValueType.Int32,
@@ -103,7 +114,7 @@ function renderAssemblyScript(definitions: {
   output: ValueInterface,
   input: ValueInterface,
 }[]) {
-  const template = fs.readFileSync(path.join(__dirname, "templates/asGate.mustache")).toString()
+  const template = fs.readFileSync(path.join(__dirname, "templates/AssemblyScriptGate.mustache")).toString()
   const functions = createRenderData(definitions)
   const code = mustache.render(template, { functions })
   return code
@@ -113,7 +124,7 @@ function renderTypeScript(definitions: {
   output: ValueInterface,
   input: ValueInterface,
 }[]) {
-  const template = fs.readFileSync(path.join(__dirname, "templates/TsGate.mustache")).toString()
+  const template = fs.readFileSync(path.join(__dirname, "templates/TypeScriptSandbox.mustache")).toString()
   const functions = createRenderData(definitions)
   return mustache.render(template, { functions })
 }
@@ -132,7 +143,7 @@ async function lintFix(code: string) {
   const defs = [
     ["i", "i"],
     ["i", "ii"],
-    ["i", "s"],
+    // ["i", "s"],
     ["i", "ifff"],
     ["i", "iffff"],
     ["fff", "i"],
@@ -140,12 +151,13 @@ async function lintFix(code: string) {
 
   ;(async () => {
     let code = renderAssemblyScript(parseDefinitions(defs))
+    console.log(code)
     try {
       code = await lintFix(code)
     } catch (e) {
       console.error(e)
     }
-    fs.writeFileSync(path.join(__dirname, "../artifacts/as_gate.ts"), code)
+    fs.writeFileSync(path.join(__dirname, "../artifacts/AssemblyScriptGate.ts"), code)
   })()
 
   ;(async () => {
@@ -155,6 +167,6 @@ async function lintFix(code: string) {
     } catch (e) {
       console.error(e)
     }
-    fs.writeFileSync(path.join(__dirname, "../artifacts/ts_gate.ts"), code)
+    fs.writeFileSync(path.join(__dirname, "../artifacts/TypeScriptSandbox.ts"), code)
   })()
 })()

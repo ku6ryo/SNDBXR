@@ -1,7 +1,7 @@
-import { callEngine_i_ff } from "../../assembly/proto"
+import { callEngine_i_ifff } from "../../assembly/gate"
 import { logInt } from "../../assembly/debug"
 
 export function test(): void {
-  const result = callEngine_i_ff(33.7, 2.8, 200)
-  logInt(result[0])
+  const result = callEngine_i_ifff(200, 1, 33.7, 2.8, 789.53)
+  logInt(result[0].vi32)
 }

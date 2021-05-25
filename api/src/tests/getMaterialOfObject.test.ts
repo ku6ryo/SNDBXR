@@ -1,37 +1,32 @@
 import * as path from "path"
 import { loadFromFile } from "../loader"
-import Gate from "../connector/Gate"
+import { Sandbox } from "../connector/Sandbox"
 import { GET_MATERIAL_OF_OBJECT, CREATE_PRIMITIVE_OBJECT } from "../../assembly/function_ids"
 
-class TestGate extends Gate {
+class TestSandbox extends Sandbox {
+  constructor() {
+    super()
+    this.callEngine_i_i_Map.set(CREATE_PRIMITIVE_OBJECT, this.createPrimitive.bind(this))
+    this.callEngine_i_i_Map.set(GET_MATERIAL_OF_OBJECT, this.getMaterial.bind(this))
+  }
   logInt(value) {
-    console.log(value)
     expect(value).toBe(23)
   }
-  callEngine_i_i(funcId, i0) {
-    switch (funcId) {
-      case CREATE_PRIMITIVE_OBJECT:
-        expect(i0).toBe(0)
-        let val1 = new Uint32Array(1)
-        val1[0] = 10
-        return new Uint8Array(val1.buffer)
-      case GET_MATERIAL_OF_OBJECT:
-        expect(i0).toBe(10)
-        const val2 = new Uint32Array(1)
-        val2[0] = 23
-        return new Uint8Array(val2.buffer)
-      default:
-        super.callEngine_i_i(funcId, i0)
-        break
-    }
+  createPrimitive(i0) {
+    expect(i0).toBe(0)
+    return [10]
+  }
+  getMaterial(i0) {
+    expect(i0).toBe(10)
+    return [23]
   }
 }
 
 test("test createPrimitive", async () => {
-  const gate = new TestGate()
+  const sandbox = new TestSandbox()
   await loadFromFile(
     path.join(__dirname, "../../build_test/getMaterialOfObject.wasm"),
-    gate
+    sandbox
   )
-  gate.onStart()
+  sandbox.onStart()
 })

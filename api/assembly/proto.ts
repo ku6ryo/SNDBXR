@@ -1,11 +1,13 @@
-const I32 = 1
-const F32 = 2
+import { logInt } from "./debug"
+
+export const I32 = 1
+export const F32 = 2
 
 export declare function _callEngine32(p: usize, pOut: usize, unitLength: i32, funcId: i32): void
 
 // In AssemblyScript we cannot use type or interface to define structure quickly.
 // So created this class to hold values.
-class ValueContainer32 {
+export class ValueContainer32 {
   vi32: i32 = 0
   vf32: f32 = 0
 
@@ -48,7 +50,7 @@ export function callEngine32(
     const type = iTypes[i]
     if (type === I32) {
       store<i32>(p + offset, inputs[i].vi32)
-    } else (type === F32) {
+    } else if (type === F32) {
       store<f32>(p + offset, inputs[i].vf32)
     }
     offset += 4
@@ -67,12 +69,4 @@ export function callEngine32(
   }
   heap.free(p)
   return outs
-}
-
-export function callEngine_i_ff(f0: f32, f1: f32, funcId: i32): i32[] {
-  const outs = callEngine32([F32, F32], [I32], [
-    ValueContainer32.f32(f0),
-    ValueContainer32.f32(f1)
-  ], funcId)
-  return [outs[0].vi32]
 }
