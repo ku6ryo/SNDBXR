@@ -125,11 +125,11 @@ public class Sandbox : MonoBehaviour
     void Awake()
     {
         #if UNITY_EDITOR
-        connector = new ConnectorWasm3(this);
+        connector = new ConnectorWasmerSharp(this);
         #elif UNITY_WEBGL
         connector = new ConnectorWebGL(this);
         #elif UNITY_ANDROID
-        connector = new ConnectorWasmerSharp(this);
+        connector = new ConnectorAndroid(this);
         #elif UNITY_STANDALONE_WIN
         connector = new ConnectorWasmerSharp(this);
         #elif UNITY_STANDALONE_OSX

@@ -9,3 +9,10 @@
 
 # Note
 Stopped using cs-wasm because class in assembly script cannot be used on cs-wasm VM.
+
+# Android build
+Get a unity package from following repo and install. https://github.com/googlesamples/unity-jar-resolver
+
+The file is included in the source code files. Download on the page of the latest package. e.g. https://github.com/googlesamples/unity-jar-resolver/blob/master/external-dependency-manager-1.2.165.unitypackage
+
+Run [Assets] -> [External Dependency Manager] -> [Android Resolver] -> [Resolve]
