@@ -8,13 +8,19 @@ This server is deployed to `https://sndbxr.org`.
 - /compile : Entrypoint to compile SNDBXR scripts. POST (text/plain) is accepted.
 
 # Development
-Please install [yarn](https://yarnpkg.com/) as you like. (`npm install -g yarn` might be easiest)
+Please install Node.js and [yarn](https://yarnpkg.com/) as you like.
 
 ## Start server locally
 To start the server locally, please run the following commands.
 ```
 yarn
 yarn dev
+```
+
+## Build
+Artifacts are stored in `dist` directory.
+```
+yarn build
 ```
 
 ## Updating SNDBXR wasm api module
