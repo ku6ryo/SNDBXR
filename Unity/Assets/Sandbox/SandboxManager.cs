@@ -11,7 +11,7 @@ public class SandboxManager: MonoBehaviour {
     public void Start ()
     {
         #if UNITY_EDITOR
-        string url = "http://192.168.1.5:8080/artifacts/69df76e4-c13a-434e-940f-cd530da08a13.wasm";
+        string url = "http://localhost:8080/artifacts/test.wasm";
         CreateSandbox(url);
         #else
         #if UNITY_WEBGL
