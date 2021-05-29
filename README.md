@@ -14,3 +14,4 @@ Currently only Unity is supported.
 - Unity: Unity project that implements the sandbox environment.
 - api: APIs for scripting in WASM environment. 
 - server: Compiler / Playground server
+- three.js: three.js engine player that works with SNDBXR scripts.
