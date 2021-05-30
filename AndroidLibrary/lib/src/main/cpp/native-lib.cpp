@@ -63,7 +63,7 @@ void trashCall(int callId) {
  * @param p
  * @param funcId
  */
-void _callEngine32(void* p, int _, int __, int funcId)
+void _callEngine32(void* p, int funcId)
 {
     int* iPtr = (int *) p;
     float* fPtr = (float *) p;

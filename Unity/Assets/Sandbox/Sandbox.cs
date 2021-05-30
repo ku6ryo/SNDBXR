@@ -1,4 +1,5 @@
 using UnityEngine;
+using Sndbxr;
 
 public class Sandbox : MonoBehaviour
 {
@@ -39,6 +40,131 @@ public class Sandbox : MonoBehaviour
         id = sandboxId;
         wasmUrl = url;
     }
+
+    public void CallEngine32(FunctionCall call) {
+        var sign = call.GetFuncSign();
+        switch (sign)
+        {
+            case "i_i":
+                CallEngine32_i_i(call);
+                break;
+            case "i_ifff":
+                CallEngine32_i_ifff(call);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void CallEngine32_i_i(FunctionCall call)
+    {
+        var funcId = call.GetFuncId();
+        var ai0 = call.GetArgs()[0].GetInt();
+        var ri0 = 0;
+        switch(funcId)
+        {
+            case GET_MATERIAL_OF_OBJECT:
+                ri0 = objectService.GetMaterialByObjectId(ai0);
+                break;
+            case CREATE_PRIMITIVE_OBJECT:
+                ri0 = objectService.CreatePrimitiveObject((PrimitiveTypeEnum) ai0);
+                break;
+            default:
+                Debug.LogWarning("No function to match. " + funcId);
+                // throw new System.Exception("No function to match");
+                break;
+        }
+        call.GetReturns()[0].SetInt(ri0);
+    }
+    public void CallEngine32_i_ifff(FunctionCall call)
+    {
+        var funcId = call.GetFuncId();
+        var ai0 = call.GetArgs()[0].GetInt();
+        var af0 = call.GetArgs()[1].GetFloat();
+        var af1 = call.GetArgs()[2].GetFloat();
+        var af2 = call.GetArgs()[3].GetFloat();
+        var ri0 = 0;
+        switch(funcId)
+        {
+            case SET_OBJECT_POSITION:
+                ri0 = objectService.SetObjectPosition(ai0, new Vector3(af0, af1, af2));
+                break;
+            case SET_OBJECT_SCALE:
+                ri0 = objectService.SetObjectScale(ai0, new Vector3(af0, af1, af2));
+                break;
+            default:
+                Debug.LogWarning("No function to match. " + funcId);
+                // throw new System.Exception("No function to match");
+                break;
+        }
+        call.GetReturns()[0].SetInt(ri0);
+    }
+
+    ///////////////////////////////
+    // Unity life cycle methods. //
+    ///////////////////////////////
+
+    void Awake()
+    {
+        #if UNITY_EDITOR
+        #elif UNITY_WEBGL
+        connector = new ConnectorWebGL(this);
+        #elif UNITY_ANDROID
+        connector = new ConnectorAndroid(this);
+        #else
+        connector = new ConnectorDummy();
+        #endif
+        objectService = new ObjectService(this.gameObject.name);
+        audioService = new AudioService(objectService);
+        gltfService = new GltfService(objectService);
+        skyService = new SkyService();
+    }
+
+    public void OnLoadCompleted(int status) {
+        if (status == 0)
+        {
+            this.Running = true;
+            #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+            WasmerSharpRunner.Start();
+            #endif
+            if (connector != null) {
+                connector.Start(this.id);
+            }
+            /*
+            StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
+                audioService.CreateAudioObjectWithAudioSource(id);
+            }));
+            */
+        }
+    }
+
+    void Start()
+    {
+        if (wasmUrl != null)
+        {
+            Debug.Log("starting " + wasmUrl);
+            #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+            WasmerSharpRunner.Load(this, wasmUrl);
+            #endif
+            if (connector != null) {
+                connector.Load(id, wasmUrl);
+            }
+        }
+    }
+    void Update()
+    {
+      if (Running) {
+            #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
+            WasmerSharpRunner.Update();
+            #endif
+            if (connector != null) {
+                connector.Update(this.id);
+            }
+      }
+    }
+
+
+///////////////// The followings are legacy code. /////////////////////////
 
     public int ExecI_I(int funcId, int i0) {
         switch(funcId)
@@ -116,58 +242,5 @@ public class Sandbox : MonoBehaviour
             default:
                 throw new System.Exception("No function to match");
         }
-    }
-
-    ///////////////////////////////
-    // Unity life cycle methods. //
-    ///////////////////////////////
-
-    void Awake()
-    {
-        #if UNITY_EDITOR
-        connector = new ConnectorWasmerSharp(this);
-        #elif UNITY_WEBGL
-        connector = new ConnectorWebGL(this);
-        #elif UNITY_ANDROID
-        connector = new ConnectorAndroid(this);
-        #elif UNITY_STANDALONE_WIN
-        connector = new ConnectorWasmerSharp(this);
-        #elif UNITY_STANDALONE_OSX
-        connector = new ConnectorWasmerSharp(this);
-        #else
-        connector = new ConnectorDummy();
-        #endif
-        objectService = new ObjectService(this.gameObject.name);
-        audioService = new AudioService(objectService);
-        gltfService = new GltfService(objectService);
-        skyService = new SkyService();
-    }
-
-    public void OnLoadCompleted(int status) {
-        if (status == 0)
-        {
-            this.Running = true;
-            connector.Start(this.id);
-            /*
-            StartCoroutine(audioService.loadAudioByUrl("https://www.bensound.com/bensound-music/bensound-ukulele.mp3", (id) => {
-                audioService.CreateAudioObjectWithAudioSource(id);
-            }));
-            */
-        }
-    }
-
-    void Start()
-    {
-        if (wasmUrl != null)
-        {
-            Debug.Log("starting " + wasmUrl);
-            connector.Load(id, wasmUrl);
-        }
-    }
-    void Update()
-    {
-      if (Running) {
-        connector.Update(this.id);
-      }
     }
 }

@@ -21,8 +21,8 @@ public class SandboxManager: MonoBehaviour {
      * For debuging.
      * If LOAD_INITIAL_SANDBOX is true, loads WASM file in INITIAL_SANDBOX_WASM_URL and creates a sanbox at start.
      */
-    static private bool LOAD_INITIAL_SANDBOX = false;
-    static private string INITIAL_SANDBOX_WASM_URL = "http://192.168.1.5:8080/915a89d2-93cb-4d90-9c8d-3d8ad80310f0.wasm";
+    static private bool LOAD_INITIAL_SANDBOX = true;
+    static private string INITIAL_SANDBOX_WASM_URL = "http://192.168.1.5:8080/artifacts/5593bdc2-9f28-4d52-848b-d41163f94273.wasm";
 
     public void Start ()
     {

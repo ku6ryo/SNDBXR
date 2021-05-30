@@ -1,9 +1,7 @@
-import { logInt } from "./debug"
-
 export const I32 = 1
 export const F32 = 2
 
-export declare function _callEngine32(p: usize, pOut: usize, unitLength: i32, funcId: i32): void
+export declare function _callEngine32(p: usize, funcId: i32): void
 
 // In AssemblyScript we cannot use type or interface to define structure quickly.
 // So created this class to hold values.
@@ -56,7 +54,7 @@ export function callEngine32(
     offset += 4
   }
 
-  _callEngine32(p, p + offset, i32Len, funcId)
+  _callEngine32(p, funcId)
 
   const outs: ValueContainer32[] = []
   for (let i = 0; i < no; i++) {

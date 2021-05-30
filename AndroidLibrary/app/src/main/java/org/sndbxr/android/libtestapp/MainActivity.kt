@@ -26,17 +26,11 @@ class MainActivity : AppCompatActivity() {
         fetchAndRun()
     }
 
-    companion object {
-        // Used to load the 'native-lib' library on application startup.
-        init {
-            System.loadLibrary("native-lib")
-        }
-    }
-
     private fun fetchAndRun() {
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
-            val url = "http://192.168.1.5:8080/915a89d2-93cb-4d90-9c8d-3d8ad80310f0.wasm"
+			// Change depending on your environment and wasm file.
+            val url = "http://192.168.1.5:8080/artifacts/5593bdc2-9f28-4d52-848b-d41163f94273.wasm"
             val client = OkHttpClient()
             val request = Request.Builder().url(url).build()
             val response = client.newCall(request).execute()

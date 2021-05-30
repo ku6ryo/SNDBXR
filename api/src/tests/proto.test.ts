@@ -19,27 +19,30 @@ test("proto", async () => {
       }
     },
     proto: {
-      _callEngine32: (p, outP, unitLength, funcId) => {
+      _callEngine32: (p, funcId) => {
+        const headerArray = new Int32Array(memory.buffer, p, 2)
+        const numArgs = headerArray[0]
+        const numReturns = headerArray[1]
+
         callPtr = p
-        callUnitLength = unitLength
-        const iArray = new Int32Array(memory.buffer, p, unitLength)
-        const fArray = new Float32Array(memory.buffer, p, unitLength)
-        const ni = iArray[0]
-        const no = iArray[1]
-        const iTypes = iArray.slice(2, 2 + ni)
-        const oTypes = iArray.slice(2 + ni, 2 + ni + no)
+        callUnitLength = 2 + numArgs * 2 + numReturns * 2;
+        const iArray = new Int32Array(memory.buffer, p, callUnitLength)
+        const fArray = new Float32Array(memory.buffer, p, callUnitLength)
+        const iTypes = iArray.slice(2, 2 + numArgs)
+        const oTypes = iArray.slice(2 + numArgs, 2 + numArgs + numReturns)
         const memory32 = new Int32Array(memory.buffer)
-        memory32[outP >> 2] = 300
+        const outP = (p >> 2) + 2 + numArgs * 2 + numReturns
+        memory32[outP] = 300
 
         expect(iTypes[0]).toBe(1)
         expect(iTypes[1]).toBe(2)
         expect(iTypes[2]).toBe(2)
         expect(iTypes[3]).toBe(2)
         expect(oTypes[0]).toBe(1)
-        expect(iArray[2 + ni + no]).toBe(1)
-        expect(Math.round(fArray[2 + ni + no + 1] * 1000) / 1000).toBe(33.7)
-        expect(Math.round(fArray[2 + ni + no + 2] * 1000) / 1000).toBe(2.8)
-        expect(Math.round(fArray[2 + ni + no + 3] * 1000) / 1000).toBe(789.53)
+        expect(iArray[2 + numArgs + numReturns]).toBe(1)
+        expect(Math.round(fArray[2 + numArgs + numReturns + 1] * 1000) / 1000).toBe(33.7)
+        expect(Math.round(fArray[2 + numArgs + numReturns + 2] * 1000) / 1000).toBe(2.8)
+        expect(Math.round(fArray[2 + numArgs + numReturns + 3] * 1000) / 1000).toBe(789.53)
         expect(funcId).toBe(200)
       }
     }

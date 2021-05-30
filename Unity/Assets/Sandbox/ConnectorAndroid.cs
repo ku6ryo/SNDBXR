@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine.Android;
 
@@ -8,11 +7,6 @@ public class ConnectorAndroid : ConnectorAbstract
     private string ANDROID_WASM_SANDBOX_CLASS = "org.sndbxr.android.lib.WasmSandbox";
     private Sandbox sandbox;
     static private string ANDROID_WASM_SANDBOX_CALLBACK_CLASS = "org.sndbxr.android.lib.OnCallEngine32";
-    private int id = -1;
-    private static Sandbox SandboxInstance = null;
-    private static int SandboxNextId = 0;
-    private static IDictionary<int, Sandbox> SandboxIdMap = new Dictionary<int, Sandbox>();
-
     private AndroidJavaObject wasmExecutorAndroidObj = null;
 
     class OnCallEngine32 : AndroidJavaProxy {
@@ -47,17 +41,7 @@ public class ConnectorAndroid : ConnectorAbstract
 
     public ConnectorAndroid(Sandbox sandbox)
     {
-        SandboxInstance = sandbox;
-        SandboxIdMap.Add(SandboxNextId, sandbox);
-        this.id = SandboxNextId;
-        SandboxNextId += 1;
         this.sandbox = sandbox;
-    }
-
-    static Sandbox GetSandbox()
-    {
-        return SandboxInstance;
-        // return SandboxIdMap[id];
     }
 
     public override void Load(int sandboxId, string url)
@@ -73,7 +57,7 @@ public class ConnectorAndroid : ConnectorAbstract
             var wasm = req.downloadHandler.data;
             Debug.Log("WASM fetched: " + wasm.Length);
             var androidObj = new AndroidJavaObject(ANDROID_WASM_SANDBOX_CLASS, wasm);
-            androidObj.Call("setOnCallEngine32", new OnCallEngine32(SandboxIdMap[sandboxId]));
+            androidObj.Call("setOnCallEngine32", new OnCallEngine32(this.sandbox));
             androidObj.Call("run");
             this.wasmExecutorAndroidObj = androidObj;
             this.sandbox.OnLoadCompleted(0);
