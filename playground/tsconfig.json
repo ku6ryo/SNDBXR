@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+    "typeRoots": ["./node_modules/@types", "./@types"],
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true,
+  }
+}

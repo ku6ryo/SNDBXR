@@ -77,3 +77,6 @@ crashlytics-build.properties
 /Assets/VRMShaders.meta
 /Assets/UniGLTF
 /Assets/UniGLTF.meta
+
+/Assets/ExternalDependencyManager
+/Assets/Plugins/Android/org.jetbrains.*

@@ -1,28 +1,26 @@
 import * as path from "path"
 import { loadFromFile } from "../loader"
-import Gate from "../connector/Gate"
+import { Sandbox } from "../connector/Sandbox"
 
-class TestGate extends Gate {
+class TestSandbox extends Sandbox {
+  constructor() {
+    super()
+    this.callEngine_i_i_Map.set(1001, this.createPrimitive.bind(this))
+  }
   logInt(value) {
-    console.log(value)
     expect(value).toBe(100)
   }
-  callEngine_i_i(funcId, i0) {
-    console.log(funcId)
-    expect(funcId).toBe(1001)
-    console.log(i0)
+  createPrimitive(i0) {
     expect(i0).toBe(0)
-    const value = new Uint32Array(1)
-    value[0] = 100
-    return new Uint8Array(value.buffer)
+    return [100]
   }
 }
 
 test("test createPrimitive", async () => {
-  const gate = new TestGate()
+  const sandbox = new TestSandbox()
   await loadFromFile(
     path.join(__dirname, "../../build_test/createPrimitive.wasm"),
-    gate,
+    sandbox,
   )
-  gate.onStart()
+  sandbox.onStart()
 })

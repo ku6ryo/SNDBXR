@@ -3,25 +3,44 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+/**
+ * Controls (creates / removes) sandboxes.
+ */
 public class SandboxManager: MonoBehaviour {
 
+    /**
+     * Counter to generates a unique ID for each sandbox.
+     */
     static int SandboxNextId = 0;
+    /**
+     * Dictionaly to store running sandboxes.
+     */
     static private IDictionary<int, GameObject> SandboxObjMap = new Dictionary<int, GameObject>();
+
+    /**
+     * For debuging.
+     * If LOAD_INITIAL_SANDBOX is true, loads WASM file in INITIAL_SANDBOX_WASM_URL and creates a sanbox at start.
+     */
+    static private bool LOAD_INITIAL_SANDBOX = true;
+    static private string INITIAL_SANDBOX_WASM_URL = "http://192.168.1.5:8080/artifacts/5593bdc2-9f28-4d52-848b-d41163f94273.wasm";
 
     public void Start ()
     {
-        #if UNITY_EDITOR
-        string url = "http://192.168.1.5:8080/artifacts/69df76e4-c13a-434e-940f-cd530da08a13.wasm";
-        CreateSandbox(url);
-        #else
-        #if UNITY_WEBGL
-        ConnectorWebGL.WebGLInit();
-        ConnectOnLoadRequested(OnLoadRequested);
-        ConnectOnDeleteRequested(OnDeleteRequested);
+        // WebGL needs setup to connect JS.
+        #if UNITY_EDITOR && UNITY_WEBGL
+            ConnectorWebGL.WebGLInit();
+            ConnectOnLoadRequested(OnLoadRequested);
+            ConnectOnDeleteRequested(OnDeleteRequested);
         #endif
-        #endif
+        if (LOAD_INITIAL_SANDBOX) {
+            CreateSandbox(INITIAL_SANDBOX_WASM_URL);
+        }
     }
 
+    /**
+     * Creates a sandbox with WASM URL.
+     * @param url WASM file URL.
+     */
     static void CreateSandbox(string url)
     {
         var uuid = System.Guid.NewGuid().ToString();
@@ -35,6 +54,9 @@ public class SandboxManager: MonoBehaviour {
         SandboxNextId += 1;
     }
 
+    /**
+     * Deletes a sandbox by ID.
+     */
     static void DeleteSandbox(int id)
     {
         if (SandboxObjMap.ContainsKey(id))
@@ -44,6 +66,8 @@ public class SandboxManager: MonoBehaviour {
         }
     }
 
+// For WebGL only
+#if UNITY_WEBGL
     delegate void dlgOnLoadRequested(string url);
     [MonoPInvokeCallback(typeof(dlgOnLoadRequested))]
     private static void OnLoadRequested(string url)
@@ -61,4 +85,5 @@ public class SandboxManager: MonoBehaviour {
     }
     [DllImport("__Internal")]
     private static extern int ConnectOnDeleteRequested(dlgOnDeleteRequested ptr);
+#endif
 }

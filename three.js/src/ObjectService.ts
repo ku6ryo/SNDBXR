@@ -27,26 +27,26 @@ export class ObjectService {
     const id = this.nextObjectId
     this.objectMap.set(id, obj)
     this.nextObjectId += 1
-    return id
+    return [id]
   }
 
   setObjectPosition(objectId: number, x: number, y: number, z: number) {
     if (!this.objectMap.has(objectId)) {
-      return 1
+      return [1]
     } else {
       const obj = this.objectMap.get(objectId)
       obj?.position.set(x * UNIT_SIZE, y * UNIT_SIZE, z * UNIT_SIZE)
-      return 0
+      return [0]
     }
   }
 
   setObjectScale(objectId: number, x: number, y: number, z: number) {
     if (!this.objectMap.has(objectId)) {
-      return 1
+      return [1]
     } else {
       const obj = this.objectMap.get(objectId)
       obj?.scale.set(x, y, z)
-      return 0
+      return [0]
     }
   }
 }

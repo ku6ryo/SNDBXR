@@ -13,7 +13,7 @@ import {
 } from "./function_ids"
 import {
   callEngine_i_i,
-  callEngine_i_s,
+  // callEngine_i_s,
   callEngine_i_ifff,
   callEngine_fff_i,
 } from "./gate"
@@ -28,6 +28,7 @@ export enum PrimitiveType {
   SPHERE = 1,
 }
 
+/*
 export function getObjectByName(name: string): Object | null {
   const id = callEngine_i_s(GET_OBJECT_ID_BY_NAME, name)
   if (id === OBJECT_NOT_FOUND_ID) {
@@ -35,12 +36,13 @@ export function getObjectByName(name: string): Object | null {
   } 
   return new Object(id, eventManager)
 }
+*/
 
 /**
  * Creates a primitive object.
  */
 export function createPrimitive(type: PrimitiveType): Object {
-  const id = callEngine_i_i(CREATE_PRIMITIVE_OBJECT, type);
+  const id = callEngine_i_i(CREATE_PRIMITIVE_OBJECT, type)[0].vi32;
   return new Object(id, eventManager);
 }
 
@@ -56,25 +58,25 @@ export class Object {
     }
 
     getPosition(): Vector3 {
-      const value = callEngine_fff_i(GET_OBJECT_POSITION, this.id);
+      const value = callEngine_fff_i(GET_OBJECT_POSITION, this.id).map(v => v.vf32);
       return new Vector3(value[0], value[1], value[2])
     }
 
     setPosition(v: Vector3): i32 {
-      return callEngine_i_ifff(SET_OBJECT_POSITION, this.id, v.x, v.y, v.z)
+      return callEngine_i_ifff(SET_OBJECT_POSITION, this.id, v.x, v.y, v.z)[0].vi32
     }
 
     getScale(v: Vector3): Vector3 {
-      const value: f32[] = callEngine_fff_i(GET_OBJECT_SCALE, this.id);
+      const value: f32[] = callEngine_fff_i(GET_OBJECT_SCALE, this.id).map(v => v.vf32)
       return new Vector3(value[0], value[1], value[2])
     }
 
     setScale(v: Vector3): i32 {
-      return callEngine_i_ifff(SET_OBJECT_SCALE, this.id, v.x, v.y, v.z)
+      return callEngine_i_ifff(SET_OBJECT_SCALE, this.id, v.x, v.y, v.z)[0].vi32
     }
 
     getMaterial(): Material | null {
-        const id = callEngine_i_i(GET_MATERIAL_OF_OBJECT, this.id)
+        const id = callEngine_i_i(GET_MATERIAL_OF_OBJECT, this.id)[0].vi32
         if (id === -1) {
           return null
         }
