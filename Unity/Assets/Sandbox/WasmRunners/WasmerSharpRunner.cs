@@ -101,9 +101,9 @@ namespace Sndbxr {
                         throw new Exception("Unknown arg type");
                     }
                 }
+                var returns = call.GetReturns();
                 for (int i = 0; i < numReturns; i++) {
                     int type = (int) *(iPtr + 2 + numArgs + i * 1);
-                    var returns = call.GetReturns();
                     if (type == FunctionCall.ValuePack.I32) {
                         returns[i] = new FunctionCall.ValuePack(0);
                     } else if (type == FunctionCall.ValuePack.F32) {
@@ -115,7 +115,22 @@ namespace Sndbxr {
                 if (sandbox == null) {
                     throw new Exception("Sandbox is NULL.");
                 }
+
+                // At this step, return values are set in Sandbox logics.
                 sandbox.CallEngine32(call);
+
+                for (int i = 0; i < numReturns; i++) {
+                    var v = returns[i];
+                    var type = v.GetValueType();
+                    if (type == FunctionCall.ValuePack.I32) {
+                        *(iPtr + 2 + numArgs * 2 + 1 + i) = v.GetInt();
+                    } else if (type == FunctionCall.ValuePack.F32) {
+                        *(fPtr + 2 + numArgs * 2 + 1 + i) = v.GetFloat();
+                    } else {
+                        throw new Exception("Unknown arg type");
+                    }
+                }
+
             }
         }
     }
