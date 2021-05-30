@@ -110,9 +110,23 @@ class WasmSandbox constructor(wasmBytes: ByteArray) {
         }
         throw Exception("no session found.")
     }
+	@Keep
+	fun setCallReturnInt(callId: Int, index: Int, value: Int) {
+		val call = callMap[callId]
+		if (call != null) {
+			call.setReturnInt(index, value)
+		}
+	}
+	@Keep
+	fun setCallReturnFloat(callId: Int, index: Int, value: Float) {
+		val call = callMap[callId]
+		if (call != null) {
+			call.setReturnFloat(index, value)
+		}
+	}
 
-    fun setOnCallEngine32(callback: OnCallEngine32) {
-        this.onCallEngine32 = callback
+	fun setOnCallEngine32(callback: OnCallEngine32) {
+		this.onCallEngine32 = callback
     }
 
     class Call32(numArgs: Int, numReturns: Int, private val funcId: Int) {
@@ -120,10 +134,10 @@ class WasmSandbox constructor(wasmBytes: ByteArray) {
         private val argValues: MutableList<ValuePack> = mutableListOf()
 
         init {
-            for (i in 0..numArgs) {
+            for (i in 0..numArgs - 1) {
                 argValues.add(ValuePack())
             }
-            for (i in 0..numReturns) {
+            for (i in 0..numReturns - 1) {
                 returnValues.add(ValuePack())
             }
         }
@@ -131,6 +145,50 @@ class WasmSandbox constructor(wasmBytes: ByteArray) {
         fun getFuncId(): Int {
            return this.funcId
         }
+
+		fun getNumArgs(): Int {
+			return argValues.size;
+		}
+
+		fun getArg(index: Int): ValuePack {
+			val vp = this.argValues[index]
+			if (vp != null) {
+				return vp
+			} else {
+				throw Exception("index out of value range")
+			}
+		}
+
+		fun getReturn(index: Int): ValuePack {
+			val vp = this.returnValues[index]
+			if (vp != null) {
+				return vp
+			} else {
+				throw Exception("index out of value range")
+			}
+		}
+
+		fun getArgType(index: Int): Int {
+			val vp = this.argValues[index]
+			if (vp != null) {
+				return vp.getType()
+			} else {
+				throw Exception("index out of value range")
+			}
+		}
+
+		fun getReturnType(index: Int): Int {
+			val vp = this.returnValues[index]
+			if (vp != null) {
+				return vp.getType()
+			} else {
+				throw Exception("index out of value range")
+			}
+		}
+
+		fun getNumReturns(): Int {
+			return returnValues.size;
+		}
 
         fun setReturnInt(index: Int, value: Int) {
             val vp = this.returnValues[index]
@@ -207,12 +265,19 @@ class WasmSandbox constructor(wasmBytes: ByteArray) {
     class ValuePack {
         private var i32: Int = 0;
         private var f32: Float = 0f;
+		private var type: Int = 0;
+
+		fun getType(): Int {
+			return type
+		}
 
         fun setInt(value: Int) {
+			type = 1
             i32 = value
         }
 
         fun setFloat(value: Float) {
+			type = 2
             f32 = value
         }
 

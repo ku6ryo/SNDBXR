@@ -5,6 +5,9 @@
 #include <iostream>
 #include <sstream>
 
+// Currently, crashes occurring 5 - 10 min after app launch. This needs to be fixed.
+// JNI global reference table overflow (max=51200)global reference table dump
+// https://stackoverflow.com/questions/36143101/why-do-i-need-to-release-global-references-created-in-jni-native-functions/36143581#36143581
 JavaVM* javaVM;
 JNIEnv* jniEnv;
 jclass  activityClz;
@@ -44,6 +47,16 @@ int getCallReturnInt(int callId, int index) {
 float getCallReturnFloat(int callId, int index) {
     jmethodID methodId = jniEnv->GetMethodID(activityClz, "getCallReturnFloat", "(II)F");
     return jniEnv->CallFloatMethod(activityObj, methodId, callId, index);
+}
+
+void setCallReturnInt(int callId, int index, int value) {
+    jmethodID methodId = jniEnv->GetMethodID(activityClz, "setCallReturnInt", "(III)V");
+    return jniEnv->CallVoidMethod(activityObj, methodId, callId, index, value);
+}
+
+void setCallReturnFloat(int callId, int index, float value) {
+    jmethodID methodId = jniEnv->GetMethodID(activityClz, "setCallReturnFloat", "(IIF)V");
+    return jniEnv->CallVoidMethod(activityObj, methodId, callId, index, value);
 }
 
 void callEngine32(int callId) {
@@ -87,6 +100,15 @@ void _callEngine32(void* p, int funcId)
            ss << "," << v;
            setCallArgFloat(callId, i, v);
        }
+    }
+    for (int i = 0; i < numReturns; i++)
+    {
+        int type = *(iPtr + 2 + numArgs + i);
+        if (type == 1) {
+            setCallReturnInt(callId, i, 0);
+        } else if (type == 2) {
+            setCallReturnFloat(callId, i, 0.0);
+        }
     }
     ss << std::endl;
     ss >> str;
