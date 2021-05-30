@@ -74,6 +74,13 @@ namespace Sndbxr {
             */
         }
 
+
+        /**
+         * Memory layout
+         * | i32 (n of args) |  i32 (n of returns) | = 2 x 4 bytes
+         * | i32 (arg type) x n of args | i32 (return type) x n of returns | = 4 x (n of args) + 4 x (n of returns)
+         * | i32 or f32 arg | i32 or f32 return value | = 4 x (n of args) + 4 x (n of returns)
+         */
         private static void CallEngine32(InstanceContext ctx, int ptrOffset, int funcId)
         {
             unsafe {
