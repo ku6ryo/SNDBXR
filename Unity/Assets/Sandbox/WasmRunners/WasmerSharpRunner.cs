@@ -91,19 +91,19 @@ namespace Sndbxr {
                 var numReturns = (int) *(iPtr + 1);
                 var call = new FunctionCall(funcId, numArgs, numReturns);
                 for (int i = 0; i < numArgs; i++) {
-                    int type = (int) *(iPtr + 2 + i * 1);
+                    int type = (int) *(iPtr + 2 + i);
                     var args = call.GetArgs();
                     if (type == FunctionCall.ValuePack.I32) {
-                        args[i] = new FunctionCall.ValuePack((int) *(iPtr + 2 + numArgs * 1 + 1 + i));
+                        args[i] = new FunctionCall.ValuePack((int) *(iPtr + 2 + numArgs + 1 + i));
                     } else if (type == FunctionCall.ValuePack.F32) {
-                        args[i] = new FunctionCall.ValuePack((float) *(fPtr + 2 + numArgs * 1 + 1 + i));
+                        args[i] = new FunctionCall.ValuePack((float) *(fPtr + 2 + numArgs + 1 + i));
                     } else {
                         throw new Exception("Unknown arg type");
                     }
                 }
                 var returns = call.GetReturns();
                 for (int i = 0; i < numReturns; i++) {
-                    int type = (int) *(iPtr + 2 + numArgs + i * 1);
+                    int type = (int) *(iPtr + 2 + numArgs + i);
                     if (type == FunctionCall.ValuePack.I32) {
                         returns[i] = new FunctionCall.ValuePack(0);
                     } else if (type == FunctionCall.ValuePack.F32) {
@@ -123,14 +123,13 @@ namespace Sndbxr {
                     var v = returns[i];
                     var type = v.GetValueType();
                     if (type == FunctionCall.ValuePack.I32) {
-                        *(iPtr + 2 + numArgs * 2 + 1 + i) = v.GetInt();
+                        *(iPtr + 2 + numArgs * 2 + numReturns + i) = v.GetInt();
                     } else if (type == FunctionCall.ValuePack.F32) {
-                        *(fPtr + 2 + numArgs * 2 + 1 + i) = v.GetFloat();
+                        *(fPtr + 2 + numArgs * 2 + numReturns + i) = v.GetFloat();
                     } else {
                         throw new Exception("Unknown arg type");
                     }
                 }
-
             }
         }
     }

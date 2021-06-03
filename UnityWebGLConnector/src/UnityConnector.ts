@@ -1,5 +1,4 @@
-import { Connector } from "./Connector"
-import GateUnityImplementation from "./GateUnityImplementation"
+import { WasmRunner } from "./WasmRunner"
 export interface UnityModule {
   HEAP8: Int8Array
   HEAP16: Int16Array
@@ -10,6 +9,7 @@ export interface UnityModule {
   HEAPU16: Uint16Array
   HEAPU32: Uint32Array
   _malloc: (len: number) => number
+  dynCall_viii: any
   dynCall_vii: any
   dynCall_vi: any
   dynCall_iii: any
@@ -25,35 +25,51 @@ export interface UnityInstance {
   SetFullscreen: (fullscreen: boolean) => void
 }
 
-export class UnityConnector extends Connector {
+export class UnityConnector {
 
   unityInstance: UnityInstance
   unityPointers: any
+  runnerMap = new Map<number, WasmRunner>()
 
   constructor (unityInstance: UnityInstance, unityPointers: any) {
-    super()
     this.unityInstance = unityInstance
     this.unityPointers = unityPointers
   }
 
-  async load (sandboxId: number, url: string) {
+  registerRunner(sandboxId: number, runner: WasmRunner) {
+    this.runnerMap.set(sandboxId, runner)
+  }
+
+  unregisterRunner(sandboxId: number) {
+    this.runnerMap.delete(sandboxId)
+  }
+
+  getRunner(sandboxId: number): WasmRunner {
+    if (!this.runnerMap.has(sandboxId)) {
+      throw new Error("get does not exist for sandbox: " + sandboxId)
+    }
+    return this.runnerMap.get(sandboxId)!
+  }
+
+  onStart (sandboxId: number) {
     console.log(sandboxId)
-    console.log(url)
+    const runner = this.getRunner(sandboxId)
+    runner.onStart()
+  }
+
+  onUpdate (sandboxId: number) {
+    const runner = this.getRunner(sandboxId)
+    runner.onUpdate()
+  }
+
+  async load (sandboxId: number, url: string) {
     try {
       const res = await fetch(url)
       const blob  = await res.blob()
       const buf = await blob.arrayBuffer()
-
-      const gate = new GateUnityImplementation(this)
-      const source = await WebAssembly.instantiate(buf, {
-        env: {
-          abort: gate.onAbort.bind(gate),
-        },
-        gate: gate.createImport(),
-      })
-      gate.setWasm(source.instance)
-      this.registerGate(sandboxId, gate)
-      // return source.instance
+      const runner = new WasmRunner(this, sandboxId)
+      await runner.createWasm(buf)
+      this.registerRunner(sandboxId, runner)
       this.unityInstance.Module.dynCall_vii(this.unityPointers.onLoadCompleted, sandboxId, 0)
     } catch(e) {
       console.log(e)
@@ -70,11 +86,11 @@ export class UnityConnector extends Connector {
 
   requestDelete(sandboxId: number) {
     this.unityInstance.Module.dynCall_vi(this.unityPointers.onDeleteRequested, sandboxId)
-    this.unregisterGate(sandboxId)
+    this.unregisterRunner(sandboxId)
   }
 
   requestDeleteAll() {
-    this.gateMap.forEach((_, sandboxId) => {
+    this.runnerMap.forEach((_, sandboxId) => {
       this.requestDelete(sandboxId)
     })
   }
