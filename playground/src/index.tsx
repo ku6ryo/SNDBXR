@@ -5,9 +5,13 @@ import "sanitize.css/sanitize.css"
 import style from "./style.module.scss"
 import { editor as monacoEditor } from "monaco-editor"
 import { VscDebugStart } from "react-icons/vsc"
+import { IoLogoGithub } from "react-icons/io"
+import { AiFillCaretDown, AiFillDelete } from "react-icons/ai"
 import { apiClient } from "./global"
 import { initialCode } from "./constants"
 import { v4 as uuid } from "uuid"
+import { Button, SelectMenu, SelectMenuItem } from "evergreen-ui"
+import { Spinner } from "evergreen-ui"
 
 
 const LEFT_PANEL_DEFAULT_WIDTH = 500;
@@ -20,6 +24,11 @@ type LogLine = {
 
 const logLines: LogLine[] = []
 
+enum Player {
+  UNITY = "UNITY",
+  THREE = "THREE",
+}
+
 const App = () => {
   const editorContainerRef = useRef<HTMLDivElement>(null)
   const playerIFrameRef = useRef<HTMLIFrameElement | null>(null)
@@ -28,6 +37,8 @@ const App = () => {
   const [separatorMoving, setSeparatorMoving] = useState(false)
   const [editor, setMonacoEditor] = useState<monacoEditor.IStandaloneCodeEditor | null>(null)
   const [logUpdateTime, setLogUpdateTime] = useState<number>(0)
+  const [compiling, setCompiling] = useState(false)
+  const [player, setPlayer] = useState(Player.THREE)
   useEffect(() => {
     if (editorContainerRef.current) {
       monacoEditor.setTheme("vs-dark")
@@ -43,15 +54,12 @@ const App = () => {
   const onSeparatorClick =  (e: React.MouseEvent<HTMLDivElement>) => {
     setSeparatorMoving(true)
   }
-  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const onSeparatorMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (separatorMoving) {
       setLeftPanelWidth(leftPanelWidth + e.movementX)
     }
   }
-  const onMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-    setSeparatorMoving(false)
-  }
-  const onMouseLeave = () => {
+  const stopSeparatorMoving = () => {
     setSeparatorMoving(false)
   }
   const addLog = (line: string) => {
@@ -63,6 +71,7 @@ const App = () => {
   }
   const onPlayClick = async () => {
     if (editor) {
+      setCompiling(true)
       addLog("Compiling ...")
       const code = editor.getModel()?.getValue()
       if (code) {
@@ -70,27 +79,70 @@ const App = () => {
           const res = await apiClient.compile(code)
           addLog(res.wasm.path)
           addLog(res.wat.path)
-          ;(playerIFrameRef.current?.contentWindow! as any).connector.requestLoad("http://localhost:8080" + res.wasm.path)
+          ;(playerIFrameRef.current?.contentWindow! as any).createSandbox("http://localhost:8080" + res.wasm.path)
         } catch (e) {
           addLog(e.message)
         }
+        setCompiling(false)
       } else {
         addLog("code empty")
       }
     }
   }
+  const onRemoveAllClick = () => {
+    ;(playerIFrameRef.current?.contentWindow! as any).deleteAllSandboxes()
+  }
+  const onPlayerSelect = (item: SelectMenuItem) => {
+    const player = item.value as Player
+    setPlayer(player)
+  }
   return (
     <div>
       <div className={style.header}>
-        <div className={style.playButton} onClick={onPlayClick}>
-          <VscDebugStart/>
-          <span>PLAY</span>
+        <div className={style.operationButtons}>
+          <Button
+            iconBefore={compiling ? Spinner : VscDebugStart}
+            onClick={onPlayClick}
+          >Run</Button>
+          <Button
+            iconBefore={AiFillDelete}
+            onClick={onRemoveAllClick}
+          >Remove Sandboxes</Button>
+          <SelectMenu
+            title="Players"
+            hasFilter={false}
+            options={[
+              {
+                label: 'Unity',
+                value: 'UNITY',
+              },
+              {
+                label: 'Three.js',
+                value: 'THREE',
+              },
+            ]}
+            onSelect={onPlayerSelect}
+          >
+            <Button
+              iconAfter={AiFillCaretDown}
+            >{player == Player.UNITY ? (
+              "Unity"
+            ): (
+              "Three.js"
+            )}</Button>
+          </SelectMenu>
+        </div>
+        <div className={style.github}>
+          <a href="https://github.com/ku6ryo/SNDBXR" target="_blank">
+            <Button iconBefore={IoLogoGithub}>Github</Button>
+          </a>
         </div>
       </div>
-      <div className={style.body}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseLeave}
+      <div
+        className={style.body}
+        onMouseMove={onSeparatorMove}
+        onMouseUp={stopSeparatorMoving}
+        onMouseLeave={stopSeparatorMoving}
       >
         <div
           className={style.leftPanel}
@@ -124,7 +176,8 @@ const App = () => {
               })}
             </div>
           </div>
-          <div className={style.separator}
+          <div
+            className={style.separator}
             onMouseDown={onSeparatorClick}
           />
         </div>
@@ -135,7 +188,10 @@ const App = () => {
             width: `calc(100% - ${leftPanelWidth}px)`,
           }}
         >
-          <iframe ref={playerIFrameRef} src="http://localhost:8080/three"></iframe>
+          <iframe ref={playerIFrameRef} src={`/player/${player.toLocaleLowerCase()}`}></iframe>
+          {separatorMoving && (
+            <div className={style.playerCover}/>
+          )}
         </div>
       </div>
     </div>

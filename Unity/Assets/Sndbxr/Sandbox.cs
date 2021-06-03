@@ -34,7 +34,7 @@ namespace Sndbxr
         const int SANDBOX_ON_GLTF_LOADED = 10010;
         const int SANDBOX_ON_SKY_LOADED = 10020;
 
-        int id = -1;
+        public int id = -1;
         string wasmUrl = null;
         public void SetLoadParameters(int sandboxId, string url)
         {

@@ -66,9 +66,9 @@ export class Three {
     }
   }
 
-  requestDeleteSandbox(sandboxId: number) {
+  deleteSandbox(sandboxId: number) {
   }
 
-  requestDeleteAllSandboxes() {
+  deleteAllSandboxes() {
   }
 }

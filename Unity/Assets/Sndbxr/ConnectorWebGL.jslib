@@ -3,7 +3,7 @@ var ConnectorPlugin = {
 
   JsInit: function () {
     window.unityPointers = {};
-    window.connector = new Connector(window.unityInstance, window.unityPointers)
+    window.connector.onUnityLoad(window.unityInstance, window.unityPointers)
   },
   JsLoad: function (id, urlPtr) {
     if (window.connector) {

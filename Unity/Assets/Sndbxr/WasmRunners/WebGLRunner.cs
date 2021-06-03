@@ -2,12 +2,13 @@
 using AOT;
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Sndbxr
 {
     public class WebGLRunner : AbstractRunner
     {
-        private static Sandbox sandbox = null;
+        static private IDictionary<int, Sandbox> SandboxMap = new Dictionary<int, Sandbox>();
         
         [DllImport("__Internal")]
         private static extern int JsInit();
@@ -24,6 +25,11 @@ namespace Sndbxr
 
         [DllImport("__Internal")]
         private static extern void ConnectCallEngine32(dlgCallEngine32 ptr);
+
+        public WebGLRunner(Sandbox sandbox)
+        {
+            SandboxMap.Add(sandbox.id, sandbox);
+        }
         public static void WebGLInit()
         {
             JsInit();
@@ -31,9 +37,12 @@ namespace Sndbxr
             ConnectCallEngine32(CallEngine32);
         }
 
-
         static Sandbox GetSandbox(int sandboxId)
         {
+            var sandbox = SandboxMap[sandboxId];
+            if (sandbox == null) {
+                throw new Exception("No sandbox found for ID: " + sandboxId);
+            }
             return sandbox;
         }
 

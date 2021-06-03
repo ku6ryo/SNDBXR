@@ -25,15 +25,34 @@ export interface UnityInstance {
   SetFullscreen: (fullscreen: boolean) => void
 }
 
+/**
+ * Connects Unity and WasmRunner.
+ */
 export class UnityConnector {
 
-  unityInstance: UnityInstance
-  unityPointers: any
-  runnerMap = new Map<number, WasmRunner>()
+  private unityInstance: UnityInstance | null = null
+  unityPointers: any = null
+  private runnerMap = new Map<number, WasmRunner>()
 
-  constructor (unityInstance: UnityInstance, unityPointers: any) {
-    this.unityInstance = unityInstance
-    this.unityPointers = unityPointers
+  /**
+   * Called when Unity WebGL has been loaded and starts.
+   * @param instance Unity instance 
+   * @param pointers Pointers of Unity static functions
+   */
+  onUnityLoad(instance: UnityInstance, pointers: any) {
+    this.unityInstance = instance
+    this.unityPointers = pointers
+  }
+
+  getUnityInstance() {
+    if (!this.unityInstance) {
+      throw new Error("Unity instance is not set.")
+    }
+    return this.unityInstance
+  }
+
+  getUnityModule() {
+    return this.getUnityInstance().Module
   }
 
   registerRunner(sandboxId: number, runner: WasmRunner) {
@@ -63,6 +82,9 @@ export class UnityConnector {
   }
 
   async load (sandboxId: number, url: string) {
+    if (!this.unityInstance) {
+      throw new Error("Unity instance is not set.")
+    }
     try {
       const res = await fetch(url)
       const blob  = await res.blob()
@@ -70,25 +92,31 @@ export class UnityConnector {
       const runner = new WasmRunner(this, sandboxId)
       await runner.createWasm(buf)
       this.registerRunner(sandboxId, runner)
-      this.unityInstance.Module.dynCall_vii(this.unityPointers.onLoadCompleted, sandboxId, 0)
+      this.getUnityModule().dynCall_vii(this.unityPointers.onLoadCompleted, sandboxId, 0)
     } catch(e) {
       console.log(e)
-      this.unityInstance.Module.dynCall_vii(this.unityPointers.onLoadCompleted, sandboxId, 1)
+      this.getUnityModule().dynCall_vii(this.unityPointers.onLoadCompleted, sandboxId, 1)
     }
   }
 
   requestLoad(url: string) {
     const strArray = (new TextEncoder()).encode(url + String.fromCharCode(0))
-    const uPtr = this.unityInstance.Module._malloc(strArray.length)
-    this.unityInstance.Module.HEAP8.set(strArray, uPtr)
-    this.unityInstance.Module.dynCall_vi(this.unityPointers.onLoadRequested, uPtr)
+    const uPtr = this.getUnityModule()._malloc(strArray.length)
+    this.getUnityModule().HEAP8.set(strArray, uPtr)
+    this.getUnityModule().dynCall_vi(this.unityPointers.onLoadRequested, uPtr)
   }
 
+  /**
+   * Requests to delete all sandboxes.
+   */
   requestDelete(sandboxId: number) {
-    this.unityInstance.Module.dynCall_vi(this.unityPointers.onDeleteRequested, sandboxId)
+    this.getUnityModule().dynCall_vi(this.unityPointers.onDeleteRequested, sandboxId)
     this.unregisterRunner(sandboxId)
   }
 
+  /**
+   * Requests to delete a sandbox.
+   */
   requestDeleteAll() {
     this.runnerMap.forEach((_, sandboxId) => {
       this.requestDelete(sandboxId)

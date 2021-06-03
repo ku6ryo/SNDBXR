@@ -38,14 +38,6 @@ export class WasmRunner {
     throw new Error('No memory export.')
   }
 
-  getUnityInstance() {
-    return this.connector.unityInstance
-  }
-
-  getUnityModule() {
-    return this.getUnityInstance().Module
-  }
-
   getUnityPointers() {
     return this.connector.unityPointers
   }
@@ -79,7 +71,7 @@ export class WasmRunner {
   }
 
   _callEngine32(p: number, funcId: number) {
-    const unityModule = this.getUnityModule()
+    const unityModule = this.connector.getUnityModule()
     const header = new Uint32Array(this.getWasmMemory().buffer.slice(p, p + 2 * 4))
     const numArgs = header[0]
     const numReturns = header[1]
@@ -87,21 +79,21 @@ export class WasmRunner {
     const totalBytes = total32Units * 4
     const uPtr = unityModule._malloc(totalBytes)
     const wData = new Uint8Array(this.getWasmMemory().buffer.slice(p, p + totalBytes))
-    this.getUnityModule().HEAPU8.set(wData, uPtr)
+    this.connector.getUnityModule().HEAPU8.set(wData, uPtr)
     unityModule.dynCall_viii(this.getUnityPointers().callEngine32, uPtr, funcId, this.sandboxId)
 
     const wBuffer = new Uint32Array(this.getWasmMemory().buffer)
     const wPtrReturn = (p >> 2) + 2 + numArgs * 2 + numReturns
     const uPtrReturn = (uPtr >> 2) + 2 + numArgs * 2 + numReturns
     for(let i = 0; i < numReturns; i++) {
-      wBuffer[wPtrReturn] = this.getUnityModule().HEAPU32[uPtrReturn]
+      wBuffer[wPtrReturn] = this.connector.getUnityModule().HEAPU32[uPtrReturn]
     }
   }
 
   passStringFromWasmToUnity(wasmPtr: number, len: number) {
     const strArray = new Uint8Array(this.getWasmMemory().buffer.slice(wasmPtr, wasmPtr + len))
-    const uPtr = this.getUnityModule()._malloc(len)
-    this.getUnityModule().HEAP8.set(strArray, uPtr)
+    const uPtr = this.connector.getUnityModule()._malloc(len)
+    this.connector.getUnityModule().HEAP8.set(strArray, uPtr)
     return uPtr
   }
   //return new Uint8Array(this.getUnityModule().HEAP32.buffer.slice(ptr32, ptr32 + 2))
