@@ -89,6 +89,13 @@ export class WasmRunner {
     const wData = new Uint8Array(this.getWasmMemory().buffer.slice(p, p + totalBytes))
     this.getUnityModule().HEAPU8.set(wData, uPtr)
     unityModule.dynCall_viii(this.getUnityPointers().callEngine32, uPtr, funcId, this.sandboxId)
+
+    const wBuffer = new Uint32Array(this.getWasmMemory().buffer)
+    const wPtrReturn = (p >> 2) + 2 + numArgs * 2 + numReturns
+    const uPtrReturn = (uPtr >> 2) + 2 + numArgs * 2 + numReturns
+    for(let i = 0; i < numReturns; i++) {
+      wBuffer[wPtrReturn] = this.getUnityModule().HEAPU32[uPtrReturn]
+    }
   }
 
   passStringFromWasmToUnity(wasmPtr: number, len: number) {
