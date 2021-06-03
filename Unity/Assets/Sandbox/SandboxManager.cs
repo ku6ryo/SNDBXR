@@ -30,7 +30,7 @@ namespace Sndbxr
         {
             // WebGL needs setup to connect JS.
             #if !UNITY_EDITOR && UNITY_WEBGL
-                ConnectorWebGL.WebGLInit();
+                WebGLRunner.WebGLInit();
                 ConnectOnLoadRequested(OnLoadRequested);
                 ConnectOnDeleteRequested(OnDeleteRequested);
             #endif
@@ -70,6 +70,7 @@ namespace Sndbxr
 
     // For WebGL only
     #if UNITY_WEBGL
+
         delegate void dlgOnLoadRequested(string url);
         [MonoPInvokeCallback(typeof(dlgOnLoadRequested))]
         private static void OnLoadRequested(string url)
