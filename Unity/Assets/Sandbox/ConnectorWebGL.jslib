@@ -40,23 +40,8 @@ var ConnectorPlugin = {
   ConnectOnLoadCompleted: function(ptr) {
     window.unityPointers.onLoadCompleted = ptr;
   },
-  ConnectExecI_I: function(ptr) {
-    window.unityPointers.execI_I = ptr;
-  },
-  ConnectExecI_II: function(ptr) {
-    window.unityPointers.execI_II = ptr;
-  },
-  ConnectExecI_S: function(ptr) {
-    window.unityPointers.execI_S = ptr;
-  },
-  ConnectExecI_IV3: function(ptr) {
-    window.unityPointers.execI_IV3 = ptr;
-  },
-  ConnectExecI_IV4: function(ptr) {
-    window.unityPointers.execI_IV4 = ptr;
-  },
-  ConnectExecV3_I: function(ptr) {
-    window.unityPointers.execV3_I = ptr;
+  ConnectCallEngine32: function(ptr) {
+    window.unityPointers.callEngine32 = ptr;
   },
 };
 
