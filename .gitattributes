@@ -11,4 +11,4 @@
 *.wasm binary
 
 # Unity
-.data
+.data binary
