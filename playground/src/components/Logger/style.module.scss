@@ -1,0 +1,21 @@
+.frame {
+  color: white;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  position: relative;
+  overflow-y: scroll;
+  height: 100%;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .log {
+    border-bottom: 1px solid #222;
+    font-size: 12px;
+    line-height: 1em;
+    padding: 2px 8px;
+  }
+}

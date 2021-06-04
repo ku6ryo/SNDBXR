@@ -2,11 +2,14 @@ const path = require("path")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin")
 
+const buildMode = process.env.NODE_ENV === "production" ? "production" : "development"
+
 module.exports = {
-  mode: "development",
+  mode: buildMode,
   entry: "./src/index.tsx",
   output: {
     path: `${__dirname}/dist`,
+    filename: "[contenthash].bundle.js",
   },
   target: "web",
   node: {

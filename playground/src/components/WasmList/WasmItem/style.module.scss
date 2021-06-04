@@ -1,0 +1,52 @@
+.frame {
+  padding: 8px;
+  position: relative;
+  border-bottom: 1px dotted #777;
+}
+
+.date {
+  display: inline-block;
+  color: white;
+  font-size: 10px;
+  padding: 4px 4px;
+  background-color: #444;
+  border-radius: 2px;
+  line-height: 1em;
+}
+
+.copyButtons {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+
+  .button {
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1em;
+    margin-right: 8px;
+    padding: 4px;
+    transition: .4s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, .4);
+    }
+
+    &.run {
+      svg {
+        margin-right: 4px;
+      }
+    }
+
+    &.copy {
+      span {
+        margin-right: 4px;
+      }
+
+      svg {
+        stroke: white;
+      }
+    }
+  }
+}
