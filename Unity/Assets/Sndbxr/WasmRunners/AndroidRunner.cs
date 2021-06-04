@@ -15,7 +15,7 @@ namespace Sndbxr
 
         class OnCallEngine32 : AndroidJavaProxy {
             private Sandbox sandbox;
-            public OnCallEngine32(Sandbox sandbox) : base(ConnectorAndroid.ANDROID_WASM_SANDBOX_CALLBACK_CLASS) {
+            public OnCallEngine32(Sandbox sandbox) : base(AndroidRunner.ANDROID_WASM_SANDBOX_CALLBACK_CLASS) {
                 this.sandbox = sandbox;
             }
 
@@ -84,7 +84,7 @@ namespace Sndbxr
             }
         }
 
-        public ConnectorAndroid(Sandbox sandbox)
+        public AndroidRunner(Sandbox sandbox)
         {
             this.sandbox = sandbox;
         }
@@ -116,12 +116,6 @@ namespace Sndbxr
         public override void Update(int sandboxId)
         {
             this.wasmExecutorAndroidObj.Call("update");
-        }
-        public override void SandboxExecV_II(int funcId, int i0, int i1)
-        {
-        }
-        public override void SandboxExecV_I(int funcId, int loaderId)
-        {
         }
     }
 }

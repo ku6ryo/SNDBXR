@@ -1,1 +1,14 @@
 * text eol=lf
+
+# Image files
+*.jpg binary
+*.png binary
+
+# Android
+*.aar binary
+
+# WASM files
+*.wasm binary
+
+# Unity
+.data

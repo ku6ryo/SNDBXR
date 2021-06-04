@@ -24,7 +24,7 @@ namespace Sndbxr
         * If LOAD_INITIAL_SANDBOX is true, loads WASM file in INITIAL_SANDBOX_WASM_URL and creates a sanbox at start.
         */
         static private bool LOAD_INITIAL_SANDBOX = true;
-        static private string INITIAL_SANDBOX_WASM_URL = "http://192.168.1.5:8080/artifacts/5593bdc2-9f28-4d52-848b-d41163f94273.wasm";
+        static private string INITIAL_SANDBOX_WASM_URL = "http://192.168.1.5:8080/artifacts/468c176a-26d1-43ff-bbc7-2579bfd3c63e.wasm";
 
         public void Start ()
         {

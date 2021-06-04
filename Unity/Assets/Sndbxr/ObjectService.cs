@@ -17,24 +17,25 @@ public class ObjectService
     IDictionary<int, UnityAction<BaseEventData>> EventListenerMap = new Dictionary<int, UnityAction<BaseEventData>>();
     // key: object id , value : listner id
     IDictionary<int, int> ObjectEventListenerMap = new Dictionary<int, int>();
-    IDictionary<int, Material> MaterialMap = new Dictionary<int, Material>();
-    IDictionary<string, int> MaterialNameMap = new Dictionary<string, int>();
-
-    int MaterialCount = 0;
 
     int ObjectNextId = 0;
-    int EventListenerCount = 0;
+    int EventListenerNextId = 0;
+    GameObject SandboxGameObj = null;
 
-    string sandboxName = null;
+    MaterialService MaterialService = null;
 
-    public ObjectService(string sandboxName)
+    public ObjectService(GameObject sandboxGameObj, MaterialService materialService)
     {
-        this.sandboxName = sandboxName;
+        this.SandboxGameObj = sandboxGameObj;
+        this.MaterialService = materialService;
     }
 
     public GameObject GetSandboxGameObject()
     {
-        return GameObject.Find(this.sandboxName);
+        if (SandboxGameObj == null) {
+            throw new Exception("No sandbox GameObject");
+        }
+        return this.SandboxGameObj;
     }
 
     public int RegisterGameObject(GameObject obj)
@@ -53,6 +54,8 @@ public class ObjectService
         }
         var obj = GameObject.CreatePrimitive(type);
         obj.transform.SetParent(GetSandboxGameObject().transform);
+        var renderer = obj.GetComponent<Renderer>();
+        MaterialService.RegisterMaterial(renderer.material);
         return RegisterGameObject(obj);
     }
 
@@ -127,10 +130,10 @@ public class ObjectService
             };
             entry.callback.AddListener(callback);
             trigger.triggers.Add(entry);
-            var id = EventListenerCount;
+            var id = EventListenerNextId;
             EventListenerMap.Add(id, callback);
             ObjectEventListenerMap.Add(objectId, id);
-            EventListenerCount += 1;
+            EventListenerNextId += 1;
             return id;
         } else {
             return -1;
@@ -141,45 +144,8 @@ public class ObjectService
     {
         GameObject obj = ObjectMap[objectId];
         if (obj) {
-          var renderer = obj.GetComponent<Renderer>();
-          var material = renderer.material;
-          var known = MaterialNameMap.ContainsKey(material.name);
-          if (known) {
-            return MaterialNameMap[material.name];
-          } else {
-            var id = MaterialCount;
-            MaterialMap.Add(id, material);
-            MaterialNameMap.Add(material.name, id);
-            MaterialCount += 1;
-            return id;
-          }
-        } else {
-          return -1;
-        }
-    }
-    public int GetMaterialByName(string name) 
-    {
-        if (MaterialNameMap.ContainsKey(name)) {
-            return MaterialNameMap[name];
-        }
-        Material material = (Material) Resources.Load(name, typeof(Material));
-        if (material) {
-          var id = MaterialCount;
-          MaterialMap.Add(id, material);
-          MaterialNameMap.Add(name, id);
-          MaterialCount += 1;
-          return id;
-        } else {
-          return -1;
-        }
-    }
-
-    public int SetMaterialColor(int materialId, float r, float g, float b, float a)
-    {
-        var material = MaterialMap[materialId];
-        if (material) {
-            material.color = new Color(r, g, b, a);
-            return 1;
+            var renderer = obj.GetComponent<Renderer>();
+            return MaterialService.GetMaterialId(renderer.material);
         } else {
             return -1;
         }

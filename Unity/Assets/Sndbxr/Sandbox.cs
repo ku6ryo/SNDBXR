@@ -5,14 +5,14 @@ namespace Sndbxr
     public class Sandbox : MonoBehaviour
     {
 
-        AbstractRunner runner = null;
-
+        AbstractRunner Runner = null;
         bool Running = false;
 
-        ObjectService objectService = null;
-        AudioService audioService = null;
-        GltfService gltfService = null;
-        SkyService skyService = null;
+        ObjectService ObjectService = null;
+        AudioService AudioService = null;
+        GltfService GltfService = null;
+        SkyService SkyService = null;
+        MaterialService MaterialService = null;
 
         const int GET_OBJECT_ID_BY_NAME = 1000;
         const int CREATE_PRIMITIVE_OBJECT = 1001;
@@ -52,6 +52,9 @@ namespace Sndbxr
                 case "i_ifff":
                     CallEngine32_i_ifff(call);
                     break;
+                case "i_iffff":
+                    CallEngine32_i_iffff(call);
+                    break;
                 default:
                     break;
             }
@@ -65,10 +68,10 @@ namespace Sndbxr
             switch(funcId)
             {
                 case GET_MATERIAL_OF_OBJECT:
-                    ri0 = objectService.GetMaterialByObjectId(ai0);
+                    ri0 = ObjectService.GetMaterialByObjectId(ai0);
                     break;
                 case CREATE_PRIMITIVE_OBJECT:
-                    ri0 = objectService.CreatePrimitiveObject((PrimitiveTypeEnum) ai0);
+                    ri0 = ObjectService.CreatePrimitiveObject((PrimitiveTypeEnum) ai0);
                     break;
                 default:
                     Debug.LogWarning("No function to match. " + funcId);
@@ -88,10 +91,31 @@ namespace Sndbxr
             switch(funcId)
             {
                 case SET_OBJECT_POSITION:
-                    ri0 = objectService.SetObjectPosition(ai0, new Vector3(af0, af1, af2));
+                    ri0 = ObjectService.SetObjectPosition(ai0, new Vector3(af0, af1, af2));
                     break;
                 case SET_OBJECT_SCALE:
-                    ri0 = objectService.SetObjectScale(ai0, new Vector3(af0, af1, af2));
+                    ri0 = ObjectService.SetObjectScale(ai0, new Vector3(af0, af1, af2));
+                    break;
+                default:
+                    Debug.LogWarning("No function to match. " + funcId);
+                    // throw new System.Exception("No function to match");
+                    break;
+            }
+            call.GetReturns()[0].SetInt(ri0);
+        }
+        public void CallEngine32_i_iffff(FunctionCall call)
+        {
+            var funcId = call.GetFuncId();
+            var ai0 = call.GetArgs()[0].GetInt();
+            var af0 = call.GetArgs()[1].GetFloat();
+            var af1 = call.GetArgs()[2].GetFloat();
+            var af2 = call.GetArgs()[3].GetFloat();
+            var af3 = call.GetArgs()[4].GetFloat();
+            var ri0 = 0;
+            switch(funcId)
+            {
+                case SET_MATERIAL_COLOR:
+                    ri0 = MaterialService.SetMaterialColor(ai0, af0, af1, af2, af3);
                     break;
                 default:
                     Debug.LogWarning("No function to match. " + funcId);
@@ -109,16 +133,20 @@ namespace Sndbxr
         {
             #if UNITY_EDITOR
             #elif UNITY_WEBGL
-            runner = new WebGLRunner(this);
+            Runner = new WebGLRunner(this);
             #elif UNITY_ANDROID
-            runner = new AndroidRunner(this);
+            Runner = new AndroidRunner(this);
             #else
-            runner = new DummyRunner();
+            Runner = new DummyRunner();
             #endif
-            objectService = new ObjectService(this.gameObject.name);
-            audioService = new AudioService(objectService);
-            gltfService = new GltfService(objectService);
-            skyService = new SkyService();
+            MaterialService = new MaterialService();
+            ObjectService = new ObjectService(
+                this.gameObject,
+                MaterialService
+            );
+            AudioService = new AudioService(ObjectService);
+            GltfService = new GltfService(ObjectService);
+            SkyService = new SkyService();
         }
 
         public void OnLoadCompleted(int status) {
@@ -128,8 +156,8 @@ namespace Sndbxr
                 #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
                 WasmerSharpRunner.Start();
                 #endif
-                if (runner != null) {
-                    runner.Start(this.id);
+                if (Runner != null) {
+                    Runner.Start(this.id);
                 }
             }
         }
@@ -142,8 +170,8 @@ namespace Sndbxr
                 #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
                 WasmerSharpRunner.Load(this, wasmUrl);
                 #endif
-                if (runner != null) {
-                    runner.Load(id, wasmUrl);
+                if (Runner != null) {
+                    Runner.Load(id, wasmUrl);
                 }
             }
         }
@@ -153,8 +181,8 @@ namespace Sndbxr
                 #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
                 WasmerSharpRunner.Update();
                 #endif
-                if (runner != null) {
-                    runner.Update(this.id);
+                if (Runner != null) {
+                    Runner.Update(this.id);
                 }
             }
         }
@@ -162,23 +190,12 @@ namespace Sndbxr
 
     ///////////////// The followings are legacy code. /////////////////////////
 
-        public int ExecI_I(int funcId, int i0) {
-            switch(funcId)
-            {
-                case GET_MATERIAL_OF_OBJECT:
-                    return objectService.GetMaterialByObjectId(i0);
-                case CREATE_PRIMITIVE_OBJECT:
-                    return objectService.CreatePrimitiveObject((PrimitiveTypeEnum) i0);
-                default:
-                    throw new System.Exception("No function to match");
-            }
-        }
         public int ExecI_II(int funcId, int i0, int i1)
         {
             switch(funcId)
             {
                 case SET_OBJECT_EVENT_LISTENER:
-                    return objectService.SetObjectEventListener(i0, i1, () => {
+                    return ObjectService.SetObjectEventListener(i0, i1, () => {
                         // connector.SandboxExecV_II(SANDBOX_ON_OBJECT_EVENT, i1, i0);
                     });
                 default:
@@ -190,39 +207,15 @@ namespace Sndbxr
             switch(funcId)
             {
                 case GET_OBJECT_ID_BY_NAME:
-                    return objectService.GetObjectByName(str);
-                case GET_MATERIAL_ID_BY_NAME:
-                    return objectService.GetMaterialByName(str);
+                    return ObjectService.GetObjectByName(str);
                 case LOAD_GLTF:
-                    return gltfService.loadByUrl(str, (loaderId, objectId) => {
+                    return GltfService.loadByUrl(str, (loaderId, objectId) => {
                         // connector.SandboxExecV_II(SANDBOX_ON_GLTF_LOADED, loaderId, objectId);
                     });
                 case LOAD_SKY:
-                    return skyService.loadByUrl(str, (loaderId) => {
+                    return SkyService.loadByUrl(str, (loaderId) => {
                         // connector.SandboxExecV_I(SANDBOX_ON_SKY_LOADED, loaderId);
                     });
-                default:
-                    throw new System.Exception("No function to match");
-            }
-        }
-        public int ExecI_IV4(int funcId, int i1, float f1, float f2, float f3, float f4)
-        {
-            switch(funcId)
-            {
-                case SET_MATERIAL_COLOR:
-                    return objectService.SetMaterialColor(i1, f1, f2, f3, f4);
-                default:
-                    throw new System.Exception("No function to match");
-            }
-        }
-        public Vector3 ExecV3_I(int funcId, int i1)
-        {
-            switch (funcId)
-            {
-                case GET_OBJECT_POSITION:
-                    return objectService.GetObjectPosition(i1);
-                case GET_OBJECT_SCALE:
-                    return objectService.GetObjectScale(i1);
                 default:
                     throw new System.Exception("No function to match");
             }
