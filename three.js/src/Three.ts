@@ -47,6 +47,7 @@ export class Three {
     const width = window.innerWidth
     const height = window.innerHeight
     renderer.setSize(width, height);
+    renderer.setPixelRatio(2)
     renderer.domElement.className = style.threeCanvas
     document.body.appendChild(renderer.domElement);
     this.renderer = renderer
@@ -57,7 +58,7 @@ export class Three {
     scene.add( axesHelper );
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
-    camera.position.set(0, 0, 1000)
+    camera.position.set(0, 0, 10)
     camera.lookAt(0, 0, 0)
     this.camera = camera
 
@@ -78,13 +79,15 @@ export class Three {
   async load (url: string) {
     const sandboxId = this.nextSandboxId
     try {
-      const sandbox = new Sandbox(sandboxId, this.scene!)
+      const group = new THREE.Group()
+      const sandbox = new Sandbox(sandboxId, group)
       const res = await fetch(url)
       const blob  = await res.blob()
       const buf = await blob.arrayBuffer()
       const source = await WebAssembly.instantiate(buf, {
         ...sandbox.createImports(),
       })
+      this.getScene().add(group)
       sandbox.setWasm(source.instance)
       sandbox.onStart()
       this.sandboxMap.set(sandboxId, sandbox)
@@ -95,8 +98,18 @@ export class Three {
   }
 
   deleteSandbox(sandboxId: number) {
+    const sandbox = this.sandboxMap.get(sandboxId)
+    if (sandbox) {
+      this.getScene().remove(sandbox.getContainer())
+    } else {
+      throw new Error("No sandbox ID: " + sandboxId)
+    }
   }
 
   deleteAllSandboxes() {
+    for (let sandbox of this.sandboxMap.values()) {
+      this.getScene().remove(sandbox.getContainer())
+    }
+    this.sandboxMap = new Map<number, Sandbox>()
   }
 }

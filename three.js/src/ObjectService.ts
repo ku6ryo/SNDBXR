@@ -3,27 +3,39 @@ import {
   Scene,
   SphereGeometry,
   MeshStandardMaterial,
+  BoxGeometry,
+  Group,
 } from "three"
-import {
-  UNIT_SIZE
-} from "./constants"
+
+export enum Primitive {
+  CUBE = 0,
+  SPHERE = 1,
+}
 
 export class ObjectService {
 
   nextObjectId = 0
   objectMap = new Map<number, Mesh>()
 
-  scene: Scene
+  group: Group
 
-  constructor(scene: Scene) {
-    this.scene = scene
+  constructor(scene: Group) {
+    this.group = scene
   }
 
   createPrimitive(type: number) {
-    const geometry = new SphereGeometry(UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-    const material = new MeshStandardMaterial({ color: 0xffffff });
-    const obj = new Mesh(geometry, material);
-    this.scene.add(obj)
+    let geometry = null
+    if (type === Primitive.CUBE) {
+      geometry = new BoxGeometry(1, 1)
+    } else if (type === Primitive.SPHERE) {
+      geometry = new SphereGeometry(0.5, 30, 30)
+    }
+    if (!geometry) {
+      throw new Error("Unknown primitive")
+    }
+    const material = new MeshStandardMaterial({ color: 0xffffff })
+    const obj = new Mesh(geometry, material)
+    this.group.add(obj)
     const id = this.nextObjectId
     this.objectMap.set(id, obj)
     this.nextObjectId += 1
@@ -35,7 +47,7 @@ export class ObjectService {
       return [1]
     } else {
       const obj = this.objectMap.get(objectId)
-      obj?.position.set(x * UNIT_SIZE, y * UNIT_SIZE, z * UNIT_SIZE)
+      obj?.position.set(x, y, z)
       return [0]
     }
   }
@@ -47,6 +59,16 @@ export class ObjectService {
       const obj = this.objectMap.get(objectId)
       obj?.scale.set(x, y, z)
       return [0]
+    }
+  }
+
+  getObjectPosition(objectId: number) {
+    if (!this.objectMap.has(objectId)) {
+      return [1]
+    } else {
+      const obj = this.objectMap.get(objectId)
+      const pos = obj!.position
+      return [pos.x, pos.y, pos.z]
     }
   }
 }
