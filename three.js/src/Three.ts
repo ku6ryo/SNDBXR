@@ -5,24 +5,51 @@ import { Sandbox } from "./Sandbox"
 export class Three {
 
   scene: THREE.Scene | null = null
+  renderer: THREE.Renderer | null = null
+  camera: THREE.PerspectiveCamera | null = null
 
   nextSandboxId = 0
   sandboxMap = new Map<number, Sandbox>()
 
   getScene(): THREE.Scene {
     if (this.scene === null) {
-      throw new Error("no scene")
+      throw new Error("No scene")
     }
     return this.scene
   }
 
+  getRenderer(): THREE.Renderer {
+    if (this.renderer === null) {
+      throw new Error("No renderer")
+    }
+    return this.renderer
+  }
+
+  getCamera(): THREE.PerspectiveCamera {
+    if (this.camera === null) {
+      throw new Error("No camera")
+    }
+    return this.camera
+  }
+
+  onWindowResize() {
+    const width = window.innerWidth
+    const height = window.innerHeight
+    this.getRenderer().setSize(width, height);
+    this.getCamera().aspect = width / height
+    this.getCamera().updateProjectionMatrix()
+  }
+
   setup() {
+    window.addEventListener("resize", this.onWindowResize.bind(this))
+
     const renderer = new THREE.WebGLRenderer({ alpha: true });
     const width = window.innerWidth
     const height = window.innerHeight
     renderer.setSize(width, height);
     renderer.domElement.className = style.threeCanvas
     document.body.appendChild(renderer.domElement);
+    this.renderer = renderer
 
     const scene = new THREE.Scene();
     this.scene = scene
@@ -32,6 +59,7 @@ export class Three {
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
     camera.position.set(0, 0, 1000)
     camera.lookAt(0, 0, 0)
+    this.camera = camera
 
     const light = new THREE.DirectionalLight(0xffffff);
     light.position.set(1, 1, 1);

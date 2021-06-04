@@ -20,6 +20,7 @@ import {
 import { Material } from "./Material"
 import { eventManager } from "./global"
 import { Vector3 } from "./Vector3"
+import { ValueContainer32 } from "./proto"
 
 const OBJECT_NOT_FOUND_ID = -1
 
@@ -58,8 +59,8 @@ export class Object {
     }
 
     getPosition(): Vector3 {
-      const value = callEngine_fff_i(GET_OBJECT_POSITION, this.id).map(v => v.vf32);
-      return new Vector3(value[0], value[1], value[2])
+      const values = callEngine_fff_i(GET_OBJECT_POSITION, this.id)
+      return new Vector3(values[0].vf32, values[1].vf32, values[2].vf32)
     }
 
     setPosition(v: Vector3): i32 {
@@ -67,8 +68,8 @@ export class Object {
     }
 
     getScale(v: Vector3): Vector3 {
-      const value: f32[] = callEngine_fff_i(GET_OBJECT_SCALE, this.id).map(v => v.vf32)
-      return new Vector3(value[0], value[1], value[2])
+      const values = callEngine_fff_i(GET_OBJECT_SCALE, this.id)
+      return new Vector3(values[0].vf32, values[1].vf32, values[2].vf32)
     }
 
     setScale(v: Vector3): i32 {
