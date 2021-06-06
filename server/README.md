@@ -3,8 +3,7 @@ This server is deployed to `https://sndbxr.org`.
 
 # Key URLs
 - /artifacts : Stores scripts written by users and WASM artifacts .wasm and .wat.
-- /playground/unity/ : Unity playground
-- /playground/three/ : three.js playground
+- /playground : Playground page (Unity/three.js)
 - /compile : Entrypoint to compile SNDBXR scripts. POST (text/plain) is accepted.
 
 # Development
@@ -17,6 +16,8 @@ yarn
 yarn dev
 ```
 
+You can access the playground page with this URL: http://localhost:8080/playground/
+
 ## Build
 Artifacts are stored in `dist` directory.
 ```
@@ -25,3 +26,10 @@ yarn build
 
 ## Updating SNDBXR wasm api module
 After changing API codes, you should run `yarn upgrade` in this directory and restart the server to provide new APIs to the compiler.
+
+# How to use the playground page
+
+* You can edit the script (Assembly Script) on the editor pane.
+* To compile the script, push "Compile" button at the top-left corner.
+* If the compilation was successful, an item shoud appear in the ARTIFACTS pane at the bottom-left on the page.
+* Push the "RUN" button to play the script on the 3D view pane.
