@@ -1,5 +1,9 @@
 @import "./constants.scss";
 
+body {
+  font-family: sans-serif;
+}
+
 .header {
   background-color: $MENU_BACKGROUND;
   color: white;
@@ -9,20 +13,18 @@
   top: 0;
   width: 100%;
 
-  button {
+  .logo {
+    padding: 4px 8px;
+
     svg {
-      margin-right: 4px;
+      height: 30px;
+      margin-right: 8px;
+      width: 30px;
     }
-  }
 
-  .operationButtons {
-    position: absolute;
-    top: 4px;
-    left: 48px;
-
-    button {
-      background-color: transparent;
-      color: white;
+    span {
+      font-size: 14px;
+      vertical-align: middle;
     }
   }
 
@@ -51,11 +53,21 @@
 
 .sidebar {
   background-color: $MENU_BACKGROUND;
+  color: white;
   left: 0;
   height: 100%;
+  padding: 12px 6px;
   position: absolute;
   top: 0;
   width: 48px;
+
+  .item {
+    padding: 4px;
+    svg {
+      height: 28px;
+      width: 28px;
+    }
+  }
 }
 
 .leftPanel {
@@ -63,6 +75,31 @@
   left: 48px;
   position: absolute;
   top: 0;
+
+  .editorToobar {
+    background-color: #131a23;
+    color: white;
+    padding: 8px;
+    text-align: right;
+
+    .button {
+      color: white;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 12px;
+      line-height: 1em;
+      padding: 4px;
+      transition: .4s;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, .4);
+      }
+
+      span {
+        margin-left: 8px;
+      }
+    }
+  }
 
   .separator {
     background-color: $MENU_BACKGROUND;
@@ -138,6 +175,17 @@
     height: 100%;
     user-select: none;
     width: 100%;
+  }
+
+  .operationButtons {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+
+    button {
+      background-color: transparent;
+      color: white;
+    }
   }
 
   .playerCover {

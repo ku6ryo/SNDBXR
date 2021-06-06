@@ -15,8 +15,17 @@ export class ApiClient {
       body: code
     })
     if (res.status === 200) {
-      const json = await res.json()
-      return json
+      return await res.json() as {
+        id: string,
+        wasm: {
+          path: string,
+          size: number
+        },
+        wat: {
+          path: string,
+          size: number
+        }
+      }
     } else {
       const json = await res.json()
       throw new Error(json.message)

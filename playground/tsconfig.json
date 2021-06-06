@@ -11,5 +11,6 @@
     "typeRoots": ["./node_modules/@types", "./@types"],
     "jsx": "react",
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
   }
 }

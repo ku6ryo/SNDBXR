@@ -1,25 +1,25 @@
 import React from "react"
-import { useEffect, useState, Fragment, useRef } from "react"
+import { useState, Fragment, useRef } from "react"
 import ReactDOM from "react-dom"
 import "sanitize.css/sanitize.css"
 import style from "./style.module.scss"
-import { editor as monacoEditor } from "monaco-editor"
-import { VscDebugStart } from "react-icons/vsc"
-import { IoLogoGithub } from "react-icons/io"
-import { AiFillCaretDown, AiFillDelete } from "react-icons/ai"
+import { AiFillDelete } from "react-icons/ai"
 import { apiClient } from "./global"
 import { initialCode } from "./constants"
 import { v4 as uuid } from "uuid"
-import { Button, SelectMenu, SelectMenuItem } from "evergreen-ui"
-import { Spinner } from "evergreen-ui"
+import { Button } from "evergreen-ui"
 import { WasmList } from "./components/WasmList"
 import { WasmBuild } from "./models/WasmBuild"
 import { Logger, LogLine } from "./components/Logger"
 import classnames from "classnames"
 import { FaGithub, FaUnity } from "react-icons/fa"
+import { TextEditor } from "./components/TextEditor"
+import { IoIosBuild, IoMdCode } from "react-icons/io"
+import { VscPackage } from "react-icons/vsc"
 
-const LEFT_PANEL_DEFAULT_WIDTH = 500;
-const EDITOR_DEFAULT_HEIGHT = 600;
+
+const LEFT_PANEL_DEFAULT_WIDTH = 500
+const EDITOR_DEFAULT_HEIGHT = 600
 
 const logLines: LogLine[] = []
 
@@ -34,30 +34,17 @@ enum LeftBottomTab {
 }
 
 const App = () => {
-  const editorContainerRef = useRef<HTMLDivElement>(null)
   const playerIFrameRef = useRef<HTMLIFrameElement | null>(null)
   const [leftPanelWidth, setLeftPanelWidth] = useState(LEFT_PANEL_DEFAULT_WIDTH)
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT)
   const [separatorMoving, setSeparatorMoving] = useState(false)
   const [separatorHorizontalMoving, setSeparatorHorizontalMoving] = useState(false)
-  const [editor, setMonacoEditor] = useState<monacoEditor.IStandaloneCodeEditor | null>(null)
+  const [codeText, setCodeText] = useState(initialCode)
   const [logUpdateTime, setLogUpdateTime] = useState<number>(0)
   const [compiling, setCompiling] = useState(false)
   const [player, setPlayer] = useState(Player.THREE)
   const [wasmBuilds, setWasmBuilds] = useState<WasmBuild[]>([])
   const [leftBottomTab, setLeftBottomTab] = useState(LeftBottomTab.OUTPUT)
-
-  useEffect(() => {
-    if (editorContainerRef.current) {
-      monacoEditor.setTheme("vs-dark")
-      const editor = monacoEditor.create(editorContainerRef.current, {
-        automaticLayout: true,
-        value: initialCode,
-        language: "typescript"
-      })
-      setMonacoEditor(editor)
-    }
-  }, [])
 
   const onSeparatorClick =  (e: React.MouseEvent<HTMLDivElement>) => {
     setSeparatorMoving(true)
@@ -84,31 +71,28 @@ const App = () => {
     })
     setLogUpdateTime(new Date().getTime())
   }
-  const onPlayClick = async () => {
-    if (editor) {
-      setCompiling(true)
-      addLog("Compiling ...")
-      const code = editor.getModel()?.getValue()
-      if (code) {
-        try {
-          const res = await apiClient.compile(code)
-          addLog(res.wasm.path)
-          addLog(res.wat.path)
-          const build: WasmBuild = {
-            id: res.wasm.id,
-            wasmUrl: location.origin + res.wasm.path,
-            watUrl: location.origin + res.wasm.path,
-            createdAt: new Date()
-          }
-          setWasmBuilds([build, ...wasmBuilds])
-          setLeftBottomTab(LeftBottomTab.ARTIFACTS)
-        } catch (e) {
-          addLog(e.message)
+  const onBuildClick = async () => {
+    setCompiling(true)
+    addLog("Compiling ...")
+    if (codeText) {
+      try {
+        const res = await apiClient.compile(codeText)
+        addLog(res.wasm.path)
+        addLog(res.wat.path)
+        const build: WasmBuild = {
+          id: res.id,
+          wasmUrl: location.origin + res.wasm.path,
+          watUrl: location.origin + res.wasm.path,
+          createdAt: new Date()
         }
-        setCompiling(false)
-      } else {
-        addLog("code empty")
+        setWasmBuilds([build, ...wasmBuilds])
+        setLeftBottomTab(LeftBottomTab.ARTIFACTS)
+      } catch (e) {
+        addLog(e.message)
       }
+      setCompiling(false)
+    } else {
+      addLog("code empty")
     }
   }
   const play = (url: string) => {
@@ -123,18 +107,15 @@ const App = () => {
   const onWasmRunClick = (url: string) => {
     play(url)
   }
+  const onEditorCodeChange = (text: string) => {
+    setCodeText(text)
+  }
   return (
     <div>
       <div className={style.header}>
-        <div className={style.operationButtons}>
-          <Button
-            iconBefore={compiling ? Spinner : VscDebugStart}
-            onClick={onPlayClick}
-          >Compile</Button>
-          <Button
-            iconBefore={AiFillDelete}
-            onClick={onRemoveAllClick}
-          >Remove Sandboxes</Button>
+        <div className={style.logo}>
+          <VscPackage />
+          <span>SNDBXR</span>
         </div>
         <a href="https://github.com/ku6ryo/SNDBXR" target="_blank">
           <div className={style.github}>
@@ -148,13 +129,26 @@ const App = () => {
         onMouseUp={stopSeparatorMoving}
         onMouseLeave={stopSeparatorMoving}
       >
-        <div className={style.sidebar}></div>
+        <div className={style.sidebar}>
+          <div className={style.item}>
+            <IoMdCode />
+          </div>
+        </div>
         <div
           className={style.leftPanel}
           style={{
             width: leftPanelWidth + "px"
           }}
         >
+          <div className={style.editorToobar}>
+            <div
+              className={style.button}
+              onClick={onBuildClick}
+            >
+              <IoIosBuild />
+              <span>Build</span>
+            </div>
+          </div>
           <div
             className={style.editorSection}
             style={{
@@ -163,8 +157,9 @@ const App = () => {
           >
             <div
               className={style.editorContainer}
-              ref={editorContainerRef}
-            ></div>
+            >
+              <TextEditor text={codeText} onChange={onEditorCodeChange}/>
+            </div>
             <div
               className={style.separatorHorizontal}
               onMouseDown={onSeparatorHorizontalClick}
@@ -173,7 +168,7 @@ const App = () => {
           <div
             className={style.leftBottomSection}
             style={{
-              height: `calc(100% - ${editorHeight}px)`
+              height: `calc(100% - ${editorHeight + 37}px)`
             }}
           >
             <div className={style.tabs}>
@@ -237,6 +232,12 @@ const App = () => {
             </div>
           </div>
           <iframe ref={playerIFrameRef} src={`/player/${player.toLocaleLowerCase()}`}></iframe>
+          <div className={style.operationButtons}>
+            <Button
+              iconBefore={AiFillDelete}
+              onClick={onRemoveAllClick}
+            >Remove Sandboxes</Button>
+          </div>
           {separatorMoving && (
             <div className={style.playerCover}/>
           )}

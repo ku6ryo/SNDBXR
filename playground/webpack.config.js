@@ -1,6 +1,7 @@
 const path = require("path")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
-const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin")
+const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
+const webpack = require("webpack");
 
 const buildMode = process.env.NODE_ENV === "production" ? "production" : "development"
 
@@ -40,6 +41,9 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js"],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      API_BASE_PATH: JSON.stringify(process.env.NODE_ENV === "production" ? "" : "http://localhost:8080")
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src/index.html"),
       filename: "index.html",
