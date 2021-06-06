@@ -1,6 +1,8 @@
 import style from "./style.scss"
 import * as THREE from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { Sandbox } from "./Sandbox"
+
 
 export class Three {
 
@@ -58,7 +60,7 @@ export class Three {
     scene.add( axesHelper );
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
-    camera.position.set(0, 0, 10)
+    camera.position.set(0, 0, 30)
     camera.lookAt(0, 0, 0)
     this.camera = camera
 
@@ -74,6 +76,15 @@ export class Three {
       renderer.render(scene, camera);
     }
     tick()
+  }
+
+  async loadGltf(url: string) {
+    const loader = new GLTFLoader()
+    const gltf = await loader.loadAsync(url)
+    const scene = gltf.scene
+    if (scene.children.length > 0) {
+      this.getScene().add(scene)
+    }
   }
 
   async load (url: string) {

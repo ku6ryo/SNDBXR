@@ -1,0 +1,29 @@
+.toolbar {
+  background-color: #131a23;
+  color: white;
+  padding: 8px;
+  text-align: right;
+
+  .button {
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1em;
+    padding: 4px;
+    transition: .4s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, .4);
+    }
+
+    span {
+      margin-left: 8px;
+    }
+  }
+}
+
+.editorContainer {
+  height: 100%;
+  width: 100%;
+}

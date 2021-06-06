@@ -4,8 +4,6 @@ import ReactDOM from "react-dom"
 import "sanitize.css/sanitize.css"
 import style from "./style.module.scss"
 import { AiFillDelete } from "react-icons/ai"
-import { apiClient } from "./global"
-import { initialCode } from "./constants"
 import { v4 as uuid } from "uuid"
 import { Button } from "evergreen-ui"
 import { WasmList } from "./components/WasmList"
@@ -13,9 +11,13 @@ import { WasmBuild } from "./models/WasmBuild"
 import { Logger, LogLine } from "./components/Logger"
 import classnames from "classnames"
 import { FaGithub, FaUnity } from "react-icons/fa"
-import { TextEditor } from "./components/TextEditor"
-import { IoIosBuild, IoMdCode } from "react-icons/io"
+import { IoMdCode } from "react-icons/io"
 import { VscPackage } from "react-icons/vsc"
+import { CgExtension } from "react-icons/cg"
+import { FileManager } from "./components/FileManger"
+import { Asset, AssetType } from "./models/Asset"
+import { UploadedFile } from "./models/UploadedFile"
+import { CodeEditor } from "./components/CodeEditor"
 
 
 const LEFT_PANEL_DEFAULT_WIDTH = 500
@@ -33,18 +35,24 @@ enum LeftBottomTab {
   ARTIFACTS = "ARTIFACTS",
 }
 
+enum Panel {
+  CODE = "CODE",
+  FILE = "FILE"
+}
+
 const App = () => {
   const playerIFrameRef = useRef<HTMLIFrameElement | null>(null)
   const [leftPanelWidth, setLeftPanelWidth] = useState(LEFT_PANEL_DEFAULT_WIDTH)
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT)
   const [separatorMoving, setSeparatorMoving] = useState(false)
   const [separatorHorizontalMoving, setSeparatorHorizontalMoving] = useState(false)
-  const [codeText, setCodeText] = useState(initialCode)
   const [logUpdateTime, setLogUpdateTime] = useState<number>(0)
-  const [compiling, setCompiling] = useState(false)
   const [player, setPlayer] = useState(Player.THREE)
   const [wasmBuilds, setWasmBuilds] = useState<WasmBuild[]>([])
   const [leftBottomTab, setLeftBottomTab] = useState(LeftBottomTab.OUTPUT)
+  const [uploadedFiles, setUploadeFiles] = useState<UploadedFile[]>([])
+  const [panel, setPanel] = useState(Panel.CODE)
+  const [assets, setAssets] = useState<Asset[]>([])
 
   const onSeparatorClick =  (e: React.MouseEvent<HTMLDivElement>) => {
     setSeparatorMoving(true)
@@ -71,30 +79,6 @@ const App = () => {
     })
     setLogUpdateTime(new Date().getTime())
   }
-  const onBuildClick = async () => {
-    setCompiling(true)
-    addLog("Compiling ...")
-    if (codeText) {
-      try {
-        const res = await apiClient.compile(codeText)
-        addLog(res.wasm.path)
-        addLog(res.wat.path)
-        const build: WasmBuild = {
-          id: res.id,
-          wasmUrl: location.origin + res.wasm.path,
-          watUrl: location.origin + res.wasm.path,
-          createdAt: new Date()
-        }
-        setWasmBuilds([build, ...wasmBuilds])
-        setLeftBottomTab(LeftBottomTab.ARTIFACTS)
-      } catch (e) {
-        addLog(e.message)
-      }
-      setCompiling(false)
-    } else {
-      addLog("code empty")
-    }
-  }
   const play = (url: string) => {
     ;(playerIFrameRef.current?.contentWindow! as any).createSandbox(url)
   }
@@ -104,11 +88,29 @@ const App = () => {
   const onLeftBottomTabClick = (tab: LeftBottomTab) => {
     setLeftBottomTab(tab)
   }
-  const onWasmRunClick = (url: string) => {
-    play(url)
+  const onWasmRunClick = (build: WasmBuild) => {
+    play(build.wasmUrl)
+    const asset: Asset = {
+      id: uuid(),
+      type: AssetType.SCRIPT,
+      name: build.id
+    }
+    setAssets([asset, ...assets])
   }
-  const onEditorCodeChange = (text: string) => {
-    setCodeText(text)
+  const onUploadedAdd = (file: UploadedFile) => {
+    ;(playerIFrameRef.current?.contentWindow! as any).loadGltf(API_BASE_PATH + file.path)
+    const asset = {
+      id: uuid(),
+      type: AssetType.GLTF,
+      name: file.name,
+    }
+    setAssets([asset, ...assets])
+  }
+  const onFileUploaded = (uploaded: UploadedFile) => {
+    setUploadeFiles([uploaded, ...uploadedFiles])
+  }
+  const onBuildCreated = (build: WasmBuild) => {
+    setWasmBuilds([build, ...wasmBuilds])
   }
   return (
     <div>
@@ -130,8 +132,17 @@ const App = () => {
         onMouseLeave={stopSeparatorMoving}
       >
         <div className={style.sidebar}>
-          <div className={style.item}>
+          <div
+            className={style.item}
+            onClick={() => setPanel(Panel.CODE)}
+          >
             <IoMdCode />
+          </div>
+          <div
+            className={style.item}
+            onClick={() => setPanel(Panel.FILE)}
+          >
+            <CgExtension />
           </div>
         </div>
         <div
@@ -140,26 +151,25 @@ const App = () => {
             width: leftPanelWidth + "px"
           }}
         >
-          <div className={style.editorToobar}>
-            <div
-              className={style.button}
-              onClick={onBuildClick}
-            >
-              <IoIosBuild />
-              <span>Build</span>
-            </div>
-          </div>
           <div
             className={style.editorSection}
             style={{
               height: editorHeight + "px"
             }}
           >
-            <div
-              className={style.editorContainer}
-            >
-              <TextEditor text={codeText} onChange={onEditorCodeChange}/>
-            </div>
+            {panel === Panel.FILE && (
+              <FileManager
+                files={uploadedFiles}
+                onAddClick={onUploadedAdd}
+                onFileUploaded={onFileUploaded}
+              />
+            )}
+            {panel === Panel.CODE && (
+              <CodeEditor
+                onBuildCreated={onBuildCreated}
+                onMessageUpdated={addLog}
+              />
+            )}
             <div
               className={style.separatorHorizontal}
               onMouseDown={onSeparatorHorizontalClick}
@@ -241,6 +251,16 @@ const App = () => {
           {separatorMoving && (
             <div className={style.playerCover}/>
           )}
+          <div className={style.assetHierarchy}>
+            {assets.map(asset => {
+              return (
+                <div className={style.asset}>
+                  <div className={style.type}>{asset.type}</div>
+                  <div className={style.name}>{asset.name}</div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>

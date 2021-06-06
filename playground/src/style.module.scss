@@ -76,31 +76,6 @@ body {
   position: absolute;
   top: 0;
 
-  .editorToobar {
-    background-color: #131a23;
-    color: white;
-    padding: 8px;
-    text-align: right;
-
-    .button {
-      color: white;
-      cursor: pointer;
-      display: inline-block;
-      font-size: 12px;
-      line-height: 1em;
-      padding: 4px;
-      transition: .4s;
-
-      &:hover {
-        background-color: rgba(255, 255, 255, .4);
-      }
-
-      span {
-        margin-left: 8px;
-      }
-    }
-  }
-
   .separator {
     background-color: $MENU_BACKGROUND;
     cursor: col-resize;
@@ -201,11 +176,6 @@ body {
   position: relative;
 }
 
-.editorContainer {
-  height: 100%;
-  width: 100%;
-}
-
 .playerSelector {
   color: white;
   position: absolute;
@@ -236,6 +206,34 @@ body {
     }
     &:last-child {
       border-radius: 0 4px 4px 0;
+    }
+  }
+}
+
+.assetHierarchy {
+  background-color: #222;
+  padding: 8px 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+
+  .asset {
+    border-bottom: 1px dotted white;
+    padding: 8px 12px;
+
+    .type {
+      background-color: #555;
+      color: white;
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px;
+      margin-right: 8px;
+    }
+    .name {
+      color: white;
+      display: inline-block;
+      font-size: 12px;
     }
   }
 }

@@ -9,7 +9,7 @@ import classnames from "classnames"
 
 type Props = {
   item: WasmBuild,
-  onRunClick: (url: string) => void
+  onRunClick: (url: WasmBuild) => void
 }
 
 export function WasmItemComponent ({ item, onRunClick }: Props) {
@@ -20,7 +20,7 @@ export function WasmItemComponent ({ item, onRunClick }: Props) {
     copyTextToClipboard(item.wasmUrl)
   }, [item])
   const onRunClickInternal = useCallback(() => {
-    onRunClick(item.wasmUrl)
+    onRunClick(item)
   }, [item])
   return (
     <div className={style.frame}>

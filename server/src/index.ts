@@ -1,4 +1,4 @@
-import fs, { write } from "fs"
+import fs from "fs"
 import util from "util"
 import path from "path"
 import express from "express"
@@ -11,6 +11,15 @@ import { BadRequestError } from "./errors"
 import compression from "compression"
 import serveStatic from "serve-static"
 import cors from "cors"
+import multer from "multer"
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "../assets")
+})
+const upload = multer({
+  storage,
+  limits: { fileSize: 1000_000_000 },
+}).single("asset")
 
 const writeFile = util.promisify(fs.writeFile)
 
@@ -34,6 +43,7 @@ app.use("/", serveStatic(path.join(__dirname, "public"), {
 }))
 app.use(compression())
 app.use("/artifacts", express.static(path.join(__dirname, "../artifacts")))
+app.use("/assets", express.static(path.join(__dirname, "../assets")))
 
 app.get("/", (req ,res) => {
   res.send("no content yet")
@@ -82,6 +92,14 @@ app.post("/api/compile", async (req: express.Request, res: express.Response, nex
     }
     next(e)
   }
+})
+app.post("/api/upload", upload, async (req, res, next) => {
+  const id = req.file.filename
+  res.json({
+    id,
+    name: req.file.originalname,
+    path: "/assets/" + id
+  })
 })
 app.use(handleApiError)
 app.use(handleFinally)

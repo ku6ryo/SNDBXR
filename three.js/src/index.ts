@@ -6,6 +6,7 @@ declare global {
     createSandbox: (utl: string) => Promise<void>
     deleteSandbox: (sandboxId: number) => void
     deleteAllSandboxes: () => void
+    loadGltf: (url: string) => Promise<void>
   }
 }
 
@@ -15,4 +16,5 @@ window.addEventListener("DOMContentLoaded", async () => {
   window.createSandbox = three.load.bind(three)
   window.deleteSandbox = three.deleteSandbox.bind(three)
   window.deleteAllSandboxes = three.deleteAllSandboxes.bind(three)
+  window.loadGltf = three.loadGltf.bind(three)
 });

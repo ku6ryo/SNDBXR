@@ -1,2 +1,4 @@
 artifacts/*
 !artifacts/.gitkeep
+assets/*
+!assets/.gitkeep

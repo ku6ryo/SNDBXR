@@ -4,7 +4,7 @@ import { WasmItemComponent } from "./WasmItem"
 
 type Props = {
   items: WasmBuild[]
-  onRunClick: (url: string) => void
+  onRunClick: (url: WasmBuild) => void
 }
 
 export function WasmList ({ items, onRunClick }: Props) {
