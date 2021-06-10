@@ -5,9 +5,7 @@ import { ESLint } from "eslint"
 
 enum ValueType {
   Int32 = "i",
-  Int64 = "L",
   Float32 = "f",
-  Float64 = "d",
   String = "s",
 }
 
@@ -44,8 +42,6 @@ function parseValueSign(sign: string): ValueInterface {
       let byteUnit = 0
       if (t === ValueType.Int32 || t === ValueType.Float32) {
         byteUnit = 4
-      } else if (t === ValueType.Int64 || t === ValueType.Float64) {
-        byteUnit = 8
       }
       return {
         type: t,
@@ -78,9 +74,7 @@ function createRenderData(definitions: {
         return {
           index: i,
           isInt32: v.type === ValueType.Int32,
-          isInt64: v.type === ValueType.Int64,
           isFloat32: v.type === ValueType.Float32,
-          isFloat64: v.type === ValueType.Float64,
           isString: v.type === ValueType.String,
           isLast: i === d.input.values.length - 1 
         }
@@ -89,9 +83,7 @@ function createRenderData(definitions: {
         return {
           index: i,
           isInt32: v.type === ValueType.Int32,
-          isInt64: v.type === ValueType.Int64,
           isFloat32: v.type === ValueType.Float32,
-          isFloat64: v.type === ValueType.Float64,
           isString: v.type === ValueType.String,
           isLast: i === d.input.values.length - 1 
         }
@@ -99,9 +91,7 @@ function createRenderData(definitions: {
       output: {
         isVoid: d.output.isVoid,
         isInt32: d.output.isVoid ? false : d.output.values[0].type === ValueType.Int32,
-        isInt64: d.output.isVoid ? false : d.output.values[0].type === ValueType.Int64,
         isFloat32: d.output.isVoid ? false : d.output.values[0].type === ValueType.Float32,
-        isFloat64: d.output.isVoid ? false : d.output.values[0].type === ValueType.Float64,
         byteUnit: d.output.values[0].byteUnit,
         isArray: d.output.values.length > 1,
         length: d.output.values.length,
@@ -131,7 +121,7 @@ function renderTypeScript(definitions: {
 
 async function lintFix(code: string) {
   const eslint = new ESLint({ fix: true })
-  const lintResult = await eslint.lintText(code)//code.replace(/\n/g, ""))
+  const lintResult = await eslint.lintText(code)
   console.log(lintResult[0].source)
   console.log(lintResult[0].messages.map(m => {
     return `LINE ${m.line}: ${m.message}`

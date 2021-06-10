@@ -13,7 +13,7 @@ export class EventManager {
 
   setListener(object: Object, type: EventType): i32  {
     this.objects.set(object.id, object)
-    return callEngine_i_ii(SET_OBJECT_EVENT_LISTENER, object.id, type)
+    return callEngine_i_ii(SET_OBJECT_EVENT_LISTENER, object.id, type)[0].vi32
   }  
 
   onEvent(objectId: i32, type: i32): void {

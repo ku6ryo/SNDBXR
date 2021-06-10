@@ -1,5 +1,4 @@
-import { logInt } from "../../assembly/debug"
-import { createPrimitive, PrimitiveType } from "../../assembly/Object"
+import { createPrimitive, PrimitiveType, logInt } from "sndbxr-wasm-api"
 
 export function start(): void {
   const o = createPrimitive(PrimitiveType.CUBE)

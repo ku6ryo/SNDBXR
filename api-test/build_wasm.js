@@ -4,8 +4,8 @@ const childProcess = require("child_process")
 const util = require("util")
 
 const readdir = util.promisify(fs.readdir)
-const testFileDir = path.join(__dirname, "src/test_scripts")
-const testBuildDir = path.join(__dirname, "build_test")
+const testFileDir = path.join(__dirname, "assembly")
+const testBuildDir = path.join(__dirname, "build")
 
 /**
  * Promisify wrapper of spawn.

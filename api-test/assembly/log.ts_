@@ -1,4 +1,4 @@
-import { log } from "../../assembly/debug"
+import { log } from "sndbxr-wasm-api"
 
 export function start(): void {
   log("test")

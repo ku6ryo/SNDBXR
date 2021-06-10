@@ -1,6 +1,6 @@
 import * as path from "path"
-import { loadFromFile } from "../loader"
-import { Sandbox } from "../connector/Sandbox"
+import { loadFromFile } from "./loader"
+import { Sandbox } from "./connector/Sandbox"
 
 class TestSandbox extends Sandbox {
   constructor() {

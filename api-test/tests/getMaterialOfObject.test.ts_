@@ -1,6 +1,6 @@
 import * as path from "path"
-import { loadFromFile } from "../loader"
-import { Sandbox } from "../connector/Sandbox"
+import { loadFromFile } from "./loader"
+import { Sandbox } from "./connector/Sandbox"
 import { GET_MATERIAL_OF_OBJECT, CREATE_PRIMITIVE_OBJECT } from "../../assembly/function_ids"
 
 class TestSandbox extends Sandbox {
