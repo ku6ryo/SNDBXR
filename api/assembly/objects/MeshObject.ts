@@ -4,6 +4,9 @@ import { callEngine } from "../interface";
 import { CREATE_PRIMITIVE_OBJECT } from "../function_ids";
 import { objectEventManager } from "../global";
 
+/**
+ * Types of primitives.
+ */
 export enum Primitive {
   Cube = 0,
   Sphere = 1,
