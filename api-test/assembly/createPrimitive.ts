@@ -6,6 +6,6 @@ export function malloc(len: i32): usize {
 }
 
 export function main(): void {
-  const o = MeshObject.createPrimitive(Primitive.CUBE)
+  const o = MeshObject.createPrimitive(Primitive.Sphere)
   log("ID:" + o.id.toString())
 }

@@ -12,7 +12,7 @@ test("createPrimitive", async () => {
   }
   const createPrimitive = (buf: Uint8Array) => {
     const primitiveType = decode(buf)
-    expect(primitiveType).toBe(0)
+    expect(primitiveType).toBe(1)
     return encode(100)
   }
   const source = await WebAssembly.instantiate(file, {
