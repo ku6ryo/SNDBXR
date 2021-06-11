@@ -1,9 +1,9 @@
 export const initialCode = `
-import { createPrimitive, Object, PrimitiveType, } from "sndbxr/Object"
+import { MeshObject, Primitive, } from "sndbxr/objects/MeshObject"
 import { Vector2 } from "sndbxr/Vector2"
 import { Vector3 } from "sndbxr/Vector3"
 
-const objects: Object[] = [];
+const objects: MeshObject[] = [];
 let speed: Vector2 = new Vector2(0, 0.6)
 const g: f32 = 0.01
 const mEarth: f32 = 1
@@ -30,8 +30,8 @@ export function update(): void {
 }
 
 export function start(): void {
-  const sun = createPrimitive(PrimitiveType.SPHERE)
-  const earth = createPrimitive(PrimitiveType.SPHERE)
+  const sun = MeshObject.createPrimitive(Primitive.Sphere)
+  const earth = MeshObject.createPrimitive(Primitive.Sphere)
 	sun.setPosition(new Vector3(sunPos.x, sunPos.y, 0))
 	objects.push(sun)
 	earth.setPosition(new Vector3(earthPos.x, earthPos.y, 0))

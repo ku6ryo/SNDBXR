@@ -1,18 +1,15 @@
 import {
   Mesh,
-  Scene,
   SphereGeometry,
-  MeshStandardMaterial,
   BoxGeometry,
   Group,
-  MeshPhysicalMaterial,
-  Material,
 } from "three"
 import { MaterialService } from "./MaterialService"
+import { decode, encode } from "@msgpack/msgpack"
 
 export enum Primitive {
-  CUBE = 0,
-  SPHERE = 1,
+  Cube = 0,
+  Sphere = 1,
 }
 
 export class ObjectService {
@@ -39,11 +36,12 @@ export class ObjectService {
    * @param type Type of primitive
    * @returns Id of object.
    */
-  createPrimitive(type: number) {
+  createPrimitive(ua: Uint8Array) {
+    const type = decode(ua) as number
     let geometry = null
-    if (type === Primitive.CUBE) {
+    if (type === Primitive.Cube) {
       geometry = new BoxGeometry(1, 1)
-    } else if (type === Primitive.SPHERE) {
+    } else if (type === Primitive.Sphere) {
       geometry = new SphereGeometry(0.5, 30, 30)
     }
     if (!geometry) {
@@ -56,7 +54,7 @@ export class ObjectService {
     const id = this.nextObjectId
     this.objectMap.set(id, obj)
     this.nextObjectId += 1
-    return [id]
+    return encode(id)
   }
 
   getObject(objectId: number) {

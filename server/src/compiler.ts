@@ -1,26 +1,38 @@
 import asc from "assemblyscript/cli/asc"
 import path from "path"
 import fs from "fs"
-import util from "util" 
+import util from "util"
+import recursive from "recursive-readdir"
 
 const apiUserDir = "node_modules/sndbxr/assembly"
 const apiModuleDir = "node_modules/sndbxr-wasm-api/assembly"
+const mpModuleDir = "node_modules/@wapc/as-msgpack/assembly"
 const apiDir = path.join(__dirname, "..", apiModuleDir)
+const mpDir = path.join(__dirname, "..", mpModuleDir)
 const readdir = util.promisify(fs.readdir)
 const readFile = util.promisify(fs.readFile)
+const recursiveReaddir = util.promisify(recursive)
 
 export async function createFileSourceMap (userScript: string) {
-  const apiFiles = await readdir(apiDir)
+  const apiFiles = await recursive(apiDir)
   const apiSources = await Promise.all(apiFiles.map(f => {
-    return readFile(path.join(apiDir, f))
+    return readFile(f)
   }))
-  const sourceMap = {} 
+  const mpFiles = await recursiveReaddir(mpDir)
+  const mpSources = await Promise.all(mpFiles.map(f => {
+    return readFile(f)
+  }))
+  const sourceMap = {}
   apiFiles.forEach((f, i) => {
-    sourceMap[path.join(apiUserDir, f)] = apiSources[i].toString()
+    sourceMap[f.replace(path.join(__dirname, "../"), "").replace("sndbxr-wasm-api", "sndbxr")] = apiSources[i].toString()
+  })
+  mpFiles.forEach((f, i) => {
+    sourceMap[f.replace(path.join(__dirname, "../"), "")] = mpSources[i].toString()
   })
   const indexSourceBuf = await readFile(path.join(__dirname, "../assembly/entrypoint.ts"))
   sourceMap["userScript.ts"] = userScript
   sourceMap["index.ts"] = indexSourceBuf.toString()
+  Object.keys(sourceMap).forEach(f => console.log(f))
   return sourceMap
 }
 
