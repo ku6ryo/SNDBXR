@@ -1,8 +1,8 @@
-import { Object } from "./Object"
+import { MeshObject } from "./objects/MeshObject"
 import {
   LOAD_GLTF
 } from "./function_ids"
-import { eventManager } from "./global"
+import { objectEventManager } from "./global"
 import { callEngine } from "./interface"
 import { Encoder, Sizer, Decoder } from "@wapc/as-msgpack" 
 
@@ -45,7 +45,7 @@ export class GltfLoader {
     if (this.callbacks.has(sessionId)) {
       const c = this.callbacks.get(sessionId)
       if (status === LoadStatus.SUCCESS) {
-        const obj = new Object(objectId, eventManager)
+        const obj = new MeshObject(objectId, objectEventManager)
         c.call(null, status, obj)
       } else {
         c.call(null, status, null)

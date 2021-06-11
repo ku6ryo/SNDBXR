@@ -1,4 +1,4 @@
-import { Encoder, Sizer, Decoder } from "@wapc/as-msgpack" 
+import { Encoder, Sizer } from "@wapc/as-msgpack" 
 import { LOG } from "./function_ids"
 import { callEngine } from "./interface"
 

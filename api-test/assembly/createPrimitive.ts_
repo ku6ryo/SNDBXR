@@ -1,5 +1,0 @@
-import { createPrimitive, PrimitiveType, logInt } from "sndbxr-wasm-api"
-
-export function start(): void {
-  logInt(createPrimitive(PrimitiveType.CUBE).id)
-}
