@@ -1,53 +1,26 @@
 import {
     EventType,
-} from "./EventType"
-import { EventManager } from "./EventManager"
+} from "../EventType"
+import { EventManager } from "../EventManager"
 import {
-  GET_OBJECT_ID_BY_NAME,
   SET_OBJECT_POSITION,
   GET_OBJECT_POSITION,
   GET_MATERIAL_OF_OBJECT,
-  CREATE_PRIMITIVE_OBJECT,
   SET_OBJECT_SCALE,
   GET_OBJECT_SCALE,
-} from "./function_ids"
+} from "../function_ids"
 import {
   callEngine_i_i,
   // callEngine_i_s,
   callEngine_i_ifff,
   callEngine_fff_i,
-} from "./gate"
-import { Material } from "./Material"
-import { eventManager } from "./global"
-import { Vector3 } from "./Vector3"
-import { ValueContainer32 } from "./proto"
+} from "../gate"
+import { Material } from "../Material"
+import { eventManager } from "../global"
+import { Vector3 } from "../Vector3"
+import { ValueContainer32 } from "../proto"
 
-const OBJECT_NOT_FOUND_ID = -1
-
-export enum PrimitiveType {
-  CUBE = 0,
-  SPHERE = 1,
-}
-
-/*
-export function getObjectByName(name: string): Object | null {
-  const id = callEngine_i_s(GET_OBJECT_ID_BY_NAME, name)
-  if (id === OBJECT_NOT_FOUND_ID) {
-    return null
-  } 
-  return new Object(id, eventManager)
-}
-*/
-
-/**
- * Creates a primitive object.
- */
-export function createPrimitive(type: PrimitiveType): Object {
-  const id = callEngine_i_i(CREATE_PRIMITIVE_OBJECT, type)[0].vi32;
-  return new Object(id, eventManager);
-}
-
-export class Object {
+export class BaseObject {
     id: i32
     eventManger: EventManager
 

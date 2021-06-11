@@ -1,8 +1,9 @@
 import path from "path"
 import fs from "fs"
+import { decode } from "@msgpack/msgpack"
 
 test("proto", async () => {
-  const pathToWasm = path.join(__dirname, "../../build_test/proto.wasm")
+  const pathToWasm = path.join(__dirname, "../build/proto.wasm")
   const file = fs.readFileSync(pathToWasm)
 
   let callPtr = 0
@@ -13,9 +14,15 @@ test("proto", async () => {
         throw new Error()
       }
     },
-    debug: {
-      logInt: (value: number) => {
-        expect(value).toBe(300)
+    interface: {
+      callEngineImport: (funcId: number, ptr: number) => {
+        expect(funcId).toBe(100)
+        const aLen = new Uint32Array(memory.buffer)[(ptr >> 2) - 1]
+        const aData = new Uint8Array(memory.buffer).subarray(ptr, ptr + aLen)
+        const message = decode(aData)
+        expect(message).toBe("300")
+        const rPtr = (instance.exports.malloc as (len: number) => number)(1)
+        return rPtr
       }
     },
     proto: {
@@ -50,4 +57,5 @@ test("proto", async () => {
   const instance = source.instance
   const memory = instance.exports.memory as WebAssembly.Memory
   (instance.exports.test as any)();
+  expect.assertions(12)
 })

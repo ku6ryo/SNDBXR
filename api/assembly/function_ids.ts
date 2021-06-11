@@ -1,3 +1,7 @@
+
+export const LOG = 100
+
+
 // OBJECT/GENERAL
 export const GET_OBJECT_ID_BY_NAME = 1000
 export const CREATE_PRIMITIVE_OBJECT = 1001

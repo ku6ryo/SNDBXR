@@ -1,5 +1,0 @@
-import { log } from "sndbxr-wasm-api"
-
-export function start(): void {
-  log("test")
-}
