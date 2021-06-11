@@ -1,4 +1,4 @@
-import { malloc, registerFuncToCallSandboxFuncMap, callSandbox as callSandboxInternal } from "sndbxr-wasm-api/interface"
+import { malloc, registerCallSandboxFunc, callSandbox as callSandboxInternal } from "sndbxr-wasm-api/interface"
 import { Encoder, Decoder, Sizer, Writer } from "@wapc/as-msgpack" 
 
 function encode(writer: Writer, i: i32, f: f32, s: string): void {
@@ -21,7 +21,7 @@ function receive(buf: ArrayBuffer): ArrayBuffer {
 }
 
 export function main(len: i32): usize {
-  registerFuncToCallSandboxFuncMap(1234, receive)
+  registerCallSandboxFunc(1234, receive)
   return malloc(len)
 }
 export function callSandbox(funcId: i32, ptr: i32): ArrayBuffer {

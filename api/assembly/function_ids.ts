@@ -24,6 +24,8 @@ export const SET_MATERIAL_COLOR = 2100
 
 // Loader
 export const LOAD_GLTF = 3000
+export const LOAD_GLTF_ON_PROGRESS = 3001
+export const LOAD_GLTF_ON_COMPLETE = 3002
 
 export const LOAD_SKY = 4000
 

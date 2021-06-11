@@ -1,7 +1,7 @@
 import { GroupObject } from "../objects/GroupObject"
 import { gltfLoaderManager } from "./GLTFLoaderManager"
 
-enum LoadError {
+export enum LoadError {
   ERROR_UNKNOWN = 1
 }
 
@@ -29,10 +29,8 @@ export class GLTFLoader {
 
   /**
    * Loads a glTF file as an Object asynchronously. 
-   * @param fileId glTF file ID 
    */
-  load(
-  ): void {
+  load(): void {
     gltfLoaderManager.load(this)
   }
 }

@@ -20,7 +20,7 @@ export function callEngine(funcId: i32, buf: ArrayBuffer): ArrayBuffer {
 
 const callSandboxFuncMap = new Map<i32, (data: ArrayBuffer) => ArrayBuffer>()
 
-export function registerFuncToCallSandboxFuncMap(funcId: i32, func: (data: ArrayBuffer) => ArrayBuffer): void {
+export function registerCallSandboxFunc(funcId: i32, func: (data: ArrayBuffer) => ArrayBuffer): void {
   if (callSandboxFuncMap.has(funcId)) {
     throw new Error("Already exits cannot register the same function. funcId: " + funcId.toString())
   } else {

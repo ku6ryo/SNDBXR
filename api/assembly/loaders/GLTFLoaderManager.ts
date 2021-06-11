@@ -1,19 +1,24 @@
 import { Decoder, Encoder, Sizer } from "@wapc/as-msgpack";
-import { callEngine } from "../interface";
+import { callEngine, registerCallSandboxFunc } from "../interface";
 import { GLTFLoader } from "./GLTFLoader";
-import { LOAD_GLTF } from "../function_ids"
+import { LOAD_GLTF, LOAD_GLTF_ON_COMPLETE, LOAD_GLTF_ON_PROGRESS } from "../function_ids"
 import { objectEventManager } from "../global"
 import { GroupObject } from "../objects/GroupObject";
 
-enum CompleteStatus {
-  SUCCESS = 0
-}
+const SUCCESS_STATUS = 0
 
 class GLTFLoaderManager {
 
-  loaderMap = new Map<i32, GLTFLoader>()
+  private static instanceCreated: boolean = false
+  private loaderMap: Map<i32, GLTFLoader> = new Map<i32, GLTFLoader>()
 
-  load(loader: GLTFLoader) {
+  constructor() {
+    if (GLTFLoaderManager.instanceCreated) {
+      throw new Error("Already created")
+    }
+  }
+
+  load(loader: GLTFLoader): void {
     const sizer = new Sizer()
     sizer.writeString(loader.fileId)
     const buf = new ArrayBuffer(sizer.length)
@@ -43,7 +48,7 @@ class GLTFLoaderManager {
   onComplete(sessionId: i32, status: i32, objectId: i32): void {
     if (this.loaderMap.has(sessionId)) {
       const loader = this.loaderMap.get(sessionId)
-      if (status === CompleteStatus.SUCCESS) {
+      if (status === SUCCESS_STATUS) {
         const obj = new GroupObject(objectId, objectEventManager)
         loader.onLoad(obj)
       } else {
@@ -57,3 +62,23 @@ class GLTFLoaderManager {
 }
 
 export const gltfLoaderManager = new GLTFLoaderManager()
+
+function onComplete(buf: ArrayBuffer): ArrayBuffer {
+  const decoder = new Decoder(buf)
+  const sessionId = decoder.readInt32()
+  const status = decoder.readInt32()
+  const objectId = decoder.readInt32()
+  gltfLoaderManager.onComplete(sessionId, status, objectId)
+  return (new Uint8Array(0)).buffer
+}
+function onProgress(buf: ArrayBuffer): ArrayBuffer {
+  const decoder = new Decoder(buf)
+  const sessionId = decoder.readInt32()
+  const loaded = decoder.readInt32()
+  const total = decoder.readInt32()
+  gltfLoaderManager.onProgress(sessionId, loaded, total)
+  return (new Uint8Array(0)).buffer
+}
+
+registerCallSandboxFunc(LOAD_GLTF_ON_COMPLETE, onComplete)
+registerCallSandboxFunc(LOAD_GLTF_ON_PROGRESS, onProgress)
