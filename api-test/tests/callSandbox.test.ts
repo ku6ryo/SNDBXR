@@ -1,5 +1,6 @@
 import path from "path"
 import fs from "fs"
+import { abort } from "./utils/asAbort"
 import { encode, decodeMulti } from "@msgpack/msgpack"
 
 test("callSandbox", async () => {
@@ -7,12 +8,7 @@ test("callSandbox", async () => {
   const file = fs.readFileSync(pathToWasm)
   const source = await WebAssembly.instantiate(file, {
     env: {
-      abort: function (mPtr) {
-        const len = new Uint32Array(memory.buffer.slice(mPtr - 4, mPtr))[0]
-        const decoder = new TextDecoder()
-        const msg = decoder.decode(new Uint8Array(memory.buffer.slice(mPtr, mPtr + len)))
-        throw new Error(msg)
-      }
+      abort: (mPtr: number, fPtr: number, line: number, column: number) => abort(memory, mPtr, fPtr, line, column)
     },
   })
   const instance = source.instance
@@ -20,10 +16,10 @@ test("callSandbox", async () => {
   const data = [1234, 12.34, "1234"]
   const encoded = encode(data)
   const ptr = (instance.exports.main as (len: number) => number)(encoded.byteLength - 1)
-  ;(new Uint8Array(memory.buffer)).set(encoded.slice(1), ptr) 
+  ;(new Uint8Array(memory.buffer)).set(encoded.subarray(1), ptr) 
   const rPtr = (instance.exports.callSandbox as (funcId: number, ptr: number) => number)(1234, ptr)
   const rLen = new Uint32Array(memory.buffer)[(ptr >> 2) - 1]
-  const rData = new Uint8Array(memory.buffer.slice(rPtr, rPtr + rLen))
+  const rData = new Uint8Array(memory.buffer).subarray(rPtr, rPtr + rLen)
   const entries = decodeMulti(rData)
   const entryArray = []
   for (const entry of entries) {
