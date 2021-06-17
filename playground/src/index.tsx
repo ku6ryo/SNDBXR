@@ -16,7 +16,7 @@ import { VscPackage } from "react-icons/vsc"
 import { CgExtension } from "react-icons/cg"
 import { FileManager } from "./components/FileManger"
 import { Asset, AssetType } from "./models/Asset"
-import { UploadedFile } from "./models/UploadedFile"
+import { UserFile } from "./models/UserFile"
 import { CodeEditor } from "./components/CodeEditor"
 
 
@@ -50,7 +50,6 @@ const App = () => {
   const [player, setPlayer] = useState(Player.THREE)
   const [wasmBuilds, setWasmBuilds] = useState<WasmBuild[]>([])
   const [leftBottomTab, setLeftBottomTab] = useState(LeftBottomTab.OUTPUT)
-  const [uploadedFiles, setUploadeFiles] = useState<UploadedFile[]>([])
   const [panel, setPanel] = useState(Panel.CODE)
   const [assets, setAssets] = useState<Asset[]>([])
 
@@ -97,17 +96,14 @@ const App = () => {
     }
     setAssets([asset, ...assets])
   }
-  const onUploadedAdd = (file: UploadedFile) => {
-    ;(playerIFrameRef.current?.contentWindow! as any).loadGltf(API_BASE_PATH + file.path)
+  const onFileAddClick = (file: UserFile) => {
+    ;(playerIFrameRef.current?.contentWindow! as any).loadGltf(file.url)
     const asset = {
       id: uuid(),
       type: AssetType.GLTF,
-      name: file.name,
+      name: file.path,
     }
     setAssets([asset, ...assets])
-  }
-  const onFileUploaded = (uploaded: UploadedFile) => {
-    setUploadeFiles([uploaded, ...uploadedFiles])
   }
   const onBuildCreated = (build: WasmBuild) => {
     setWasmBuilds([build, ...wasmBuilds])
@@ -159,9 +155,7 @@ const App = () => {
           >
             {panel === Panel.FILE && (
               <FileManager
-                files={uploadedFiles}
-                onAddClick={onUploadedAdd}
-                onFileUploaded={onFileUploaded}
+                onAddClick={onFileAddClick}
               />
             )}
             {panel === Panel.CODE && (

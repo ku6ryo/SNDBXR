@@ -1,32 +1,35 @@
 import React, { useState } from "react"
 import { apiClient } from "../../global"
-import { UploadedFile } from "../../models/UploadedFile"
+import { UserFile } from "../../models/UserFile"
 import style from "./style.module.scss"
+import { v4 as uuid } from "uuid"
 
 type Props = {
-  files: UploadedFile[],
-  onAddClick: (asset: UploadedFile) => void
-  onFileUploaded: (file: UploadedFile) => void
+  onAddClick: (file: UserFile) => void
 }
 
 export function FileManager({
-  files,
   onAddClick,
-  onFileUploaded,
 } : Props) {
-  const [file, setFile] = useState<File | null>(null)
+  const [userFiles, setUserFiles] = useState<UserFile[]>([])
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files
     if (files && files.length > 0) {
       const file = files[0]
-      setFile(file)
-    }
-  }
-  const onUploadClick = async () => {
-    if (file) {
-      const uploaded = await apiClient.uploadFile(file)
-      onFileUploaded(uploaded)
+      const reader = new FileReader()
+      reader.addEventListener("load", function () {
+        const userFile = {
+          id: uuid(),
+          path: file.name,
+          type: file.type,
+          url: reader.result,
+        } as UserFile
+        setUserFiles([userFile, ...userFiles])
+      }, false);
+      if (file) {
+        reader.readAsDataURL(file);
+      }
     }
   }
 
@@ -36,13 +39,10 @@ export function FileManager({
         <input type="file" onChange={onFileChange}/>
       </div>
       <div>
-        <button onClick={onUploadClick}>upload</button>
-      </div>
-      <div>
-        {files.map(file => {
+        {userFiles.map(file => {
           return (
             <div key={file.id}>
-              <div>{file.name}</div>
+              <div>{file.path}</div>
               <div onClick={() => onAddClick(file)}>add</div>
             </div>
           )

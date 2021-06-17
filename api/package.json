@@ -1,6 +1,6 @@
 {
   "name": "sndbxr-wasm-api",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "APIs for WASM environment",
   "scripts": {
     "test": "jest",

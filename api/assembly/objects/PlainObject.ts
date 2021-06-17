@@ -8,6 +8,8 @@ import {
   GET_MATERIAL_OF_OBJECT,
   SET_OBJECT_SCALE,
   GET_OBJECT_SCALE,
+  GET_OBJECT_NAME,
+  SET_OBJECT_NAME,
 } from "../function_ids"
 import {
   callEngine_i_i,
@@ -16,16 +18,47 @@ import {
 } from "../gate"
 import { Material } from "../Material"
 import { Vector3 } from "../Vector3"
+import { ObjectType } from "./ObjectType"
+import { Encoder, Sizer, Decoder } from "@wapc/as-msgpack" 
+import { callEngine } from "../interface";
 
-export class BaseObject {
+export class PlainObject {
   id: i32
+  type: ObjectType
   eventManger: ObjectEventManager
 
   listeners: Map<EventType, (obj: Object) => void> = new Map()
 
-  constructor(id: i32, eventManager: ObjectEventManager) {
+  constructor(
+    id: i32,
+    type: ObjectType,
+    eventManager: ObjectEventManager
+  ) {
     this.id = id
+    this.type = type
     this.eventManger = eventManager
+  }
+
+  setName(name: string): void {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    sizer.writeString(name)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    encoder.writeString(name)
+    callEngine(SET_OBJECT_NAME, buf)
+  }
+
+  getName(): string {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    const res = callEngine(GET_OBJECT_NAME, buf)
+    const decoder = new Decoder(res)
+    return decoder.readString()
   }
 
   getPosition(): Vector3 {

@@ -1224,7 +1224,7 @@ signal-exit@^3.0.2:
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
 sndbxr-wasm-api@../api:
-  version "0.0.1"
+  version "0.0.2"
   dependencies:
     "@wapc/as-msgpack" "^0.1.12"
 

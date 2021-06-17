@@ -6,10 +6,13 @@ import { ObjectService } from "./ObjectService"
 import {
   CREATE_PRIMITIVE_OBJECT,
   GET_MATERIAL_OF_OBJECT,
+  GET_OBJECT_BY_NAME,
   GET_OBJECT_POSITION,
   SET_MATERIAL_COLOR,
   SET_OBJECT_POSITION,
   SET_OBJECT_SCALE,
+  SET_OBJECT_NAME,
+  GET_OBJECT_NAME,
 } from "./function_ids"
 import { MaterialService } from "./MaterialService"
 
@@ -33,6 +36,9 @@ export class Sandbox extends TypeScriptSandbox {
     this.objectService = new ObjectService(this.container, this.materialService)
 
     this.callEngineFuncMap.set(CREATE_PRIMITIVE_OBJECT, this.objectService.createPrimitive.bind(this.objectService))
+    this.callEngineFuncMap.set(GET_OBJECT_BY_NAME, this.objectService.getObjectByName.bind(this.objectService))
+    this.callEngineFuncMap.set(SET_OBJECT_NAME, this.objectService.setObjectName.bind(this.objectService))
+    this.callEngineFuncMap.set(GET_OBJECT_NAME, this.objectService.getObjectName.bind(this.objectService))
     // Legacy
     this.callEngine_i_i_Map.set(GET_MATERIAL_OF_OBJECT, this.objectService.getMaterial.bind(this.objectService))
     this.callEngine_fff_i_Map.set(GET_OBJECT_POSITION, this.objectService.getObjectPosition.bind(this.objectService))
