@@ -8,7 +8,7 @@ export class ObjectEventManager {
 
   objects: Map<i32, PlainObject> = new Map()
 
-  setListener(object: PlainObject, type: EventType): i32  {
+  setListener(object: PlainObject, type: EventType): i32 {
     this.objects.set(object.id, object)
     // return callEngine_i_ii(SET_OBJECT_EVENT_LISTENER, object.id, type)[0].vi32
   }  

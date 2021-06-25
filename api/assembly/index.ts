@@ -1,5 +1,7 @@
+export const VERSION = "0.0.1"
 export * from "./debug"
 export * from "./loaders/GLTFLoader"
+export * from "./materials/StandardMaterial"
 export * from "./objects/MeshObject"
 export * from "./objects/GroupObject"
 export * from "./objects/ObjectUtil"

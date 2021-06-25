@@ -16,11 +16,12 @@ import {
   callEngine_i_ifff,
   callEngine_fff_i,
 } from "../gate"
-import { Material } from "../Material"
+import { Material } from "../materials/Material"
+import { MaterialType } from "../materials/MaterialType"
 import { Vector3 } from "../Vector3"
 import { ObjectType } from "./ObjectType"
 import { Encoder, Sizer, Decoder } from "@wapc/as-msgpack" 
-import { callEngine } from "../interface";
+import { callEngine } from "../interface"
 
 export class PlainObject {
   id: i32
@@ -84,7 +85,7 @@ export class PlainObject {
     if (id === -1) {
       return null
     }
-    return new Material(id)
+    return new Material(id, MaterialType.Unknown)
   }
 
   listen(type: EventType, callback: (obj: Object) => void): i32 {

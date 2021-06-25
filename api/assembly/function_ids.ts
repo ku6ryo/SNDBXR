@@ -1,7 +1,6 @@
 
 export const LOG = 100
 
-
 // OBJECT/GENERAL
 export const GET_OBJECT_ID_BY_NAME = 1000
 export const CREATE_PRIMITIVE_OBJECT = 1001
@@ -23,6 +22,7 @@ export const SET_OBJECT_EVENT_LISTENER = 1300
 export const GET_MATERIAL_ID_BY_NAME = 2000
 // MATERIAL/COLOR
 export const SET_MATERIAL_COLOR = 2100
+export const SET_MATERIAL_COLOR_MAP = 2110
 
 // Loader
 export const LOAD_GLTF = 3000
@@ -30,6 +30,10 @@ export const LOAD_GLTF_ON_PROGRESS = 3001
 export const LOAD_GLTF_ON_COMPLETE = 3002
 
 export const LOAD_SKY = 4000
+
+export const LOAD_RESOURCE = 5000
+export const LOAD_RESOURCE_ON_PROGRESS = 5001
+export const LOAD_RESOURCE_ON_COMPLETE = 5002
 
 // FROM Sandbox
 export const SANDBOX_ON_OBJECT_EVENT = 10000

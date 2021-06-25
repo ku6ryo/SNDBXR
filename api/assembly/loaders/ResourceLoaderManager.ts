@@ -1,29 +1,28 @@
-import { Decoder, Encoder, Sizer } from "@wapc/as-msgpack";
-import { callEngine, registerCallSandboxFunc } from "../interface";
-import { GLTFLoader } from "./GLTFLoader";
+import { Decoder, Encoder, Sizer } from "@wapc/as-msgpack"
+import { callEngine, registerCallSandboxFunc } from "../interface"
+import { ResourceLoader } from "./ResourceLoader"
 import { LOAD_GLTF, LOAD_GLTF_ON_COMPLETE, LOAD_GLTF_ON_PROGRESS } from "../function_ids"
-import { objectEventManager } from "../global"
-import { GroupObject } from "../objects/GroupObject";
 
 const SUCCESS_STATUS = 0
 
-class GLTFLoaderManager {
+class ResourceLoaderManager {
 
   private static instanceCreated: boolean = false
-  private loaderMap: Map<i32, GLTFLoader> = new Map<i32, GLTFLoader>()
+  private loaderMap: Map<i32, ResourceLoader> = new Map<i32, ResourceLoader>()
 
   constructor() {
-    if (GLTFLoaderManager.instanceCreated) {
+    if (ResourceLoaderManager.instanceCreated) {
       throw new Error("Already created")
     }
   }
 
-  load(loader: GLTFLoader): void {
+  load(loader: ResourceLoader): void {
     const sizer = new Sizer()
-    sizer.writeString(loader.fileId)
+    sizer.writeString(loader.filePath)
+    sizer.writeInt32(loader.resourceType)
     const buf = new ArrayBuffer(sizer.length)
     const encoder = new Encoder(buf)
-    encoder.writeString(loader.fileId)
+    encoder.writeString(loader.filePath)
     const rBuf = callEngine(LOAD_GLTF, buf)
     const decoder = new Decoder(rBuf)
     const sessionId = decoder.readInt32()
@@ -45,12 +44,11 @@ class GLTFLoaderManager {
    * @param status Session status 
    * @param objectId ID of object. If object is not created, -1.
    */
-  onComplete(sessionId: i32, status: i32, objectId: i32): void {
+  onComplete(sessionId: i32, status: i32, resourceId: i32): void {
     if (this.loaderMap.has(sessionId)) {
       const loader = this.loaderMap.get(sessionId)
       if (status === SUCCESS_STATUS) {
-        const obj = new GroupObject(objectId, objectEventManager)
-        loader.onLoad(obj)
+        loader.onLoad(resourceId)
       } else {
         loader.onError(status)
       }
@@ -61,14 +59,14 @@ class GLTFLoaderManager {
   }
 }
 
-export const gltfLoaderManager = new GLTFLoaderManager()
+export const resourceLoaderManager = new ResourceLoaderManager()
 
 function onComplete(buf: ArrayBuffer): ArrayBuffer {
   const decoder = new Decoder(buf)
   const sessionId = decoder.readInt32()
   const status = decoder.readInt32()
-  const objectId = decoder.readInt32()
-  gltfLoaderManager.onComplete(sessionId, status, objectId)
+  const resourceId = decoder.readInt32()
+  resourceLoaderManager.onComplete(sessionId, status, resourceId)
   return (new Uint8Array(0)).buffer
 }
 function onProgress(buf: ArrayBuffer): ArrayBuffer {
@@ -76,7 +74,7 @@ function onProgress(buf: ArrayBuffer): ArrayBuffer {
   const sessionId = decoder.readInt32()
   const loaded = decoder.readInt32()
   const total = decoder.readInt32()
-  gltfLoaderManager.onProgress(sessionId, loaded, total)
+  resourceLoaderManager.onProgress(sessionId, loaded, total)
   return (new Uint8Array(0)).buffer
 }
 
