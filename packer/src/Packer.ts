@@ -1,4 +1,3 @@
-import path from "path"
 import Zip from "jszip"
 import { Compiler } from "./Compiler"
 
@@ -10,6 +9,13 @@ export interface UserFile {
 const RESOURCE_FILE_DIR = "resources"
 const SCRIPT_WASM_FILE = "script.wasm"
 
+/**
+ * Package bundler.
+ * Package is a zip file and structure is like the below.
+ * - script.wasm
+ * - resources
+ *  - resource files ...
+ */
 export class Packer {
   #resourceFiles: UserFile[] = []
   #scriptFiles: UserFile[] = []

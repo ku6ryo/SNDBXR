@@ -1,7 +1,7 @@
 {
   "name": "sndbxr",
-  "version": "0.0.2",
-  "description": "APIs for WASM environment",
+  "version": "0.0.3",
+  "description": "APIs for WASM scripting",
   "scripts": {
     "test": "jest",
     "docs": "documentation build ./assembly --parse-extension ts -f html -o docs --document-exported"
