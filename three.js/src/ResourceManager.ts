@@ -30,8 +30,4 @@ export class ResourceManager {
   async getAsBlob(path: string) {
     return await this.getRaw(path).blob()
   }
-
-  async getAsUrl(path: string) {
-    return URL.createObjectURL(await this.getAsBlob(path))
-  }
 }

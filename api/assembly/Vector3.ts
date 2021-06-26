@@ -30,7 +30,7 @@ export class Vector3 {
   }
 
   length(): f32 {
-    return Math.sqrt(this.length()) as f32
+    return Math.sqrt(this.lengthSquared()) as f32
   }
 
   distanceToSquared(v: Vector3): f32 {

@@ -22,7 +22,7 @@ export class Sandbox {
   resourceLoaderInterface: ResourceLoaderInterface
 
   wasmInstance: WebAssembly.Instance | null = null
-  wasmMemory: WebAssembly.Memory | null = null
+  wasmMemory: WebAssembly.Memory
   resourceManager: ResourceManager
 
   callEngineFuncMap = new Map<number, (arg: Uint8Array) => Uint8Array>()
@@ -38,10 +38,17 @@ export class Sandbox {
 
     this.materialServiceInterface = new MaterialServiceInterface(this.materialService)
     this.objectServiceInterface = new ObjectServiceInterface(this.objectService)
-    this.resourceLoaderInterface = new ResourceLoaderInterface(this, this.textureService)
+    this.resourceLoaderInterface = new ResourceLoaderInterface(
+      this,
+      this.resourceManager,
+      this.textureService,
+      this.objectService,
+    )
     this.materialServiceInterface.registerFuncs(this)
     this.objectServiceInterface.registerFuncs(this)
     this.resourceLoaderInterface.registerFuncs(this)
+
+    this.wasmMemory = new WebAssembly.Memory({ initial: 1, maximum: 10 })
   }
 
   registerFunc(funcId: number, func: (arg: Uint8Array) => Uint8Array) {
@@ -63,14 +70,6 @@ export class Sandbox {
     throw new Error('WASM instance is not set yet.')
   }
 
-  getWasmMemory (): WebAssembly.Memory {
-    const instance = this.getWasmInstance()
-    if (instance.exports.memory) {
-      return instance.exports.memory as WebAssembly.Memory
-    }
-    throw new Error('No memory export.')
-  }
-
   onStart () {
     (this.getWasmInstance().exports as any).start()
   }
@@ -85,7 +84,7 @@ export class Sandbox {
     line: number,
     column: number
   ) {
-    const memory = this.getWasmMemory()
+    const memory = this.wasmMemory
     const mLen = new Uint32Array(memory.buffer)[(messagePtr >> 2) - 1]
     const fLen = new Uint32Array(memory.buffer)[(filePtr >> 2) - 1]
     const decoder = new TextDecoder()
@@ -95,30 +94,33 @@ export class Sandbox {
   }
 
   callSanbdbox(funcId: number, ua: Uint8Array): Uint8Array {
+    const memory = this.wasmMemory
     const argPtr = ((this.getWasmInstance().exports as any).malloc as (len: number) => number)(ua.byteLength - 1)
-    ;(new Uint8Array(this.getWasmMemory().buffer)).set(ua.subarray(1), argPtr)
+    ;(new Uint8Array(memory.buffer)).set(ua.subarray(1), argPtr)
     const rPtr = ((this.getWasmInstance().exports as any).callSandbox as (funcId: number, ptr: number) => number)(funcId, argPtr)
-    const rLen = new Uint32Array(this.getWasmMemory().buffer)[(rPtr >> 2) - 1]
-    const rData = new Uint8Array(this.getWasmMemory().buffer).subarray(rPtr, rPtr + rLen)
+    const rLen = new Uint32Array(memory.buffer)[(rPtr >> 2) - 1]
+    const rData = new Uint8Array(memory.buffer).subarray(rPtr, rPtr + rLen)
     return rData
   }
 
   createImports () {
     return {
       env: {
-        abort: this.onAbort.bind(this)
+        abort: this.onAbort.bind(this),
+        memory: this.wasmMemory,
       },
       interface: {
         callEngineImport: (funcId: number, ptr: number) => {
-          const aLen = new Uint32Array(this.getWasmMemory().buffer)[(ptr >> 2) - 1]
-          const aData = new Uint8Array(this.getWasmMemory().buffer).subarray(ptr, ptr + aLen)
+          const memory = this.wasmMemory
+          const aLen = new Uint32Array(memory.buffer)[(ptr >> 2) - 1]
+          const aData = new Uint8Array(memory.buffer).subarray(ptr, ptr + aLen)
           const func = this.callEngineFuncMap.get(funcId)
           if (!func) {
             throw new Error("Unknown func: " + funcId)
           }
           const rData = func(aData)
           const rPtr = (this.getWasmInstance().exports.malloc as (len: number) => number)(rData.byteLength)
-          ;(new Uint8Array(this.getWasmMemory().buffer)).set(rData, rPtr)
+          ;(new Uint8Array(memory.buffer)).set(rData, rPtr)
           return rPtr
         }
       },

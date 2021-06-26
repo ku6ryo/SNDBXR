@@ -38,8 +38,8 @@ export class TextureService {
     }
   }
 
-  async createTexture(filePath: string) {
-    const url = await this.resourceManagere.getAsUrl(filePath)
+  createTexture(blob: Blob) {
+    const url = URL.createObjectURL(blob)
     const texture = new TextureLoader().load(url)
     const id = this.register(texture)
     return id

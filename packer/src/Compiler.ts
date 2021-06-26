@@ -85,6 +85,7 @@ export class Compiler {
     if (generateSourceMap) {
       commandParts.push(`--sourceMap`)
     }
+    commandParts.push("--importMemory")
 
     return new Promise((resolve, reject) => {
       const stdout = asc.createMemoryStream();

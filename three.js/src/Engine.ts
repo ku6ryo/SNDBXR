@@ -43,8 +43,8 @@ export class Engine {
   /**
    * Adds canvas to HTML document.
    */
-  addToDocument() {
-    document.body.appendChild(this.renderer.domElement)
+  getCanvas(): HTMLCanvasElement {
+    return this.renderer.domElement
   }
 
   /**

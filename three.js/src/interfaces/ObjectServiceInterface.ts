@@ -11,6 +11,8 @@ import {
   GET_OBJECT_BY_NAME,
   SET_OBJECT_NAME,
   GET_OBJECT_NAME,
+  SET_OBJECT_QUATERNION,
+  GET_OBJECT_QUATERNION,
 } from "./function_ids"
 
 /**
@@ -27,9 +29,11 @@ export class ObjectServiceInterface {
     sandbox.registerFunc(SET_OBJECT_POSITION, this.setPosition.bind(this))
     sandbox.registerFunc(GET_OBJECT_SCALE, this.getScale.bind(this))
     sandbox.registerFunc(SET_OBJECT_SCALE, this.setScale.bind(this))
-    sandbox.registerFunc(GET_OBJECT_BY_NAME, this.getByName.bind(this.objectService))
-    sandbox.registerFunc(SET_OBJECT_NAME, this.setName.bind(this.objectService))
-    sandbox.registerFunc(GET_OBJECT_NAME, this.getName.bind(this.objectService))
+    sandbox.registerFunc(GET_OBJECT_BY_NAME, this.getByName.bind(this))
+    sandbox.registerFunc(SET_OBJECT_NAME, this.setName.bind(this))
+    sandbox.registerFunc(GET_OBJECT_NAME, this.getName.bind(this))
+    sandbox.registerFunc(SET_OBJECT_QUATERNION, this.setQuaternion.bind(this))
+    sandbox.registerFunc(GET_OBJECT_QUATERNION, this.getQuaternion.bind(this))
   }
 
   createPrimitive(ua: Uint8Array) {
@@ -78,6 +82,24 @@ export class ObjectServiceInterface {
     const objectId = decoded.next().value as number
     const v = this.objectService.getScale(objectId)
     return encode([v.x, v.y, v.z])
+  }
+
+  setQuaternion(ua: Uint8Array) {
+    const decoded = decodeMulti(ua)
+    const objectId = decoded.next().value as number
+    const x = decoded.next().value as number
+    const y = decoded.next().value as number
+    const z = decoded.next().value as number
+    const w = decoded.next().value as number
+    this.objectService.setQuaternion(objectId, x, y, z, w)
+    return encode(0)
+  }
+
+  getQuaternion(ua: Uint8Array) {
+    const decoded = decodeMulti(ua)
+    const objectId = decoded.next().value as number
+    const q = this.objectService.getQuaternion(objectId)
+    return encode([q.x, q.y, q.z, q.w])
   }
 
   getByName(ua: Uint8Array) {

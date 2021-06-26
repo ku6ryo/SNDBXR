@@ -5,6 +5,7 @@ import {
   Group,
   Object3D,
 } from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { MaterialService, MaterialType } from "./MaterialService"
 
 export enum Primitive {
@@ -125,6 +126,16 @@ export class ObjectService {
     obj.scale.set(x, y, z)
   }
 
+  getQuaternion(objectId: number) {
+    const obj = this.getObject(objectId)
+    return obj.quaternion
+  }
+
+  setQuaternion(objectId: number, x: number, y: number, z: number, w: number) {
+    const obj = this.getObject(objectId)
+    obj.quaternion.set(x, y, z, w)
+  }
+
   getMaterial(objectId: number) {
     const object = this.getObject(objectId)
     if (object instanceof Mesh) {
@@ -145,5 +156,22 @@ export class ObjectService {
       throw new Error("Cannot set material to non mesh object")
     }
     (obj as Mesh).material = mat
+  }
+
+  async loadGltf(blob: Blob) {
+    const url = URL.createObjectURL(blob)
+    const loader = new GLTFLoader()
+    return new Promise((resolve, reject) => {
+      loader.load(
+        url,
+        (gltf) => {
+          this.container.add(gltf.scene)
+          const id = this.registerObject(gltf.scene)
+          resolve(id)
+        }, () => {
+        }, (error) => {
+          reject(error)
+        })
+    })
   }
 }

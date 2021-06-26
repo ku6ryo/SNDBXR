@@ -9,11 +9,13 @@ import {
   GET_OBJECT_SCALE,
   GET_OBJECT_NAME,
   SET_OBJECT_NAME,
+  SET_OBJECT_QUATERNION,
 } from "../function_ids"
 import { Vector3 } from "../Vector3"
 import { ObjectType } from "./ObjectType"
 import { Encoder, Sizer, Decoder } from "@wapc/as-msgpack" 
 import { callEngine } from "../interface"
+import { Quaternion } from "../Quaternion"
 
 /**
  * The base object class.
@@ -75,15 +77,15 @@ export class PlainObject {
   setPosition(v: Vector3): void {
     const sizer = new Sizer()
     sizer.writeInt32(this.id)
-    sizer.writeInt32(v.x)
-    sizer.writeInt32(v.y)
-    sizer.writeInt32(v.z)
+    sizer.writeFloat32(v.x)
+    sizer.writeFloat32(v.y)
+    sizer.writeFloat32(v.z)
     const buf = new ArrayBuffer(sizer.length)
     const encoder = new Encoder(buf)
     encoder.writeInt32(this.id)
-    encoder.writeInt32(v.x)
-    encoder.writeInt32(v.y)
-    encoder.writeInt32(v.z)
+    encoder.writeFloat32(v.x)
+    encoder.writeFloat32(v.y)
+    encoder.writeFloat32(v.z)
     callEngine(SET_OBJECT_POSITION, buf)
   }
 
@@ -104,16 +106,48 @@ export class PlainObject {
   setScale(v: Vector3): void {
     const sizer = new Sizer()
     sizer.writeInt32(this.id)
-    sizer.writeInt32(v.x)
-    sizer.writeInt32(v.y)
-    sizer.writeInt32(v.z)
+    sizer.writeFloat32(v.x)
+    sizer.writeFloat32(v.y)
+    sizer.writeFloat32(v.z)
     const buf = new ArrayBuffer(sizer.length)
     const encoder = new Encoder(buf)
     encoder.writeInt32(this.id)
-    encoder.writeInt32(v.x)
-    encoder.writeInt32(v.y)
-    encoder.writeInt32(v.z)
+    encoder.writeFloat32(v.x)
+    encoder.writeFloat32(v.y)
+    encoder.writeFloat32(v.z)
     callEngine(SET_OBJECT_SCALE, buf)
+  }
+
+  getQuaternion(): Quaternion {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    const res = callEngine(SET_OBJECT_QUATERNION, buf)
+    const decoder = new Decoder(res)
+    const x = decoder.readFloat32()
+    const y = decoder.readFloat32()
+    const z = decoder.readFloat32()
+    const w = decoder.readFloat32()
+    return new Quaternion(x, y, z, w)
+  }
+
+  setQuaternion(q: Quaternion): void {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    sizer.writeFloat32(q.x)
+    sizer.writeFloat32(q.y)
+    sizer.writeFloat32(q.z)
+    sizer.writeFloat32(q.w)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    encoder.writeFloat32(q.x)
+    encoder.writeFloat32(q.y)
+    encoder.writeFloat32(q.z)
+    encoder.writeFloat32(q.w)
+    callEngine(SET_OBJECT_QUATERNION, buf)
   }
 
   listen(type: EventType, callback: (obj: Object) => void): i32 {

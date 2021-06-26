@@ -14,6 +14,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   window.createSandbox = engine.createSandbox.bind(engine)
   window.deleteSandbox = engine.deleteSandbox.bind(engine)
   window.deleteAllSandboxes = engine.deleteAllSandboxes.bind(engine)
-  engine.addToDocument()
+  document.body.appendChild(engine.getCanvas())
   engine.start()
 })
