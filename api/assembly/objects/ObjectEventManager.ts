@@ -1,8 +1,5 @@
 import { EventType, } from "../EventType"
 import { PlainObject } from "./PlainObject"
-import {
-  SET_OBJECT_EVENT_LISTENER,
-} from "../function_ids"
 
 export class ObjectEventManager {
 

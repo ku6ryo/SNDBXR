@@ -5,8 +5,7 @@ import {
   Group,
   Object3D,
 } from "three"
-import { MaterialService } from "./MaterialService"
-import { decode, decodeMulti, encode } from "@msgpack/msgpack"
+import { MaterialService, MaterialType } from "./MaterialService"
 
 export enum Primitive {
   Cube = 0,
@@ -59,8 +58,7 @@ export class ObjectService {
    * @param type Type of primitive
    * @returns Id of object.
    */
-  createPrimitive(ua: Uint8Array) {
-    const type = decode(ua) as number
+  createPrimitive(type: Primitive) {
     let geometry = null
     if (type === Primitive.Cube) {
       geometry = new BoxGeometry(1, 1)
@@ -70,38 +68,32 @@ export class ObjectService {
     if (!geometry) {
       throw new Error("Unknown primitive")
     }
-    const [materialId] = this.materialService.createMaterial()
-    const material = this.materialService.getMaterial(materialId)
-    const obj = new Mesh(geometry, material)
+    const matId = this.materialService.createMaterial(MaterialType.Standard)
+    const mat = this.materialService.getMaterialById(matId)
+    const obj = new Mesh(geometry, mat)
     this.container.add(obj)
     const id = this.registerObject(obj)
-    return encode(id)
+    return id
   }
 
-  getObjectByName(ua: Uint8Array) {
-    const name = decode(ua) as string
+  getByName(name: string) {
     const obj = this.container.getObjectByName(name)
     if (obj) {
       const id = this.registerObject(obj)
-      return encode([id, 0]).subarray(1)
+      return id
     } else {
-      return encode([-1, 0]).subarray(1)
+      return null
     }
   }
 
-  getObjectName(ua: Uint8Array) {
-    const objectId = decode(ua) as number
+  getName(objectId: number) {
     const obj = this.getObject(objectId)
-    return encode(obj.name)
+    return obj.name
   }
 
-  setObjectName(ua: Uint8Array) {
-    const decoded = decodeMulti(ua)
-    const objectId = decoded.next().value as number
-    const name = decoded.next().value as string
+  setName(objectId: number, name: string) {
     const obj = this.getObject(objectId)
     obj.name = name
-    return encode(0)
   }
 
   getObject(objectId: number) {
@@ -113,34 +105,24 @@ export class ObjectService {
     }
   }
 
-  setObjectPosition(objectId: number, x: number, y: number, z: number) {
-    if (!this.objectMap.has(objectId)) {
-      return [1]
-    } else {
-      const obj = this.objectMap.get(objectId)
-      obj?.position.set(x, y, z)
-      return [0]
-    }
+  getPosition(objectId: number) {
+    const obj = this.getObject(objectId)
+    return obj.position
   }
 
-  setObjectScale(objectId: number, x: number, y: number, z: number) {
-    if (!this.objectMap.has(objectId)) {
-      return [1]
-    } else {
-      const obj = this.objectMap.get(objectId)
-      obj?.scale.set(x, y, z)
-      return [0]
-    }
+  setPosition(objectId: number, x: number, y: number, z: number) {
+    const obj = this.getObject(objectId)
+    obj.position.set(x, y, z)
   }
 
-  getObjectPosition(objectId: number) {
-    if (!this.objectMap.has(objectId)) {
-      return [1]
-    } else {
-      const obj = this.objectMap.get(objectId)
-      const pos = obj!.position
-      return [pos.x, pos.y, pos.z]
-    }
+  getScale(objectId: number) {
+    const obj = this.getObject(objectId)
+    return obj.scale
+  }
+
+  setScale(objectId: number, x: number, y: number, z: number) {
+    const obj = this.getObject(objectId)
+    obj.scale.set(x, y, z)
   }
 
   getMaterial(objectId: number) {
@@ -152,7 +134,16 @@ export class ObjectService {
         return this.materialService.getMaterialId(object.material)
       }
     } else {
-      return [-1]
+      return null
     }
+  }
+
+  setMaterial(objectId: number, materialId: number) {
+    const obj = this.getObject(objectId)
+    const mat = this.materialService.getMaterialById(materialId)  
+    if (obj.type !== "Mesh") {
+      throw new Error("Cannot set material to non mesh object")
+    }
+    (obj as Mesh).material = mat
   }
 }

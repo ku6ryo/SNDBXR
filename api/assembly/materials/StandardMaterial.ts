@@ -7,8 +7,14 @@ import { MaterialType } from "./MaterialType"
 import { Texture } from "../Texture"
 import { callEngine } from "../interface"
 import { Sizer, Encoder } from "@wapc/as-msgpack"
+import { MaterialUtil } from "./MaterialUtil"
 
 export class StandardMaterial extends Material {
+
+  static create(): StandardMaterial {
+    return new StandardMaterial(MaterialUtil.createMaterial(MaterialType.Standard))
+  }
+
   constructor(id: i32) {
     super(id, MaterialType.Standard)
   }

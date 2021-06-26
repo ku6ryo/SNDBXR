@@ -1,20 +1,19 @@
 import "sanitize.css/sanitize.css"
-import { Three } from "./Three"
+import { Engine } from "./Engine"
 
 declare global {
   interface Window {
-    createSandbox: (utl: string) => Promise<void>
+    createSandbox: (url: string) => Promise<number>
     deleteSandbox: (sandboxId: number) => void
     deleteAllSandboxes: () => void
-    loadGltf: (url: string) => Promise<void>
   }
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const three = new Three()
-  three.setup()
-  window.createSandbox = three.load.bind(three)
-  window.deleteSandbox = three.deleteSandbox.bind(three)
-  window.deleteAllSandboxes = three.deleteAllSandboxes.bind(three)
-  window.loadGltf = three.loadGltf.bind(three)
-});
+  const engine = new Engine()
+  window.createSandbox = engine.createSandbox.bind(engine)
+  window.deleteSandbox = engine.deleteSandbox.bind(engine)
+  window.deleteAllSandboxes = engine.deleteAllSandboxes.bind(engine)
+  engine.addToDocument()
+  engine.start()
+})

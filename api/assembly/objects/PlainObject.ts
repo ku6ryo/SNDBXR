@@ -5,24 +5,20 @@ import { ObjectEventManager } from "./ObjectEventManager"
 import {
   SET_OBJECT_POSITION,
   GET_OBJECT_POSITION,
-  GET_MATERIAL_OF_OBJECT,
   SET_OBJECT_SCALE,
   GET_OBJECT_SCALE,
   GET_OBJECT_NAME,
   SET_OBJECT_NAME,
 } from "../function_ids"
-import {
-  callEngine_i_i,
-  callEngine_i_ifff,
-  callEngine_fff_i,
-} from "../gate"
-import { Material } from "../materials/Material"
-import { MaterialType } from "../materials/MaterialType"
 import { Vector3 } from "../Vector3"
 import { ObjectType } from "./ObjectType"
 import { Encoder, Sizer, Decoder } from "@wapc/as-msgpack" 
 import { callEngine } from "../interface"
 
+/**
+ * The base object class.
+ * Every object class extends this class.
+ */
 export class PlainObject {
   id: i32
   type: ObjectType
@@ -63,29 +59,61 @@ export class PlainObject {
   }
 
   getPosition(): Vector3 {
-    const values = callEngine_fff_i(GET_OBJECT_POSITION, this.id)
-    return new Vector3(values[0].vf32, values[1].vf32, values[2].vf32)
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    const res = callEngine(GET_OBJECT_POSITION, buf)
+    const decoder = new Decoder(res)
+    const x = decoder.readFloat32()
+    const y = decoder.readFloat32()
+    const z = decoder.readFloat32()
+    return new Vector3(x, y, z)
   }
 
-  setPosition(v: Vector3): i32 {
-    return callEngine_i_ifff(SET_OBJECT_POSITION, this.id, v.x, v.y, v.z)[0].vi32
+  setPosition(v: Vector3): void {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    sizer.writeInt32(v.x)
+    sizer.writeInt32(v.y)
+    sizer.writeInt32(v.z)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    encoder.writeInt32(v.x)
+    encoder.writeInt32(v.y)
+    encoder.writeInt32(v.z)
+    callEngine(SET_OBJECT_POSITION, buf)
   }
 
-  getScale(v: Vector3): Vector3 {
-    const values = callEngine_fff_i(GET_OBJECT_SCALE, this.id)
-    return new Vector3(values[0].vf32, values[1].vf32, values[2].vf32)
+  getScale(): Vector3 {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    const res = callEngine(GET_OBJECT_SCALE, buf)
+    const decoder = new Decoder(res)
+    const x = decoder.readFloat32()
+    const y = decoder.readFloat32()
+    const z = decoder.readFloat32()
+    return new Vector3(x, y, z)
   }
 
-  setScale(v: Vector3): i32 {
-    return callEngine_i_ifff(SET_OBJECT_SCALE, this.id, v.x, v.y, v.z)[0].vi32
-  }
-
-  getMaterial(): Material | null {
-    const id = callEngine_i_i(GET_MATERIAL_OF_OBJECT, this.id)[0].vi32
-    if (id === -1) {
-      return null
-    }
-    return new Material(id, MaterialType.Unknown)
+  setScale(v: Vector3): void {
+    const sizer = new Sizer()
+    sizer.writeInt32(this.id)
+    sizer.writeInt32(v.x)
+    sizer.writeInt32(v.y)
+    sizer.writeInt32(v.z)
+    const buf = new ArrayBuffer(sizer.length)
+    const encoder = new Encoder(buf)
+    encoder.writeInt32(this.id)
+    encoder.writeInt32(v.x)
+    encoder.writeInt32(v.y)
+    encoder.writeInt32(v.z)
+    callEngine(SET_OBJECT_SCALE, buf)
   }
 
   listen(type: EventType, callback: (obj: Object) => void): i32 {

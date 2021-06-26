@@ -1,50 +1,51 @@
-import { TypeScriptSandbox } from "./TypeScriptSandbox"
 import {
   Group,
 } from "three"
-import { ObjectService } from "./ObjectService"
-import {
-  CREATE_PRIMITIVE_OBJECT,
-  GET_MATERIAL_OF_OBJECT,
-  GET_OBJECT_BY_NAME,
-  GET_OBJECT_POSITION,
-  SET_MATERIAL_COLOR,
-  SET_OBJECT_POSITION,
-  SET_OBJECT_SCALE,
-  SET_OBJECT_NAME,
-  GET_OBJECT_NAME,
-} from "./function_ids"
-import { MaterialService } from "./MaterialService"
+import { ObjectService } from "./services/ObjectService"
+import { MaterialService } from "./services/MaterialService"
+import { ObjectServiceInterface } from "./interfaces/ObjectServiceInterface"
+import { MaterialServiceInterface } from "./interfaces/MaterialServiceInterface"
+import { ResourceManager } from "./ResourceManager"
+import { ResourceLoaderInterface } from "./interfaces/ResourceLoaderInterface"
+import { TextureService } from "./services/TextureService"
 
-export class Sandbox extends TypeScriptSandbox {
+export class Sandbox {
 
   id: number
   container: Group
   objectService: ObjectService
   materialService: MaterialService
+  textureService: TextureService
+
+  objectServiceInterface: ObjectServiceInterface
+  materialServiceInterface: MaterialServiceInterface
+  resourceLoaderInterface: ResourceLoaderInterface
+
   wasmInstance: WebAssembly.Instance | null = null
   wasmMemory: WebAssembly.Memory | null = null
+  resourceManager: ResourceManager
 
   callEngineFuncMap = new Map<number, (arg: Uint8Array) => Uint8Array>()
 
-  constructor(id: number, container: Group) {
-    super()
+  constructor(id: number, container: Group, resourceManager: ResourceManager) {
     this.id = id
     this.container = container
 
-    this.materialService = new MaterialService()
+    this.resourceManager = resourceManager
+    this.textureService = new TextureService(this.resourceManager)
+    this.materialService = new MaterialService(this.textureService)
     this.objectService = new ObjectService(this.container, this.materialService)
 
-    this.callEngineFuncMap.set(CREATE_PRIMITIVE_OBJECT, this.objectService.createPrimitive.bind(this.objectService))
-    this.callEngineFuncMap.set(GET_OBJECT_BY_NAME, this.objectService.getObjectByName.bind(this.objectService))
-    this.callEngineFuncMap.set(SET_OBJECT_NAME, this.objectService.setObjectName.bind(this.objectService))
-    this.callEngineFuncMap.set(GET_OBJECT_NAME, this.objectService.getObjectName.bind(this.objectService))
-    // Legacy
-    this.callEngine_i_i_Map.set(GET_MATERIAL_OF_OBJECT, this.objectService.getMaterial.bind(this.objectService))
-    this.callEngine_fff_i_Map.set(GET_OBJECT_POSITION, this.objectService.getObjectPosition.bind(this.objectService))
-    this.callEngine_i_ifff_Map.set(SET_OBJECT_POSITION, this.objectService.setObjectPosition.bind(this.objectService))
-    this.callEngine_i_ifff_Map.set(SET_OBJECT_SCALE, this.objectService.setObjectScale.bind(this.objectService))
-    this.callEngine_i_iffff_Map.set(SET_MATERIAL_COLOR, this.materialService.setColor.bind(this.materialService))
+    this.materialServiceInterface = new MaterialServiceInterface(this.materialService)
+    this.objectServiceInterface = new ObjectServiceInterface(this.objectService)
+    this.resourceLoaderInterface = new ResourceLoaderInterface(this, this.textureService)
+    this.materialServiceInterface.registerFuncs(this)
+    this.objectServiceInterface.registerFuncs(this)
+    this.resourceLoaderInterface.registerFuncs(this)
+  }
+
+  registerFunc(funcId: number, func: (arg: Uint8Array) => Uint8Array) {
+    this.callEngineFuncMap.set(funcId, func)
   }
 
   getContainer(): Group {
@@ -78,52 +79,30 @@ export class Sandbox extends TypeScriptSandbox {
     (this.getWasmInstance().exports as any).update()
   }
 
-  onAbort (message: string | null,
-    fileName: string | null,
-    lineNumber: number,
-    columnNumber: number) {
+  onAbort (
+    messagePtr: number,
+    filePtr: number,
+    line: number,
+    column: number
+  ) {
+    const memory = this.getWasmMemory()
+    const mLen = new Uint32Array(memory.buffer)[(messagePtr >> 2) - 1]
+    const fLen = new Uint32Array(memory.buffer)[(filePtr >> 2) - 1]
+    const decoder = new TextDecoder()
+    const msg = decoder.decode((new Uint8Array(memory.buffer)).subarray(messagePtr, messagePtr + mLen))
+    const file = decoder.decode((new Uint8Array(memory.buffer)).subarray(filePtr, filePtr + fLen))
+    throw new Error(`${file} ${line}:${column} ${msg}`)
   }
 
-  _callEngine32(p: number, funcId: number) {
-    const headerArray = new Int32Array(this.getWasmMemory().buffer, p, 2)
-    const numArgs = headerArray[0]
-    const numReturns = headerArray[1]
-    const totalLength = 2 + numArgs * 2 + numReturns * 2;
-    const iArray = new Int32Array(this.getWasmMemory().buffer, p, totalLength)
-    const fArray = new Float32Array(this.getWasmMemory().buffer, p, totalLength)
-    const iTypes: number[] = []
-    iArray.slice(2, 2 + numArgs).forEach(v => {
-      iTypes.push(v)
-    })
-    const oTypes: number[] = []
-    iArray.slice(2 + numArgs, 2 + numArgs + numReturns).forEach(v => {
-      oTypes.push(v)
-    })
-    const inputs: number[] = []
-    iTypes.forEach((t, i) => {
-      if (t === 1) {
-        inputs.push(iArray[2 + numArgs + numReturns + i])
-      } else if (t == 2) {
-        inputs.push(fArray[2 + numArgs + numReturns + i])
-      } else {
-        throw new Error("Unknown type")
-      }
-    })
-    const outs = this.callEngine32(iTypes, oTypes, inputs, funcId)
-    const iMemory = new Int32Array(this.getWasmMemory().buffer)
-    const fMemory = new Float32Array(this.getWasmMemory().buffer)
-    let outIndex32 = (p >> 2) + 2 + numArgs * 2 + numReturns;
-    oTypes.forEach((t, i) => {
-      if (t === 1) {
-        iMemory[outIndex32] = outs[i]
-      } else if (t === 2) {
-        fMemory[outIndex32] = outs[i]
-      } else {
-        throw new Error("Unknown type")
-      }
-      outIndex32 += 1
-    })
+  callSanbdbox(funcId: number, ua: Uint8Array): Uint8Array {
+    const argPtr = ((this.getWasmInstance().exports as any).malloc as (len: number) => number)(ua.byteLength - 1)
+    ;(new Uint8Array(this.getWasmMemory().buffer)).set(ua.subarray(1), argPtr)
+    const rPtr = ((this.getWasmInstance().exports as any).callSandbox as (funcId: number, ptr: number) => number)(funcId, argPtr)
+    const rLen = new Uint32Array(this.getWasmMemory().buffer)[(rPtr >> 2) - 1]
+    const rData = new Uint8Array(this.getWasmMemory().buffer).subarray(rPtr, rPtr + rLen)
+    return rData
   }
+
   createImports () {
     return {
       env: {
@@ -143,9 +122,6 @@ export class Sandbox extends TypeScriptSandbox {
           return rPtr
         }
       },
-      proto: {
-        _callEngine32: this._callEngine32.bind(this),
-      }
     }
   }
 }

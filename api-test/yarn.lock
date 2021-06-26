@@ -5321,7 +5321,7 @@ snapdragon@^0.8.1:
     use "^3.1.0"
 
 sndbxr@../api:
-  version "0.0.2"
+  version "0.0.3"
   dependencies:
     "@wapc/as-msgpack" "^0.1.12"
 
