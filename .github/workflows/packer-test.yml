@@ -21,6 +21,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: "12.x"
+      - name: t
+        run: ls
       - name: Install npm modules
         run: yarn install
       - name: Run tests
