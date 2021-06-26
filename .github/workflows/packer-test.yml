@@ -23,6 +23,8 @@ jobs:
           node-version: "12.x"
       - name: t
         run: ls
+      - name: t
+        run: pwd
       - name: Install npm modules
         run: yarn install
       - name: Run tests
