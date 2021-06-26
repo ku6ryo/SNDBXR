@@ -9,7 +9,6 @@ const mpModuleDir = "node_modules/@wapc/as-msgpack/assembly"
 const apiDir = path.join(__dirname, "..", apiModuleDir)
 const mpDir = path.join(__dirname, "..", mpModuleDir)
 const readFile = util.promisify(fs.readFile)
-const recursiveReaddir = util.promisify(recursive)
 
 export class CompileError extends Error {}
 export class CompileProcessError extends Error {}
@@ -49,7 +48,7 @@ export class Compiler {
     const apiSources = await Promise.all(apiFiles.map(f => {
       return readFile(f)
     }))
-    const mpFiles = await recursiveReaddir(mpDir)
+    const mpFiles = await recursive(mpDir)
     const mpSources = await Promise.all(mpFiles.map(f => {
       return readFile(f)
     }))

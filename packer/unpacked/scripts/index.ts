@@ -1,4 +1,4 @@
-import { start as userStart, update as userUpdate } from "./userScript"
+import { start as userStart, update as userUpdate } from "./main"
 
 export function malloc(len: i32): usize {
   return heap.alloc(len)

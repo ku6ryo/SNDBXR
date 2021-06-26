@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "pack": "ts-node pack.ts",
     "test": "jest"
   },
   "author": "",
