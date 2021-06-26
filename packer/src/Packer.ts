@@ -7,24 +7,29 @@ export interface UserFile {
   content: Uint8Array
 }
 
-const ASSET_FILE_DIR = "files"
+const RESOURCE_FILE_DIR = "resources"
 const SCRIPT_WASM_FILE = "script.wasm"
 
 export class Packer {
-  #assetFiles: UserFile[] = []
+  #resourceFiles: UserFile[] = []
   #scriptFiles: UserFile[] = []
   #compiledScript: Uint8Array | null = null
 
-  addAssetFile(file: UserFile) {
-    this.#assetFiles.push(file)
+  addResource(file: UserFile) {
+    this.#resourceFiles.push(file)
   }
 
-  addScriptFile(file: UserFile) {
+  addScript(file: UserFile) {
     this.#scriptFiles.push(file)
   }
 
   async compileScripts() {
-    const compiler = new Compiler("index.ts", 3)
+    const compiler = new Compiler("index.ts", {
+      optimizationLevel: 3
+    })
+    this.#scriptFiles.forEach(f => {
+      compiler.addScript(f)
+    })
     await compiler.compile()
     this.#compiledScript = compiler.wasm
   }
@@ -34,9 +39,9 @@ export class Packer {
       throw new Error("Not compiled yet. Please compile first.")
     }
     const zipper = new Zip()
-    zipper.folder(ASSET_FILE_DIR)
-    this.#assetFiles.forEach((f) => {
-      zipper.file(path.join(ASSET_FILE_DIR, f.path), f.content)
+    const resourceFolder = zipper.folder(RESOURCE_FILE_DIR)
+    this.#resourceFiles.forEach((f) => {
+      resourceFolder.file(f.path, f.content)
     })
     zipper.file(SCRIPT_WASM_FILE, this.#compiledScript)
     return await zipper.generateAsync({

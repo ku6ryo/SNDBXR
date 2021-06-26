@@ -1,4 +1,4 @@
-name: API test
+name: Packer test
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-18.04
     defaults:
       run:
-        working-directory: api-test
+        working-directory: packer
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node
@@ -23,7 +23,5 @@ jobs:
           node-version: "12.x"
       - name: Install npm modules
         run: yarn install
-      - name: build wasm files
-        run: node build_wasm.js
       - name: Run tests
         run: yarn test
