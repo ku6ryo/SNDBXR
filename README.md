@@ -17,15 +17,19 @@ creats a WASM runtime sandbox environment and run the WASM in it.
 # Scripting language
 [AssemblyScript](https://www.assemblyscript.org/) is supported.
 
-# Supported engines
-Unity and three.js
-
 # Directory structure
-- Unity: Unity project that implements the sandbox environment.
 - api: APIs for scripting in WASM environment. 
-- server: Compiler / Playground server
+- api-test: Tests of APIs
 - three.js: three.js engine player that works with SNDBXR scripts.
+
+The following directories are moved to another repo. (2021/6/26)
+
+https://github.com/ku6ryo/SNDBXR-Unity/tree/master/Unity/Assets
+- Unity: Unity project that implements the sandbox environment.
 - AndroidLibrary: SNDBXR Android AAR library
+
+https://github.com/ku6ryo/SNDBXR-Editor
+- server: Compiler / Playground server
 
 # Links
 - [wasm2wat](https://webassembly.github.io/wabt/demo/wasm2wat/)
