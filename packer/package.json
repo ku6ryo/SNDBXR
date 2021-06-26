@@ -1,6 +1,6 @@
 {
-  "name": "compiler",
-  "version": "1.0.0",
+  "name": "sndbxr-packer",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,9 @@
     "sndbxr": "../api"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.4.34",
     "@types/jest": "^26.0.23",
+    "adm-zip": "^0.5.5",
     "jest": "^27.0.5",
     "ts-jest": "^27.0.3",
     "ts-node": "^9.1.1",

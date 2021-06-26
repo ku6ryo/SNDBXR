@@ -116,7 +116,6 @@ export class Compiler {
           writeFile: writeFile.bind(this)
         },
         error => {
-          console.log(`>>> STDOUT >>>\n${stdout.toString()}`)
           const compileErrorMessage = stderr.toString()
           if (compileErrorMessage) {
             reject(new CompileError(compileErrorMessage))
