@@ -1,9 +1,0 @@
-import { createPrimitive, PrimitiveType, logInt } from "sndbxr-wasm-api"
-
-export function start(): void {
-  const o = createPrimitive(PrimitiveType.CUBE)
-  const m = o.getMaterial()
-  if (m) {
-    logInt(m.id)
-  }
-}
