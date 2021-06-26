@@ -1,4 +1,4 @@
-import { malloc as mallocInternal, callEngine } from "sndbxr-wasm-api/interface"
+import { malloc as mallocInternal, callEngine } from "sndbxr/interface"
 import { Encoder, Decoder, Sizer, Writer } from "@wapc/as-msgpack" 
 
 export function malloc(len: i32): usize {

@@ -1,3 +1,8 @@
+/**
+ * When extends this library, please do not use numbers less than this
+ * or equal to this value as IDs.
+ */
+export const PREVERVED_MAX_ID = 1000_000_000
 
 export const LOG = 100
 
@@ -25,10 +30,6 @@ export const SET_MATERIAL_COLOR = 2100
 export const SET_MATERIAL_COLOR_MAP = 2110
 
 // Loader
-export const LOAD_GLTF = 3000
-export const LOAD_GLTF_ON_PROGRESS = 3001
-export const LOAD_GLTF_ON_COMPLETE = 3002
-
 export const LOAD_SKY = 4000
 
 export const LOAD_RESOURCE = 5000

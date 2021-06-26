@@ -1,0 +1,26 @@
+{
+  "name": "compiler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^15.3.0",
+    "@wapc/as-msgpack": "^0.1.12",
+    "assemblyscript": "^0.18.31",
+    "jszip": "^3.6.0",
+    "recursive-readdir": "^2.2.2",
+    "sndbxr": "../api"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "jest": "^27.0.5",
+    "ts-jest": "^27.0.3",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4"
+  }
+}

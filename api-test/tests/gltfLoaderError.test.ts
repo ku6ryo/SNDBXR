@@ -17,11 +17,12 @@ test("gltfLoader", async () => {
     },
     interface: {
       callEngineImport: (funcId: number, ptr: number) => {
-        expect(funcId).toBe(3000)
+        expect(funcId).toBe(5000)
         const aLen = new Uint32Array(memory.buffer)[(ptr >> 2) - 1]
         const aData = new Uint8Array(memory.buffer).subarray(ptr, ptr + aLen)
-        const args = decode(aData)
-        expect(args).toBe("abcd")
+        const argsItr = decodeMulti(aData)
+        expect(argsItr.next().value).toBe("abcd")
+        expect(argsItr.next().value).toBe(2)
         const rData = encode(200)
         const rPtr = (instance.exports.malloc as (len: number) => number)(rData.byteLength)
         ;(new Uint8Array(memory.buffer)).set(rData, rPtr)
@@ -35,6 +36,6 @@ test("gltfLoader", async () => {
   const complete = encode([200, 1, 3])
   const completePtr = (instance.exports.malloc as (len: number) => number)(complete.byteLength - 1)
   ;(new Uint8Array(memory.buffer)).set(complete.subarray(1), completePtr)
-  ;(instance.exports.callSandbox as (funcId: number, ptr: number) => number)(3002, completePtr)
-  expect.assertions(3)
+  ;(instance.exports.callSandbox as (funcId: number, ptr: number) => number)(5002, completePtr)
+  expect.assertions(4)
 })

@@ -16,7 +16,8 @@
     "@msgpack/msgpack": "^2.7.0",
     "@wapc/as-msgpack": "^0.1.12",
     "assemblyscript": "^0.18.31",
-    "sndbxr-wasm-api": "../api",
+    "minimist": "^1.2.5",
+    "sndbxr": "../api",
     "ts-node": "^9.1.1",
     "typedoc": "^0.20.36",
     "typescript": "^4.2.4"

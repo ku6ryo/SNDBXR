@@ -1,6 +1,6 @@
-import { malloc as mallocInternal } from "sndbxr-wasm-api/interface"
-import { ObjectUtil } from "sndbxr-wasm-api/objects/ObjectUtil"
-import { log } from "sndbxr-wasm-api"
+import { malloc as mallocInternal } from "sndbxr/interface"
+import { ObjectUtil } from "sndbxr/objects/ObjectUtil"
+import { log } from "sndbxr"
 
 export function malloc(len: i32): usize {
   return mallocInternal(len)

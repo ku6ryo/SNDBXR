@@ -1,5 +1,5 @@
 import { Texture } from "../Texture"
-import { ResourceLoader, LoadError } from "./ResourceLoader"
+import { ResourceLoader } from "./ResourceLoader"
 import { ResourceType } from "./ResourceType"
 
 /**
@@ -15,7 +15,7 @@ export class TextureLoader extends ResourceLoader {
     filePath: string,
     onLoad: (texture: Texture) => void,
     onProgress: (loaded: i32, total: i32) => void,
-    onError: (error: LoadError) => void
+    onError: (code: i32) => void
   ) {
     super(filePath, ResourceType.Texture)
     this.onLoadProvided = onLoad
@@ -23,7 +23,15 @@ export class TextureLoader extends ResourceLoader {
     this.onErrorProvided = onError
   }
 
-  onLoad(resourceId: i32) {
+  onError(code: i32): void {
+    this.onErrorProvided(code)
+  }
+
+  onProgress(loaded: i32, total: i32): void {
+    this.onProgressProvided(loaded, total)
+  }
+
+  onLoad(resourceId: i32): void {
     const obj = new Texture(resourceId)
     this.onLoadProvided(obj)
   }

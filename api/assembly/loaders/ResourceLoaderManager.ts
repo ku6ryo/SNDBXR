@@ -1,7 +1,7 @@
 import { Decoder, Encoder, Sizer } from "@wapc/as-msgpack"
 import { callEngine, registerCallSandboxFunc } from "../interface"
 import { ResourceLoader } from "./ResourceLoader"
-import { LOAD_GLTF, LOAD_GLTF_ON_COMPLETE, LOAD_GLTF_ON_PROGRESS } from "../function_ids"
+import { LOAD_RESOURCE_ON_COMPLETE, LOAD_RESOURCE_ON_PROGRESS, LOAD_RESOURCE } from "../function_ids"
 
 const SUCCESS_STATUS = 0
 
@@ -23,7 +23,8 @@ class ResourceLoaderManager {
     const buf = new ArrayBuffer(sizer.length)
     const encoder = new Encoder(buf)
     encoder.writeString(loader.filePath)
-    const rBuf = callEngine(LOAD_GLTF, buf)
+    encoder.writeInt32(loader.resourceType)
+    const rBuf = callEngine(LOAD_RESOURCE, buf)
     const decoder = new Decoder(rBuf)
     const sessionId = decoder.readInt32()
     this.loaderMap.set(sessionId, loader)
@@ -78,5 +79,5 @@ function onProgress(buf: ArrayBuffer): ArrayBuffer {
   return (new Uint8Array(0)).buffer
 }
 
-registerCallSandboxFunc(LOAD_GLTF_ON_COMPLETE, onComplete)
-registerCallSandboxFunc(LOAD_GLTF_ON_PROGRESS, onProgress)
+registerCallSandboxFunc(LOAD_RESOURCE_ON_COMPLETE, onComplete)
+registerCallSandboxFunc(LOAD_RESOURCE_ON_PROGRESS, onProgress)

@@ -1,5 +1,5 @@
-import { malloc as mallocInternal, callSandbox as callSandboxInternal } from "sndbxr-wasm-api/interface"
-import { GLTFLoader, GroupObject, LoadError } from "sndbxr-wasm-api"
+import { malloc as mallocInternal, callSandbox as callSandboxInternal } from "sndbxr/interface"
+import { GLTFLoader, GroupObject } from "sndbxr"
 
 export function malloc(len: i32): usize {
   return mallocInternal(len)
@@ -17,7 +17,7 @@ export function main(): void {
     }, (loaded: i32, total: i32) => {
       assertProgressLoaded(loaded)
       assertProgressTotal(total)
-    }, (status: LoadError) => {
+    }, (code: i32) => {
       throw new Error("Not expecting this")
     })
   loader.load()

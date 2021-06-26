@@ -1,7 +1,7 @@
 import { resourceLoaderManager } from "./ResourceLoaderManager"
 import { ResourceType } from "./ResourceType"
 
-export enum LoadError {
+export enum ResourceLoadError {
   ERROR_UNKNOWN = 1
 }
 
@@ -11,7 +11,7 @@ export enum LoadError {
 export class ResourceLoader {
 
   filePath: string
-  resourceType: ResourceType.Unknown
+  resourceType: i32
 
   constructor(
     filePath: string,
@@ -23,9 +23,9 @@ export class ResourceLoader {
 
   onProgress(loaded: i32, total: i32): void {}
 
-  onLoad(resourceId: i32) {}
+  onLoad(resourceId: i32): void {}
 
-  onError(code: i32) {}
+  onError(code: i32): void {}
 
   /**
    * Loads a resource file as a resource asynchronously. 

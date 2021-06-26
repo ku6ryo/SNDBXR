@@ -1,4 +1,4 @@
-import { malloc, registerCallSandboxFunc, callSandbox as callSandboxInternal } from "sndbxr-wasm-api/interface"
+import { malloc, registerCallSandboxFunc, callSandbox as callSandboxInternal } from "sndbxr/interface"
 import { Encoder, Decoder, Sizer, Writer } from "@wapc/as-msgpack" 
 
 function encode(writer: Writer, i: i32, f: f32, s: string): void {

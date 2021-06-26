@@ -1,6 +1,6 @@
 import { objectEventManager } from "../global"
 import { GroupObject } from "../objects/GroupObject"
-import { ResourceLoader, LoadError } from "./ResourceLoader"
+import { ResourceLoader } from "./ResourceLoader"
 import { ResourceType } from "./ResourceType"
 
 /**
@@ -16,7 +16,7 @@ export class GLTFLoader extends ResourceLoader {
     filePath: string,
     onLoad: (obj: GroupObject) => void,
     onProgress: (loaded: i32, total: i32) => void,
-    onError: (error: LoadError) => void
+    onError: (code: i32) => void
   ) {
     super(filePath, ResourceType.Gltf)
     this.onLoadProvided = onLoad
@@ -24,7 +24,15 @@ export class GLTFLoader extends ResourceLoader {
     this.onErrorProvided = onError
   }
 
-  onLoad(resourceId: i32) {
+  onError(code: i32): void {
+    this.onErrorProvided(code)
+  }
+
+  onProgress(loaded: i32, total: i32): void {
+    this.onProgressProvided(loaded, total)
+  }
+
+  onLoad(resourceId: i32): void {
     const obj = new GroupObject(resourceId, objectEventManager)
     this.onLoadProvided(obj)
   }

@@ -1,3 +1,4 @@
+const parseArgs = require("minimist")
 const path = require("path")
 const fs = require("fs")
 const childProcess = require("child_process")
@@ -43,7 +44,14 @@ if (!fs.existsSync(testFileDir)){
 }
 
 ;(async () => {
-  const files = await readdir(testFileDir)
+  const argv = parseArgs(process.argv.slice(2))
+  const filterText = argv["filter"] || null
+  let files = await readdir(testFileDir)
+  if (filterText) {
+    files = files.filter((f => {
+      return f.includes(filterText)
+    }))
+  }
   const promises = files.map(function (file) {
     const ext = path.extname(file);
     if (ext !== ".ts") {

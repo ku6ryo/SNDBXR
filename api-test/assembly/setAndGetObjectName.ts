@@ -1,6 +1,6 @@
-import { malloc as mallocInternal } from "sndbxr-wasm-api/interface"
-import { MeshObject, Primitive } from "sndbxr-wasm-api"
-import { log } from "sndbxr-wasm-api"
+import { malloc as mallocInternal } from "sndbxr/interface"
+import { MeshObject, Primitive } from "sndbxr"
+import { log } from "sndbxr"
 
 export function malloc(len: i32): usize {
   return mallocInternal(len)
