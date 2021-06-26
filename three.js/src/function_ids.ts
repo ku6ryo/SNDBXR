@@ -1,5 +1,5 @@
 // OBJECT/GENERAL
-export const GET_OBJECT_ID_BY_NAME = 1000
+export const GET_OBJECT_BY_NAME = 1000
 export const CREATE_PRIMITIVE_OBJECT = 1001
 export const SET_OBJECT_POSITION = 1100
 export const GET_OBJECT_POSITION = 1101
@@ -7,6 +7,8 @@ export const SET_OBJECT_ROTATION = 1110
 export const GET_OBJECT_ROTATION = 1111
 export const SET_OBJECT_SCALE = 1120
 export const GET_OBJECT_SCALE = 1121
+export const SET_OBJECT_NAME = 1130
+export const GET_OBJECT_NAME = 1131
 
 // OBJECT/MATERIAL
 export const GET_MATERIAL_OF_OBJECT = 1200

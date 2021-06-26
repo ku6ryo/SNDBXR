@@ -12,6 +12,7 @@
   "author": "Ryo Kuroyanagi",
   "license": "MIT",
   "dependencies": {
+    "@msgpack/msgpack": "^2.7.0",
     "@types/three": "^0.128.0",
     "sanitize.css": "^12.0.1",
     "sndbxr-wasm-api": "../api",
