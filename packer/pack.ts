@@ -22,6 +22,8 @@ try {
   const packageRoot = path.join(__dirname, packageDir)
   const scriptRoot = path.join(packageRoot, "scripts/")
   const resourceRoot = path.join(packageRoot, "resources/")
+  console.log("Packing start")
+  const startTime = new Date().getTime()
   const packer = new Packer()
   const scriptFiles = await recursive(scriptRoot)
   const scriptReadPromises: Promise<void>[] = []
@@ -35,6 +37,13 @@ try {
     })())
   })
   await Promise.all(scriptReadPromises)
+  const scriptReadDoneTime = new Date().getTime()
+  console.log("Scripts' read. Took " + Math.floor((scriptReadDoneTime - startTime) / 1000 * 10) / 10 + " sec")
+  console.log("Compiling ...")
+  await packer.compileScripts()
+  const compileDoneTime = new Date().getTime()
+  console.log("Compiled. Took " + Math.floor((compileDoneTime - scriptReadDoneTime) / 1000 * 10) / 10 + " sec")
+  console.log("Reading resources ...")
   const resourceFiles = await recursive(resourceRoot)
   const resourceReadPromises: Promise<void>[] = []
   resourceFiles.forEach(f => {
@@ -47,7 +56,9 @@ try {
     })())
   })
   await Promise.all(resourceReadPromises)
-  await packer.compileScripts()
+  const resourceReadDoneTime = new Date().getTime()
+  console.log("Resources' read. Took " + Math.floor((resourceReadDoneTime - compileDoneTime) / 1000 * 10) / 10 + " sec")
+  console.log("Zipping ...")
   const zip = await packer.pack()
   writeFile(path.join(__dirname, "build", new Date().getTime() + ".zip"), zip) 
 })()

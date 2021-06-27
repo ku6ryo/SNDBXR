@@ -30,9 +30,7 @@ export class Packer {
   }
 
   async compileScripts() {
-    const compiler = new Compiler("index.ts", {
-      optimizationLevel: 3
-    })
+    const compiler = new Compiler("index.ts", {})
     this.#scriptFiles.forEach(f => {
       compiler.addScript(f)
     })

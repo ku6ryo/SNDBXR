@@ -68,12 +68,14 @@ export class Compiler {
 
   async compile(): Promise<void> {
     const fileMap = await this.createInputFileMap()
-    const optimizationLevel = this.config.optimizationLevel || 1
+    const optimizationLevel = this.config.optimizationLevel
     const generateBinary = this.config.wasm === false ? false : true
     const generateText = !!this.config.wat
     const generateSourceMap = !!this.config.sourceMap
     const commandParts: string[] = [this.entrypoint]
-    commandParts.push(`-O${optimizationLevel}`)
+    if (optimizationLevel) {
+      commandParts.push(`-O${optimizationLevel}`)
+    }
     if (generateBinary) {
       commandParts.push(`--binaryFile`)
       commandParts.push(`module.wasm`)
